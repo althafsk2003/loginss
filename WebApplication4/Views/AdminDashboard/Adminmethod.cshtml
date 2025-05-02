@@ -1,0 +1,174 @@
+﻿@model dynamic
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Dashboard";
+}
+
+<style>
+    /* Ensure card numbers are white with higher specificity */
+    .card .card-body h3 {
+        color: #ffffff !important; /* Pure white as fallback */
+        color: lavenderblush; /* Original color */
+    }
+
+    /* Limit the chart's maximum size and ensure proper container behavior */
+    #clubsChart {
+        max-width: 100%;
+        height: 300px; /* Restored to 300px for better visibility with new options */
+        max-height: 300px;
+    }
+
+    .card-body {
+        padding: 1rem; /* Ensure consistent padding */
+    }
+
+    /* Add space between header and cards */
+    .container-fluid {
+        margin-top: 4rem; /* Adjust this value as needed (e.g., 1rem, 2rem) */
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Stats Cards (Left Column) -->
+        <div class="col-md-5">
+            <div class="card bg-primary text-white mb-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-university"></i> Universities</h5>
+                    <h3 id="totalUniversities">0</h3>
+                </div>
+            </div>
+            <div class="card bg-success text-white mb-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-school"></i> Departments</h5>
+                    <h3 id="totalSchools">0</h3>
+                </div>
+            </div>
+            <div class="card bg-info text-white mb-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-users"></i> Clubs</h5>
+                    <h3 id="totalClubs">0</h3>
+                </div>
+            </div>
+            <div class="card bg-warning text-white mb-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-user-tie"></i> Mentors</h5>
+                    <h3 id="totalMentors">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart (Right Column) -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie"></i> Clubs Distribution by University</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="clubsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    (function() {
+        console.log("Script block started execution");
+        if (typeof jQuery === 'undefined') {
+            console.error("jQuery is not loaded!");
+            return;
+        }
+        console.log("jQuery is loaded, version:", $.fn.jquery);
+
+        $(document).ready(function () {
+            console.log("Index.cshtml document ready event fired");
+            $("#totalUniversities, #totalSchools, #totalClubs, #totalMentors").text("Loading...").addClass("text-info");
+            $("#clubsChart").before('<div class="text-center text-info"><i class="fas fa-spinner fa-spin"></i> Loading chart...</div>');
+
+            $.get("@Url.Action("GetDashboardStats", "Admin")", function (data) {
+                console.log("GetDashboardStats response:", data);
+                if (data.error) {
+                    console.error("Error fetching stats:", data.details);
+                    $("#totalUniversities, #totalSchools, #totalClubs, #totalMentors")
+                        .text("Error")
+                        .removeClass("text-info")
+                        .addClass("text-danger");
+                    return;
+                }
+                $("#totalUniversities").text(data.totalUniversities || 0);
+                $("#totalSchools").text(data.totalSchools || 0);
+                $("#totalClubs").text(data.totalClubs || 0);
+                $("#totalMentors").text(data.totalMentors || 0);
+            }).fail(function (xhr, status, error) {
+                console.error("AJAX error for GetDashboardStats:", error, xhr.status, xhr.responseText);
+                $("#totalUniversities, #totalSchools, #totalClubs, #totalMentors")
+                    .text("Failed to load")
+                    .removeClass("text-info")
+                    .addClass("text-danger");
+            }).always(function () {
+                console.log("GetDashboardStats request completed");
+            });
+
+            $.get("@Url.Action("GetClubsDistribution", "Admin")", function (data) {
+                console.log("GetClubsDistribution response:", data);
+                if (data.error) {
+                    console.error("Error fetching clubs distribution:", data.details);
+                    $("#clubsChart").prev(".text-center").replaceWith('<div class="alert alert-danger">Failed to load chart</div>');
+                    return;
+                }
+                $("#clubsChart").prev(".text-center").remove();
+                const labels = data.map(item => item.universityName || "Unknown");
+                const values = data.map(item => item.clubCount || 0);
+                new Chart(document.getElementById("clubsChart"), {
+                    type: "pie",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [
+                                "#007bff",
+                                "#28a745",
+                                "#17a2b8",
+                                "#ffc107",
+                                "#dc3545",
+                                "#6c757d"
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        aspectRatio: 1,
+                        plugins: {
+                            legend: {
+                                position: "bottom",
+                                labels: {
+                                    boxWidth: 10,
+                                    padding: 10,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: "Clubs per University",
+                                font: { size: 16 }
+                            }
+                        }
+                    }
+                });
+            }).fail(function (xhr, status, error) {
+                console.error("AJAX error for GetClubsDistribution:", error, xhr.status, xhr.responseText);
+                $("#clubsChart").prev(".text-center").replaceWith('<div class="alert alert-danger">Failed to load chart</div>');
+            }).always(function () {
+                console.log("GetClubsDistribution request completed");
+            });
+        });
+    })();
+</script>

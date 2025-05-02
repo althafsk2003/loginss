@@ -1,0 +1,252 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    @*<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">*@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
+
+
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: #111;
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Main Navigation */
+        .navbar {
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: bold;
+            color: #E96C20;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            color: #333;
+            transition: 0.3s;
+            padding: 10px 15px;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #E96C20;
+            }
+
+        /* Dropdown Animation */
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-item:hover .dropdown-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            overflow: visible; /* Ensures text can extend outside */
+            z-index: 1; /* Keeps video below the text */
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 72%;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-text {
+            position: absolute;
+            bottom: 160px; /* Moves text box half outside the video */
+            left: 50%;
+            transform: translateX(-50%);
+            background: orange;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 70px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgb(0, 0, /, 2%);
+            z-index: 1000; /* Keeps text always on top of everything */
+            pointer-events: none; /* Ensures no content blocks interactions */
+        }
+
+        .content-text {
+            position: absolute;
+            color: black;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            bottom: 100px;
+            left: 25%;
+        }
+
+
+
+        /* Footer */
+        .footer {
+            background: #222;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* Smooth Hover Effect for Buttons */
+        .btn-custom {
+            background: #E96C20;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            transition: 0.3s;
+            border-radius: 5px;
+        }
+
+            .btn-custom:hover {
+                background: #c45418;
+                color: white;
+            }
+    </style>
+</head>
+
+
+
+
+<body>
+
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <span>Future Students | Current Students | Faculty & Staff | Alumni | Partners</span>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="https://www.ifheindia.org/assets/img/Logo.svg"
+                     alt="ICFAI Logo"
+                     style="height: 50px; width: 200px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Index", "Clubs")">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Academics</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="icfaiLifeMenu" role="button">ICFAI Life</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("ClubsandImages", "Clubs")">Clubs</a></li>
+                            <li><a class="dropdown-item" href="#">Events</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="#">Research</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Login","Admin")">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Render the actual page content here -->
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    <!-- Hero Section with Video -->
+    <!--<div class="hero">
+        <video autoplay muted loop class="hero-video">
+            <source src="~/wwwroot/videos/clubs11.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="hero-text">
+            Always on to something amazing
+        </div>
+        <div class="content-text">
+            Always on to something amazing mbhftf bncytduy ncgfdu mcyd
+        </div>
+
+    </div>-->
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 ICFAI Foundation for Higher Education. All Rights Reserved.</p>
+    </footer>
+
+
+
+
+
+
+
+    <!-- Bootstrap & jQuery -->
+    @* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>*@
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+    </script>
+
+    <script>
+        AOS.init();
+    </script>
+
+    <!-- Custom Script -->
+    <script>
+        function startProcess() {
+            alert("Starting Clubs Process...");
+            // Add your AJAX call or redirection here
+        }</script>
+
+</body>
+</html>
+

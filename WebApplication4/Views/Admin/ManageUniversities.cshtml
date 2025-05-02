@@ -1,0 +1,253 @@
+﻿@model List<WebApplication4.Models.UNIVERSITY>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Manage Universities";
+}
+
+<h2 class="text-center mb-4">Manage Universities</h2>
+
+<!-- ✅ Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+}
+
+<!-- ✅ Error Message -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+        </button>
+    </div>
+}
+
+<!-- ✅ Universities Table with Left-Aligned Text -->
+<table class="table table-bordered table-striped text-left">
+    <thead class="thead-dark">
+        <tr>
+            <th>University Name</th>
+            <th>Abbreviation</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var university in Model)
+        {
+            <tr>
+                <td>@university.UniversityNAME</td>
+                <td>@university.Abbreviation</td>
+                <td>@university.Location</td>
+                <td>
+                    @if (university.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Inactive</span>
+                    }
+                </td>
+                <td>
+                    @if (university.IsActive == true)
+                    {
+                        <!-- ✅ Deactivate Button -->
+                        <form method="post" action="@Url.Action("DeactivateUniversity", "Admin")" style="display:inline-block;">
+                            <input type="hidden" name="universityId" value="@university.UniversityID" />
+                            <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                            <button type="submit" class="btn btn-warning btn-sm"
+                                    onclick="return confirm('Are you sure you want to deactivate this university and its departments?');">
+                                <i class="fas fa-ban"></i> Deactivate
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn btn-primary btn-sm mb-1 ml-1"
+                                onclick="openEditModal('@university.UniversityID', '@university.UniversityNAME', '@university.Abbreviation', '@university.Location')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+
+                    }
+                    else
+                    {
+                        <!-- ✅ Activate Button -->
+                        <form method="post" action="@Url.Action("ActivateUniversity", "Admin")">
+                            <input type="hidden" name="universityId" value="@university.UniversityID" />
+                            <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                            <button type="submit" class="btn btn-success btn-sm"
+                                    onclick="return confirm('Are you sure you want to activate this university and its departments?');">
+                                <i class="fas fa-check-circle"></i> Activate
+                            </button>
+                        </form>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p class="text-center">
+    Showing <span>@ViewBag.FirstItemOnPage</span> to <span>@ViewBag.LastItemOnPage</span> of <span>@ViewBag.TotalItems</span> entries
+</p>
+
+<nav class="d-flex justify-content-center">
+    <ul class="pagination">
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ManageUniversities", new { page = i, pageSize = ViewBag.PageSize })">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+
+<!-- 🔧 Edit University Modal -->
+<div class="modal fade" id="editUniversityModal" tabindex="-1" role="dialog" aria-labelledby="editUniversityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post" action="/Admin/EditUniversity">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editUniversityModalLabel">Edit University</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="UniversityID" name="UniversityID" />
+                    <div class="form-group">
+                        <label for="UniversityNAME">University Name</label>
+                        <input type="text" class="form-control" id="UniversityNAME" name="UniversityNAME" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="Abbreviation">Abbreviation</label>
+                        <input type="text" class="form-control" id="Abbreviation" name="Abbreviation" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="Location">Location</label>
+                        <input type="text" class="form-control" id="Location" name="Location" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 🧠 JavaScript to populate modal -->
+<script>
+    function openEditModal(id, name, abbreviation, location) {
+        $('#UniversityID').val(id);
+        $('#UniversityNAME').val(name);
+        $('#Abbreviation').val(abbreviation);
+        $('#Location').val(location);
+        $('#editUniversityModal').modal('show');
+    }
+</script>
+
+<!-- ✅ CSS Styling -->
+<style>
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 10px;
+        }
+
+    .btn-warning {
+        background-color: #f39c12;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+</style>
+
+<style>
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .page-item {
+        display: flex;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 14px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .page-link:hover {
+            background-color: #d0d0d0;
+        }
+
+    .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+
+    }
+</style>

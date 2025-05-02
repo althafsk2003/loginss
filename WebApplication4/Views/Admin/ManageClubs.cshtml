@@ -1,0 +1,47 @@
+﻿@model List<WebApplication4.Models.CLUB>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Manage Clubs";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Manage Clubs</h2>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Club Name</th>
+                        <th>Description</th>
+                        <th>Department</th>
+                        <th>Approval Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var club in Model)
+                    {
+                        <tr>
+                            <td>@club.ClubName</td>
+                            <td>@club.Description</td>
+                            <td>@club.DEPARTMENT.DepartmentName</td>
+                            <td>@club.ApprovalStatusTable.Status</td>
+                            <td>
+                                @* Activate and Deactivate buttons *@
+                                <a href="@Url.Action("ActivateClub", "Admin", new { id = club.ClubID })" class="btn btn-success">Activate</a>
+                                <a href="@Url.Action("DeactivateClub", "Admin", new { id = club.ClubID })" class="btn btn-warning">Deactivate</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-center">No clubs found to manage.</p>
+    }
+</div>

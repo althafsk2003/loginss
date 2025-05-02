@@ -1,0 +1,138 @@
+﻿@model List<WebApplication4.Models.USER>
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "Manage Mentors";
+}
+
+<h2 class="text-center mb-4">Manage Mentors</h2>
+
+<!-- ✅ Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- ✅ Error Message -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- ✅ Mentors Table -->
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Mentor Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var mentor in Model)
+        {
+            <tr>
+                <td>@(string.IsNullOrWhiteSpace(mentor.FirstName) ? "N/A" : mentor.FirstName) @(string.IsNullOrWhiteSpace(mentor.LastName) ? "" : mentor.LastName)</td>
+                <td>@mentor.Email</td>
+                <td>@(string.IsNullOrWhiteSpace(mentor.MobileNumber) ? "N/A" : mentor.MobileNumber)</td>
+                <td>
+                    @if (mentor.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Inactive</span>
+                    }
+                </td>
+                <td>
+                    @if (mentor.IsActive == true)
+                    {
+                        <!-- ✅ Deactivate Button -->
+                        using (Html.BeginForm("DeactivateMentor", "UniversityAdmin", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("email", mentor.Email) <!-- Passing Email -->
+                            <button type="submit" class="btn btn-warning btn-sm"
+                                    onclick="return confirm('Are you sure you want to deactivate this mentor?');">
+                                <i class="fas fa-ban"></i> Deactivate
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <!-- ✅ Activate Button -->
+                        using (Html.BeginForm("ActivateMentor", "UniversityAdmin", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("email", mentor.Email) <!-- Passing Email -->
+                            <button type="submit" class="btn btn-success btn-sm"
+                                    onclick="return confirm('Are you sure you want to activate this mentor?');">
+                                <i class="fas fa-check-circle"></i> Activate
+                            </button>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- ✅ CSS Styling -->
+<style>
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: center;
+            padding: 10px;
+        }
+
+    .btn-warning {
+        background-color: #f39c12;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+
+        }
+</style>

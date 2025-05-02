@@ -1,0 +1,150 @@
+﻿@model WebApplication4.Models.EventDetailsViewModel
+
+@{
+    ViewBag.Title = "Event Details";
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<div class="container mx-auto mt-8 px-4 max-w-4xl">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Event Details</h2>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h4 class="text-xl font-semibold text-gray-700 mb-2">Event Name: @Model.Event.EventName</h4>
+        <h5 class="text-lg text-gray-600 mb-4">Event Date: @Model.Event.EventStartDateAndTime.ToString("dd-MM-yyyy") - @Model.Event.EventEndDateAndTime.ToString("dd-MM-yyyy")</h5>
+        <p class="text-gray-600"><strong>Description:</strong> @Model.Event.EventDescription</p>
+    </div>
+
+    <form action="@Url.Action("SaveEventDetails", "ClubAdmin")" method="post" enctype="multipart/form-data" class="bg-white shadow-md rounded-lg p-6">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="EventId" value="@Model.Event.EventID" />
+
+        <!-- Existing Photos -->
+        <h4 class="text-xl font-semibold text-gray-700 mb-4">Existing Event Photos</h4>
+        <div id="existingPhotos" class="space-y-4">
+            @foreach (var photo in Model.EventPhotos)
+            {
+                <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <img src="@photo.PhotoPath" width="100" height="100" class="rounded-md object-cover" />
+                    <span class="text-gray-600">Uploaded on: @photo.UploadedDate.ToString("dd-MM-yyyy")</span>
+                    <button type="button" class="remove-existing-photo bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" data-photoid="@photo.Id">Remove</button>
+                </div>
+            }
+        </div>
+
+        <input type="hidden" id="deletedPhotoIds" name="DeletedPhotoIds" />
+
+        <!-- Add New Photos -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Add New Event Photos</h4>
+        <div id="photoUploadContainer" class="space-y-4">
+            <div class="photo-field flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <input type="file" name="EventPhotos" class="flex-1 p-2 border rounded-md" />
+                <button type="button" class="remove-photo bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+            </div>
+        </div>
+        <button type="button" id="addMorePhotos" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Another Photo</button>
+
+        <!-- Existing Winners -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Existing Winners</h4>
+        <div id="existingWinners" class="space-y-4">
+            @foreach (var winner in Model.EventWinners)
+            {
+                <div class="p-4 bg-gray-50 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p><strong>Name:</strong> @winner.WinnerName</p>
+                        <p><strong>Prize:</strong> @winner.Prize</p>
+                        <p><strong>Description:</strong> @winner.Description</p>
+                    </div>
+                    <button type="button" class="remove-existing-winner bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" data-winnerid="@winner.Id">Remove</button>
+                </div>
+            }
+        </div>
+
+        <input type="hidden" id="deletedWinnerIds" name="DeletedWinnerIds" />
+
+        <!-- Add New Winners -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Add New Winners</h4>
+        <div id="winnerContainer" class="space-y-4">
+            <div class="winner-field grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <input type="text" name="Winners[0].WinnerName" placeholder="Winner Name" class="p-2 border rounded-md" />
+                <input type="text" name="Winners[0].Prize" placeholder="Prize" class="p-2 border rounded-md" />
+                <input type="text" name="Winners[0].Description" placeholder="Description" class="p-2 border rounded-md" />
+                <button type="button" class="remove-winner bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+            </div>
+        </div>
+
+        <button type="button" id="addWinner" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Another Winner</button>
+
+        <!-- Upload Brochure -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Upload Brochure</h4>
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <input type="file" name="Brochure" class="w-full p-2 border rounded-md" />
+        </div>
+
+        <button type="submit" class="mt-6 bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600">Save Details</button>
+    </form>
+</div>
+
+<script>
+    // Manage deleted photo IDs
+    const deletedPhotoIds = [];
+    document.getElementById("existingPhotos").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-existing-photo")) {
+            deletedPhotoIds.push(e.target.getAttribute("data-photoid"));
+            document.getElementById("deletedPhotoIds").value = deletedPhotoIds.join(",");
+            e.target.closest("div").remove();
+        }
+    });
+
+    // Manage deleted winner IDs
+    const deletedWinnerIds = [];
+    document.getElementById("existingWinners").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-existing-winner")) {
+            deletedWinnerIds.push(e.target.getAttribute("data-winnerid"));
+            document.getElementById("deletedWinnerIds").value = deletedWinnerIds.join(",");
+            e.target.closest("div").remove();
+        }
+    });
+
+    // Add more photo fields
+    document.getElementById("addMorePhotos").addEventListener("click", function () {
+        const container = document.getElementById("photoUploadContainer");
+        const newField = document.createElement("div");
+        newField.className = "photo-field flex items-center space-x-4 p-4 bg-gray-50 rounded-lg";
+        newField.innerHTML = `
+            <input type="file" name="EventPhotos" class="flex-1 p-2 border rounded-md" />
+            <button type="button" class="remove-photo bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+        `;
+        container.appendChild(newField);
+    });
+
+    // Remove dynamic photo field
+    document.getElementById("photoUploadContainer").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-photo")) {
+            e.target.closest(".photo-field").remove();
+        }
+    });
+
+    // Add more winner fields
+    document.getElementById("addWinner").addEventListener("click", function () {
+        const container = document.getElementById("winnerContainer");
+        const winnerIndex = container.children.length;
+        const newField = document.createElement("div");
+        newField.className = "winner-field grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg";
+        newField.innerHTML = `
+            <input type="text" name="Winners[${winnerIndex}].WinnerName" placeholder="Winner Name" class="p-2 border rounded-md" />
+            <input type="text" name="Winners[${winnerIndex}].Prize" placeholder="Prize" class="p-2 border rounded-md" />
+            <input type="text" name="Winners[${winnerIndex}].Description" placeholder="Description" class="p-2 border rounded-md" />
+            <button type="button" class="remove-winner bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+        `;
+        container.appendChild(newField);
+    });
+
+    // Remove dynamic winner field
+    document.getElementById("winnerContainer").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-winner")) {
+            e.target.closest(".winner-field").remove();
+        }
+    });
+</script>

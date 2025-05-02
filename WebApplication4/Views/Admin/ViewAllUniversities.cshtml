@@ -1,0 +1,27 @@
+﻿@model List<WebApplication4.Models.UNIVERSITY>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "View All Universities";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">View All Universities</h2>
+
+    <div class="row">
+        @foreach (var university in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card text-center shadow-lg">
+                    <div class="card-body">
+                        <h5 class="card-title">@university.UniversityNAME</h5>
+                        <p>@university.Location</p>
+                        <a href="@Url.Action("GetDepartments", "Admin", new { universityId = university.UniversityID })" class="btn btn-info">
+                            View Departments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

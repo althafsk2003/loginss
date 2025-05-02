@@ -1,0 +1,66 @@
+﻿@model List<WebApplication4.Models.DEPARTMENT>
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "Manage Schools";
+}
+
+<h2 class="text-center mb-4">Manage Schools</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>School Name</th>
+            <th>HOD</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dept in Model)
+        {
+            <tr>
+                <td>@dept.DepartmentName</td>
+                <td>@dept.HOD</td>
+                <td>
+                    @if (dept.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Deactivated</span>
+                    }
+                </td>
+                <td>
+                    @if (dept.IsActive == true)
+                    {
+                        <form method="post" action="@Url.Action("DeactivateDepartment", "UniversityAdmin")">
+                            <input type="hidden" name="departmentId" value="@dept.DepartmentID" />
+                            <button type="submit" class="btn btn-warning btn-sm"
+                                    onclick="return confirm('Are you sure you want to deactivate this school?');">
+                                <i class="fas fa-ban"></i> Deactivate
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" action="@Url.Action("ActivateDepartment", "UniversityAdmin")">
+                            <input type="hidden" name="departmentId" value="@dept.DepartmentID" />
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i> Activate
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

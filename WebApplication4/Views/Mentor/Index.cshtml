@@ -1,0 +1,66 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+    ViewBag.Title = "Mentor Dashboard";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Mentor Dashboard</h2>
+
+    <div class="card shadow p-4">
+        <h4>Welcome, @ViewBag.Mentor.Email</h4>
+        <p>Email: @ViewBag.Mentor.Email</p>
+        <p>University: <strong>@ViewBag.University.UniversityNAME</strong></p>
+        <p>Location: @ViewBag.University.Location</p>
+    
+
+    <!-- ✅ Notifications Section -->
+    <div class="mt-3 text-center">
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                🔔 Notifications
+                @{
+                    var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>; // ✅ Safe cast
+                    if (notifications != null && notifications.Count > 0)
+                    {
+                        <span class="badge bg-danger">@notifications.Count</span> <!-- ✅ Correct badge count -->
+                    }
+                }
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+                @{
+                    if (notifications != null && notifications.Count > 0)
+                    {
+                        foreach (var notification in notifications) // ✅ Corrected loop
+                        {
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center"
+                                   href="@Url.Action("MarkNotificationAsRead", "Mentor", new { notificationId = notification.NotificationID })">
+                                    <span>@notification.Message</span>
+                                    <small class="text-muted">@(notification.StartDate?.ToString("MMM dd, yyyy") ?? "N/A")</small> <!-- ✅ Null-safe date -->
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+
+                        }
+                    }
+                    else
+                    {
+                        <li><span class="dropdown-item text-center">No new notifications</span></li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+
+
+
+
+
+    <div class="mt-4 text-center">
+        <a href="@Url.Action("RegisterClub", "Mentor")" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Register a Club</a>
+        <a href="@Url.Action("ManageClubs", "Mentor")" class="btn btn-success"><i class="fas fa-list"></i> Manage Clubs</a>
+    </div>
+</div>

@@ -1,0 +1,93 @@
+﻿@model List<WebApplication4.Models.DEPARTMENT>
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "View Schools";
+}
+
+<h2 class="text-center mb-4">Schools</h2>
+
+<!-- ✅ Filter Buttons -->
+<div class="text-center mb-3">
+    <button class="btn btn-primary filter-btn" data-filter="all">View All Schools</button>
+    <button class="btn btn-success filter-btn" data-filter="active">View Active Schools</button>
+    <button class="btn btn-danger filter-btn" data-filter="inactive">View Deactivated Schools</button>
+</div>
+
+<!-- ✅ Schools Table -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>University</th>
+            <th>School Name</th>
+            <th>HOD</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var dept in Model)
+        {
+            <tr class="school-row" data-status="@(dept.IsActive == true ? "active" : "inactive")">
+                <td>@dept.UNIVERSITY.UniversityNAME</td>
+                <td>@dept.DepartmentName</td>
+                <td>@dept.HOD</td>
+                <td>
+                    @if (dept.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Deactivated</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- ✅ JavaScript for Filtering -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".filter-btn").click(function () {
+            var filter = $(this).data("filter");
+
+            $(".school-row").each(function () {
+                var status = $(this).data("status");
+
+                if (filter === "all" || filter === status) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+</script>
+
+<!-- ✅ CSS Styling -->
+<style>
+    .btn {
+        margin: 5px;
+    }
+
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: center;
+            padding: 10px;
+        }
+</style>

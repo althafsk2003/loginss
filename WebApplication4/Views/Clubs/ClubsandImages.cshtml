@@ -1,0 +1,519 @@
+﻿@{
+    Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+    ViewBag.Title = "Clubs and Experiences";
+}
+
+<div class="clubs-section">
+    <div class="row align-items-center">
+        <!-- Left Section with Text -->
+        <div class="col-md-4 text-container">
+            <h1>Clubs and Experiences</h1>
+        </div>
+
+        <!-- Right Section with Images -->
+        <div class="col-md-8 image-container">
+            <div class="row">
+                <div class="col-md-4 image-wrapper">
+                    <img src="~/wwwroot/Images/Screenshot 2025-02-27 145635.png" alt="Club 1" class="img-fluid">
+                </div>
+                <div class="col-md-4 image-wrapper">
+                    <img src="~/wwwroot/Images/Screenshot 2025-02-27 145945.png" alt="Club 2" class="img-fluid">
+                </div>
+                <div class="col-md-4 image-wrapper">
+                    <img src="~/wwwroot/Images/Screenshot 2025-02-27 150035.png" alt="Club 3" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="content-section">
+    <div class="welcome-text">
+        <p>Welcome to a place where community is not just a word but a way of life. At RIT, we believe that every individual has something valuable to contribute. Explore on- and off-campus opportunities to find your people, explore your passions, and make a difference.</p>
+    </div>
+
+    <div class="jump-links">
+        <h2>Jump to Section</h2>
+        <div class="row">
+            <div class="col-md-3 link-item">
+                <a href="#id">
+                    <i class="fas fa-users"></i> Student Clubs and Organizations
+                </a>
+            </div>
+            <div class="col-md-3 link-item">
+                <a href="#">
+                    <i class="fas fa-search"></i> Finding Community
+                </a>
+            </div>
+            <div class="col-md-3 link-item">
+                <a href="#">
+                    <i class="fas fa-calendar-alt"></i> Campus Traditions
+                </a>
+            </div>
+            <div class="col-md-3 link-item">
+                <a href="#">
+                    <i class="fas fa-lightbulb"></i> Leadership
+                </a>
+            </div>
+            <div class="col-md-3 link-item">
+                <a href="#">
+                    <i class="fas fa-calendar-week"></i> Events
+                </a>
+            </div>
+            <div class="col-md-3 link-item">
+                <a href="#">
+                    <i class="fas fa-compass"></i> Beyond RIT
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="campus-traditions-section">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 text-content">
+                
+                    <h2>Campus Traditions</h2>
+                
+                <p>Embrace RIT's tradition of tiger pride by taking part in one of our many campus-wide events and programs. Join us to celebrate the season, showcase innovation and creativity, and bookend your chapter at RIT with moments you'll cherish forever.</p>
+                <a href="@Url.Action("Departments", "Clubs")" class="explore-link">Explore our clubs ></a>
+            </div>
+            <div class="col-md-6 image-content">
+                <img src="~/wwwroot/Images/icfai.jpg" alt="RIT Men's Hockey" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .clubs-section {
+        background-color: #ff6600; /* Orange background */
+        padding: 50px 20px;
+        color: white;
+        /*        width: 1000px;
+        height: 500px;
+       */
+        margin-top: 15px;
+    }
+
+    .text-container h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 0.3s;
+    }
+
+    .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .image-wrapper {
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        /*        margin: 0 10px;*/
+        transition: transform 0.3s ease;
+    }
+
+        .image-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+
+    .welcome-text {
+        text-align: center;
+        margin-top: 50px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 0.6s;
+    }
+
+        .welcome-text p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+    .jump-links {
+        margin-top: 50px;
+        text-align: center;
+    }
+
+        .jump-links h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 13px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1s ease-out forwards 0.7s;
+        }
+
+        .jump-links .row {
+            margin-top: calc(1* var(--bs-gutter-y));
+            margin-right: calc(-4.5* var(--bs-gutter-x));
+            margin-left: calc(6.5* var(--bs-gutter-x));
+        }
+
+
+    .link-item {
+        margin: 10px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards;
+    }
+
+        .link-item:nth-child(1) {
+            animation-delay: 0.9s;
+        }
+
+        .link-item:nth-child(2) {
+            animation-delay: 1.0s;
+        }
+
+        .link-item:nth-child(3) {
+            animation-delay: 1.1s;
+        }
+
+        .link-item:nth-child(4) {
+            animation-delay: 1.2s;
+        }
+
+        .link-item:nth-child(5) {
+            animation-delay: 1.3s;
+        }
+
+        .link-item:nth-child(6) {
+            animation-delay: 1.4s;
+        }
+
+    .jump-links a {
+        color: #333; /* Darker color for links */
+        text-decoration: none;
+        display: block;
+        padding: 15px 20px;
+        border: 2px solid #333; /* Darker border */
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+        .jump-links a:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Lighter background on hover */
+            transform: scale(1.05);
+            color: #000; /* Darker color on hover */
+            border-color: #000; /* Darker border on hover */
+        }
+
+    .jump-links i {
+        margin-right: 15px;
+    }
+
+
+    .campus-traditions-section {
+        padding: 30px 0; /* Remove horizontal padding */
+        background-color: #000;
+        color: white;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+        margin-top: 56px;
+        width: 100%; /* Make it full width */
+    }
+
+    .container-fluid {
+        padding-left: 20px; /* Add padding to the content within */
+        padding-right: 20px;
+        max-width: 100%; /* Allow container to be full width */
+    }
+
+    .campus-traditions-section h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 107px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 0.8s;
+        color: white;
+    }
+
+    .campus-traditions-section p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 20px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 0.9s;
+        color: white;
+    }
+
+    .explore-link {
+        display: inline-block;
+        padding: 15px 30px;
+        background-color: #ff6600;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.3s;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 1.0s;
+    }
+
+        .explore-link:hover {
+            background-color: #e65c00;
+            transform: scale(1.05);
+        }
+
+    .campus-traditions-section img {
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeIn 1s ease-out forwards 1.1s;
+        clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%); /* Adjust the points as needed */
+    }
+
+    .img-fluid {
+        max-width: 87%;
+        height: auto;
+    }
+
+
+    /* Animations */
+    @@keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .text-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
+
+
+
+
+
+
+
+
+
+@*@{
+        Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+        ViewBag.Title = "Clubs and Experiences";
+    }
+
+    <div class="clubs-section">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-container">
+                <h1>Clubs and Experiences</h1>
+            </div>
+
+            <div class="col-md-8 image-container">
+                <div class="row">
+                    <div class="col-md-4 image-wrapper">
+                        <img src="~/wwwroot/Images/Screenshot 2025-02-27 145635.png" alt="Club 1" class="img-fluid club-image">
+                    </div>
+                    <div class="col-md-4 image-wrapper">
+                        <img src="~/wwwroot/Images/Screenshot 2025-02-27 145945.png" alt="Club 2" class="img-fluid club-image">
+                    </div>
+                    <div class="col-md-4 image-wrapper">
+                        <img src="~/wwwroot/Images/Screenshot 2025-02-27 150035.png" alt="Club 3" class="img-fluid club-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="welcome-text">
+            <p>Welcome to a place where community is not just a word but a way of life. At RIT, we believe that every individual has something valuable to contribute. Explore on- and off-campus opportunities to find your people, explore your passions, and make a difference.</p>
+        </div>
+
+        <div class="jump-links">
+            <h2>Jump to Section</h2>
+            <div class="row">
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-users"></i> Student Clubs and Organizations
+                    </a>
+                </div>
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-search"></i> Finding Community
+                    </a>
+                </div>
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-calendar-alt"></i> Campus Traditions
+                    </a>
+                </div>
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-lightbulb"></i> Leadership
+                    </a>
+                </div>
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-calendar-week"></i> Events
+                    </a>
+                </div>
+                <div class="col-md-3 link-item">
+                    <a href="#">
+                        <i class="fas fa-compass"></i> Beyond RIT
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .clubs-section {
+            background-color: #ff6600;
+            padding: 80px 20px;
+            color: white;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-container h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1s ease-out forwards 0.3s;
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .image-wrapper {
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 0 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .image-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .club-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-wrapper:hover .club-image {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .text-container {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+        }
+
+        .content-section {
+            padding: 50px 20px; /* Add padding for spacing */
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-top: 50px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1s ease-out forwards 0.6s;
+        }
+
+        .welcome-text p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .jump-links {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .jump-links h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1s ease-out forwards 0.7s;
+        }
+
+        .link-item {
+            margin: 10px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .link-item:nth-child(1) { animation-delay: 0.9s; }
+        .link-item:nth-child(2) { animation-delay: 1.0s; }
+        .link-item:nth-child(3) { animation-delay: 1.1s; }
+        .link-item:nth-child(4) { animation-delay: 1.2s; }
+        .link-item:nth-child(5) { animation-delay: 1.3s; }
+        .link-item:nth-child(6) { animation-delay: 1.4s; }
+
+        .jump-links a {
+            color: #333; /* Darker color for links */
+            text-decoration: none;
+            display: block;
+            padding: 15px 20px;
+            border: 2px solid #333; /* Darker border */
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .jump-links a:hover {
+            background-color: rgba(0, 0, 0, 0.1); /* Lighter background on hover */
+            transform: scale(1.05);
+            color: #000; /* Darker color on hover */
+            border-color: #000; /* Darker border on hover */
+        }
+
+        .jump-links i {
+            margin-right: 15px;
+        }
+
+        /* Animations */
+        @@keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">*@

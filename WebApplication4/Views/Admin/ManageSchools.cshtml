@@ -1,0 +1,261 @@
+﻿@model IPagedList<WebApplication4.Models.DEPARTMENT>
+@using PagedList;
+@using PagedList.Mvc;
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Manage Departments (Schools)";
+}
+
+<h2 class="text-center mb-4">Manage Departments (Schools)</h2>
+
+<!-- ✅ Display Success & Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- ✅ Departments Table -->
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>University Name</th>
+            <th>Department Name</th>
+            <th>HOD</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var department in Model)
+        {
+            <tr>
+                <td>@department.UNIVERSITY.UniversityNAME</td>
+                <td>@department.DepartmentName</td>
+                <td>@department.HOD</td>
+                <td>
+                    @if (department.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Deactivated</span>
+                    }
+                </td>
+                <td>
+                    @if (department.IsActive == true)
+                    {
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- ✅ Edit Button (only for active departments) -->
+                            <button type="button"
+                                    class="btn btn-primary btn-sm edit-department-btn"
+                                    data-id="@department.DepartmentID"
+                                    data-name="@Html.Raw(department.DepartmentName)"
+                                    data-toggle="modal"
+                                    data-target="#editDepartmentModal">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+
+                            <!-- ✅ Deactivate Button -->
+                            <form method="post" action="@Url.Action("DeactivateDepartment", "Admin")" class="ml-2">
+                                <input type="hidden" name="departmentId" value="@department.DepartmentID" />
+                                <button type="submit" class="btn btn-warning btn-sm"
+                                        onclick="return confirm('Are you sure you want to deactivate this department?');">
+                                    <i class="fas fa-ban"></i> Deactivate
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ✅ Activate Button (if the department is inactive) -->
+                        <form method="post" action="@Url.Action("ActivateDepartment", "Admin")">
+                            <input type="hidden" name="departmentId" value="@department.DepartmentID" />
+                            <button type="submit" class="btn btn-success btn-sm"
+                                    onclick="return confirm('Are you sure you want to activate this department?');">
+                                <i class="fas fa-check-circle"></i> Activate
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- ✅ Pagination -->
+<div class="pagination-container text-center mt-3">
+    <div class="pagination-info">
+        Showing @Model.FirstItemOnPage to @Model.LastItemOnPage of @Model.TotalItemCount entries
+    </div>
+    <ul class="pagination justify-content-center">
+        @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.PageCount, Model.PageNumber + 2); i++)
+        {
+            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ManageSchools", new { page = i })">@i</a>
+            </li>
+        }
+    </ul>
+</div>
+
+<!-- Modal for Editing Department -->
+<div class="modal fade" id="editDepartmentModal" tabindex="-1" role="dialog" aria-labelledby="editDepartmentLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            @using (Html.BeginForm("EditDepartment", "Admin", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editDepartmentLabel">Edit Department</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Hidden Fields for Department and University -->
+                    <input type="hidden" id="editDepartmentId" name="DepartmentID" />
+                    <input type="hidden" id="editUniversityId" name="UniversityID" /> <!-- Hidden field for University -->
+
+                    <div class="form-group">
+                        <label for="editDepartmentName">Department Name</label>
+                        <input type="text" class="form-control" id="editDepartmentName" name="DepartmentName" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- JavaScript to Pre-fill Modal Fields -->
+<script>
+    $(document).on("click", ".edit-department-btn", function () {
+        var deptId = $(this).attr("data-id");
+        var deptName = $(this).attr("data-name");
+        var universityId = $(this).attr("data-university-id"); // Get University ID
+
+        $("#editDepartmentId").val(deptId);
+        $("#editDepartmentName").val(deptName);
+        $("#editUniversityId").val(universityId); // Set University ID in the modal
+    });
+</script>
+
+<!-- ✅ CSS Styling for Table, Buttons & Pagination -->
+<style>
+    /* Ensure these styles exist to avoid CSS conflicts */
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: left;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 10px;
+        }
+
+    .btn-warning {
+        background-color: #f39c12;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .pagination-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin-top: 10px;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 5px;
+    }
+
+    .page-item {
+        margin: 0 3px;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 12px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+    }
+</style>

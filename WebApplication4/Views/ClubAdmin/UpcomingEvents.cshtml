@@ -1,0 +1,136 @@
+﻿@model WebApplication4.Models.UpcomingEventsViewModel
+
+@{
+    ViewBag.Title = "Upcoming Events";
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml"; // Adjust if needed
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">📅 Upcoming Events</h2>
+
+    <div class="card mb-5">
+        <div class="card-header bg-warning text-dark">
+            Section 1: Approved but Not Yet Posted Events
+        </div>
+        <div class="card-body">
+            @if (Model.ApprovedNotPostedEvents != null && Model.ApprovedNotPostedEvents.Any())
+            {
+                <table class="table table-striped table-fixed">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Description</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.ApprovedNotPostedEvents)
+                        {
+                            <tr>
+                                <td>@ev.EventName</td>
+                                <td>@ev.EventDescription</td>
+                                <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td>
+                                    <a href="@Url.Action("PostEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-success btn-sm post-button">
+
+                                        ✅ Post to Website
+                                    </a>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No approved events awaiting posting.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            Section 2: Posted Upcoming Events
+        </div>
+        <div class="card-body">
+            @if (Model.PostedUpcomingEvents != null && Model.PostedUpcomingEvents.Any())
+            {
+                <table class="table table-hover table-fixed">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ev in Model.PostedUpcomingEvents)
+                        {
+                            <tr>
+                                <td>@ev.EventName</td>
+                                <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td>
+                                    <a href="@Url.Action("EditEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-warning btn-sm">
+                                        ✏️ Edit
+                                    </a>
+                                    <a href="@Url.Action("MarkAsConcluded", "ClubAdmin", new { id = ev.EventID })" class="btn btn-secondary btn-sm">
+                                        📅 Mark as Concluded
+                                    </a>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No upcoming events have been posted yet.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .post-button {
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .table-fixed {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+        .table-fixed th:nth-child(1),
+        .table-fixed td:nth-child(1) {
+            width: 15%;
+        }
+
+        .table-fixed th:nth-child(2),
+        .table-fixed td:nth-child(2) {
+            width: 40%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .table-fixed th:nth-child(3),
+        .table-fixed td:nth-child(3),
+        .table-fixed th:nth-child(4),
+        .table-fixed td:nth-child(4) {
+            width: 15%;
+        }
+
+        .table-fixed th:nth-child(5),
+        .table-fixed td:nth-child(5) {
+            width: 15%;
+        }
+</style>

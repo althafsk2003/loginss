@@ -1,0 +1,90 @@
+﻿@model List<WebApplication4.Models.USER>
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "View Mentors";
+}
+
+<h2 class="text-center mb-4">@ViewBag.Title</h2>
+
+<!-- ✅ Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+}
+
+<!-- ✅ Buttons to switch views -->
+<div class="text-center mt-3">
+    <a href="@Url.Action("ViewMentors", "UniversityAdmin")" class="btn btn-primary">View All Mentors</a>
+    <a href="@Url.Action("ViewActiveMentors", "UniversityAdmin")" class="btn btn-success">View Active Mentors</a>
+    <a href="@Url.Action("ViewDeactivatedMentors", "UniversityAdmin")" class="btn btn-danger">View Deactivated Mentors</a>
+</div>
+
+<!-- ✅ Mentors Table -->
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Mentor Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Status</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var mentor in Model)
+        {
+            <tr>
+                <td>@mentor.FirstName @mentor.LastName</td>
+                <td>@mentor.Email</td>
+                <td>@mentor.MobileNumber</td>
+                <td>
+                    @if (mentor.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Inactive</span>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<!-- ✅ CSS Styling -->
+<style>
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: center;
+            padding: 10px;
+        }
+
+    .alert-success {
+        font-size: 16px;
+        font-weight: bold;
+        color: green;
+        text-align: center;
+    }
+
+    .btn {
+        margin: 5px;
+
+    }
+</style>

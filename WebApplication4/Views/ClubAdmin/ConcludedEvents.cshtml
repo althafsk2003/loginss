@@ -1,0 +1,37 @@
+﻿@model List<WebApplication4.Models.EVENT>
+@{
+    ViewBag.Title = "Concluded Events";
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Concluded Events</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var ev in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@ev.EventName</h5>
+                            <p class="card-text">
+                                <strong>Start:</strong> @ev.EventStartDateAndTime.ToString("dd-MM-yyyy")<br />
+                                <strong>End:</strong> @ev.EventEndDateAndTime.ToString("dd-MM-yyyy")<br />
+                                <strong>Venue:</strong> ICFAI Foundation
+                            </p>
+                            <a href="@Url.Action("getconEventDetails", "Clubadmin", new { id = ev.EventID })" class="btn btn-primary btn-block">
+                                Add / Edit Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">No concluded events available.</div>
+    }
+</div>

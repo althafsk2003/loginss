@@ -1,0 +1,94 @@
+﻿@model WebApplication4.Models.PostEventViewModel
+
+@{
+    ViewBag.Title = "Edit the Event";
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml"; // Adjust if needed
+}
+
+<h2>Post Event</h2>
+
+@using (Html.BeginForm("EditEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(m => m.EventID)
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EventName)
+        @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", @readonly = "readonly" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EventDescription)
+        @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control", rows = 4 })
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Upload Event Poster (Image)")
+        <input type="file" name="EventPosterFile" class="form-control" />
+        @if (!string.IsNullOrEmpty(Model.EventPoster))
+        {
+            <div style="margin-top:10px;">
+                <img src="@Model.EventPoster" alt="Event Poster" style="max-height:200px;" />
+            </div>
+        }
+    </div>
+
+    <div class="form-group">
+        @Html.Label("Upload Event Banner (Image)")
+        <input type="file" name="EventBannerFile" class="form-control" />
+        @if (!string.IsNullOrEmpty(Model.EventBanner))
+        {
+            <div style="margin-top:10px;">
+                <img src="@Model.EventBanner" alt="Event Banner" style="max-height:200px;" />
+            </div>
+        }
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EventStartDateAndTime)
+        @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EventEndDateAndTime)
+        @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Venue)
+        @Html.TextBoxFor(m => m.Venue, new { @class = "form-control" })
+    </div>
+
+    @*<div class="form-group">
+            @Html.Label("Registration Link")
+            @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            @Html.Label("QR Content (text that will be encoded)")
+            @Html.TextBoxFor(m => m.QRContentText, new { @class = "form-control" })
+        </div>*@
+
+    <div class="form-group">
+        @Html.Label("Registration Link")
+        @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control", @placeholder = "Enter Google Form link" })
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.OrganizerName)
+        @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.ClubName)
+        @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+}
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success mt-3">@ViewBag.Message</div>
+}

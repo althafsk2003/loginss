@@ -1,0 +1,871 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "ICFAI Foundation for Higher Education";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom CSS -->
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            flex: 1;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            background: #111;
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+            text-align: center;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        /* Main Navigation */
+        .navbar {
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.2s;
+            z-index: 1001; /* Increased z-index to stay above hero section */
+            position: relative; /* Ensure proper stacking context */
+        }
+
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: bold;
+            color: #E96C20;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            color: #333;
+            transition: 0.3s;
+            padding: 10px 15px;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #E96C20;
+            }
+
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.3s ease-in-out;
+            background-color: white; /* Added white background */
+            border: 1px solid #ddd; /* Optional: subtle border for definition */
+            border-radius: 5px; /* Optional: rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: shadow for depth */
+            z-index: 1002; /* Ensure dropdown is above navbar */
+        }
+
+        .nav-item:hover .dropdown-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: visible;
+            z-index: 1; /* Lower z-index to allow navbar to stay above */
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 72%;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-text {
+            position: absolute;
+            bottom: 160px;
+            left: 32%;
+            transform: translateX(-50%);
+            background: orange;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 70px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        /* Card Grid Section */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+            .card-grid.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        .wide-image {
+            grid-column: span 2;
+        }
+
+            .wide-image img {
+                width: 100%;
+                height: 277px;
+                object-fit: cover;
+                display: block;
+                border-radius: 0;
+            }
+
+        .card {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+            border-radius: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+            .card img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                transition: transform 0.4s ease;
+                border-radius: 0;
+            }
+
+            .card:hover img {
+                transform: scale(1.05);
+            }
+
+            .card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 102, 0, 0.3);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 1;
+            }
+
+            .card:hover::before {
+                opacity: 1;
+            }
+
+        .card-text {
+            position: absolute;
+            bottom: 0;
+            color: white;
+            width: 100%;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 2;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+            background: none;
+        }
+
+        /* Founder's Note Section */
+        .founder-profile {
+            width: 100%;
+            min-height: 70vh;
+            margin: 0 0 60px 0;
+            padding: 40px 50px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+            .founder-profile.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        .founder-image-box {
+            flex: 0 0 300px;
+            position: relative;
+            text-align: center;
+            max-height: 100%;
+        }
+
+            .founder-image-box img {
+                width: 100%;
+                border-radius: 10px;
+                border: 4px solid #e44d26;
+                transition: transform 0.3s ease;
+            }
+
+                .founder-image-box img:hover {
+                    transform: scale(1.05);
+                }
+
+        .founder-details {
+            margin-top: 15px;
+            color: #333;
+        }
+
+        .founder-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e44d26;
+            margin: 0;
+        }
+
+        .founder-details small {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        .founder-text-box {
+            flex: 1;
+            padding-left: 20px;
+            max-width: 70%;
+        }
+
+            .founder-text-box h2 {
+                font-size: 2.5rem;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                position: relative;
+            }
+
+                .founder-text-box h2::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -5px;
+                    left: 0;
+                    width: 60px;
+                    height: 3px;
+                    background: #e44d26;
+                    transition: width 0.3s ease;
+                }
+
+                .founder-text-box h2:hover::after {
+                    width: 120px;
+                }
+
+        .quote-mark {
+            font-size: 50px;
+            line-height: 0.5;
+            color: #e44d26;
+            float: left;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+
+        .founder-quote {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #34495e;
+            margin-top: 5px;
+            font-style: italic;
+            clear: both;
+        }
+
+        /* Buttons */
+        .btn-custom {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(90deg, #e44d26, #ff7f50);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+            .btn-custom:hover {
+                background: linear-gradient(90deg, #ff7f50, #e44d26);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(228, 77, 38, 0.4);
+            }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #e44d26, #ff7f50);
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+            .btn-gradient:hover {
+                background: linear-gradient(90deg, #ff7f50, #e44d26);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(228, 77, 38, 0.3);
+            }
+
+        /* Modal Styling */
+        .stylish-modal {
+            border-radius: 16px;
+            border: none;
+            padding: 20px 30px;
+            background: #fff;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #e44d26;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .underline {
+            width: 60px;
+            height: 4px;
+            background-color: #e44d26;
+            border-radius: 2px;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+
+        .modal-body p {
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .image-gallery img {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 3px solid #f1f1f1;
+            border-radius: 10px;
+            max-width: 100%;
+        }
+
+            .image-gallery img:hover {
+                transform: scale(1.03);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .animated-modal {
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: all 0.4s ease-in-out;
+        }
+
+        .modal.show .animated-modal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal.fade .modal-dialog {
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        .modal.fade.show .modal-dialog {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1D1744;
+            color: #ccc;
+            padding: 40px 0;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+            .footer.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        .footer-col {
+            margin-bottom: 20px;
+        }
+
+        .footer-content h4 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-content p, .footer-content a {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-decoration: none;
+        }
+
+            .footer-content a:hover {
+                color: #fff;
+            }
+
+        .list-unstyled {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .footer-col i {
+            margin-right: 5px;
+            color: #ffc107;
+        }
+
+        .route-map-container {
+            position: absolute;
+            top: 35%;
+            right: 2%;
+            z-index: 0;
+            width: 65%;
+            max-width: calc(100% - 40px);
+        }
+
+            .route-map-container h2 {
+                color: #ffc107;
+                text-align: left;
+                margin-bottom: 5px;
+                font-size: 1.5em;
+            }
+
+            .route-map-container iframe {
+                display: block;
+                width: 100%;
+                min-height: 250px;
+                border: 1px solid #ccc;
+            }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            background-color: #fd7e14;
+            padding: 16px 0;
+            text-align: center;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.5s;
+        }
+
+            .footer-bottom p {
+                margin: 0;
+                color: white;
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+        /* Animation Keyframes */
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Styling */
+        @@media (max-width: 900px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wide-image {
+                grid-column: span 2;
+            }
+
+                .card, .wide-image img {
+                    height: 180px;
+                }
+        }
+
+        @@media (max-width: 768px) {
+            .hero {
+                height: 80vh;
+            }
+
+            .hero-video {
+                height: 60%;
+            }
+
+            .hero-text {
+                font-size: 18px;
+                padding: 15px 40px;
+                bottom: 120px;
+            }
+
+            .founder-profile {
+                flex-direction: column;
+                padding: 20px;
+                min-height: auto;
+                margin-bottom: 40px;
+            }
+
+            .founder-image-box {
+                flex: 0 0 200px;
+                margin-bottom: 20px;
+            }
+
+            .founder-text-box {
+                padding-left: 0;
+                max-width: 100%;
+            }
+
+                .founder-text-box h2 {
+                    font-size: 1.8rem;
+                }
+
+            .quote-mark {
+                font-size: 40px;
+            }
+
+            .route-map-container {
+                position: static;
+                width: 100%;
+                max-width: 100%;
+                margin-top: 20px;
+            }
+
+                .route-map-container iframe {
+                    min-height: 200px;
+                }
+        }
+
+        @@media (max-width: 576px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                margin-bottom: 40px;
+            }
+
+            .wide-image {
+                grid-column: span 1;
+            }
+
+            .hero-text {
+                font-size: 16px;
+                padding: 10px 30px;
+            }
+
+            .founder-image-box {
+                flex: 0 0 150px;
+            }
+
+            .founder-text-box h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <span>Future Students | Current Students | Faculty & Staff | Alumni | Partners</span>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="height: 50px; width: 200px; max-width: 100%;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Academics</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="icfaiLifeMenu" role="button">ICFAI Life</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("ClubsandImages", "Clubs")">Clubs</a></li>
+                            <li><a class="dropdown-item" href="#">Events</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="#">Research</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Login","Admin")">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <video autoplay muted loop class="hero-video">
+            <source src="~/wwwroot/videos/clubs11.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="hero-text">Always on to something amazing</div>
+    </div>
+
+    <!-- Card Grid -->
+    <div class="card-grid" id="cardGrid">
+        <div class="wide-image">
+            <img src="~/wwwroot/Images/ii.png" alt="Advancing the Exceptional" />
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im02.jpg" alt="Creativity and Innovation" />
+            <div class="card-text">Creativity and Innovation</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im03.jpg" alt="Technology, the Arts, and Design" />
+            <div class="card-text">Technology, the Arts, and Design</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im04.jpg" alt="Commitment to Goodness" />
+            <div class="card-text">Commitment to Goodness</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im05.jpg" alt="Co-op and Careers" />
+            <div class="card-text">Co-op and Careers</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im06.jpg" alt="Revolutionary Research" />
+            <div class="card-text">Revolutionary Research</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im07.jpg" alt="Global Engagement" />
+            <div class="card-text">Global Engagement</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im08.jpg" alt="Leadership in Sustainability" />
+            <div class="card-text">Leadership in Sustainability</div>
+        </div>
+        <div class="card">
+            <img src="~/wwwroot/Images/im09.jpg" alt="Welcoming and Inclusive Environment" />
+            <div class="card-text">Welcoming and Inclusive Environment</div>
+        </div>
+    </div>
+
+    <!-- Founder's Note -->
+    <section class="founder-profile" id="founderProfile">
+        <div class="founder-image-box">
+            <img src="~/wwwroot/Images/Nj.jpg" alt="N. J. Yasaswy">
+            <div class="founder-details">
+                <p class="founder-name">N. J. Yasaswy</p>
+                <p><small>(1950 - 2011)</small></p>
+            </div>
+        </div>
+        <div class="founder-text-box">
+            <h2>Message from the Founder</h2>
+            <p class="quote-mark">“</p>
+            <p class="founder-quote">
+                Mr. N.J. Yasaswy (1950–2011), Founder of the ICFAI Group of educational institutions and a pioneer in promoting higher education in the private sector had a brilliant academic career: B.Com (Andhra University 1969, First Rank), CA Inter (May 1971, First Rank), CA Final (May 1973, First Rank), ICWA Inter (July 1970, First Rank) and ICWA Final (July 1972, First Rank). He was the recipient of the Basu Foundation Award for the Best Student of the Year from both, The Institute of Cost and Works Accountants of India (in 1972) and The Institute of Chartered Accountants of India (in 1973).
+            </p>
+            <a href="#" class="btn-custom" data-bs-toggle="modal" data-bs-target="#founderModal">Read More ›</a>
+        </div>
+    </section>
+
+    <!-- Founder's Modal -->
+    <div class="modal fade" id="founderModal" tabindex="-1" aria-labelledby="founderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content stylish-modal animated-modal">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h3 class="modal-title" id="founderModalLabel">A Legacy of Vision and Leadership</h3>
+                        <div class="underline"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Mr. N.J. Yasaswy (1950–2011)</strong> was an academic icon and institutional pioneer. His early years included a brilliant academic career and deep involvement in public service and corporate governance.</p>
+                    <img src="~/wwwroot/Images/biography.jpg" alt="Mr. Yasaswy at event" class="img-fluid rounded shadow-sm mb-4 mt-2 d-block mx-auto image-gallery" style="max-width: 500px;">
+                    <p>Between <strong>1974–1980</strong>, he was a faculty member at the Administrative Staff College of India. In 1981, he launched <em>Yasaswy Management Associates Pvt. Ltd.</em> — a move that marked his foray into consulting and education.</p>
+                    <p>He held key public roles including <strong>Chairman</strong> of Andhra Pradesh State Trading Corporation and <strong>Vice-Chairman</strong> of the Public Enterprises Management Board. He also taught at <strong>IIM-Ahmedabad</strong> and was a member of the <strong>SEBI Committee on Accounting Standards</strong>.</p>
+                    <p>As the founder of <strong>ICFAI</strong> in 1985, he created a network of universities that expanded across India, especially the underserved North-East region. His institutions emphasized <strong>discipline, quality, and accessibility</strong>.</p>
+                    <p class="mb-0">Mr. Yasaswy was not only a <strong>visionary educator</strong> and <strong>institution builder</strong>, but also a <strong>gifted speaker, author, and mentor</strong>. His legacy continues to shape the future of Indian education.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-gradient" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content" style="color: #fff; font-size: 14px;">
+                        <div style="background-color: white; padding: 10px; margin-bottom: 20px;">
+                            <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="max-width: 100%; height: auto;">
+                        </div>
+                        <p style="color: #ffc107; font-weight: bold; margin-bottom: 8px;">
+                            <i class="fas fa-map-marker-alt"></i> CAMPUS ADDRESS
+                        </p>
+                        <p>
+                            The ICFAI Foundation for Higher Education (IFHE),<br>
+                            Hyderabad<br>
+                            Donthanapally, Shankarapalli Road<br>
+                            Hyderabad - 501203, Telangana, India.
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-phone-alt"></i> ADMISSION CONTACT
+                        </p>
+                        <p>
+                            Toll Free Number: 18005990767<br>
+                            Telangana: 8498053801<br>
+                            Andhra Pradesh: 9160191166
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-headset"></i> SSD (STUDENT SERVICES)
+                        </p>
+                        <p>
+                            08417-226663 / 08417-226662
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4>Useful Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#">About IFHE</a></li>
+                            <li><a href="#">ICFAI Business School</a></li>
+                            <li><a href="#">Faculty of Science & Technology</a></li>
+                            <li><a href="#">ICFAI Law School</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4>Quick Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Sitemap</a></li>
+                            <li><a href="#">Alumni</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4>Connect with Us</h4>
+                        <ul class="list-unstyled d-flex gap-2">
+                            <li><a rel="noreferrer" title="Facebook" href="https://www.facebook.com/IFHEHyderabadOfficial/" target="_blank"><i class="bi bi-facebook"></i> Facebook</a></li>
+                            <li><a href="https://twitter.com/IFHE_Hyderabad" target="_blank" rel="noreferrer" title="Twitter"><i class="fab fa-twitter"></i> Twitter</a></li>
+                            <li><a href="https://www.linkedin.com/school/icfai-foundation-for-higher-education-ifhe-hyderabad/" target="_blank" rel="noreferrer" title="LinkedIn"><i class="fab fa-linkedin-in"></i> LinkedIn</a></li>
+                            <li><a href="https://www.instagram.com/ifhe_hyderabad/" target="_blank" rel="noreferrer" title="Instagram"><i class="fab fa-instagram"></i> Instagram</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="route-map-container">
+            <h2 class="route-map-heading">ROUTE MAP TO IFHE HYDERABAD CAMPUS</h2>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3807.838918799798!2d78.2324844742829!3d17.374845483290986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb95703d119557%3A0x6a0e99997b8c5e5a!2sICFAI%20Foundation%20for%20Higher%20Education%20(IFHE)%2C%20Hyderabad!5e0!3m2!1sen!2sin!4v1712578528895!5m2!1sen!2sin" style="border:0;" loading="lazy"></iframe>
+        </div>
+    </footer>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+        <p>© 2024 Copyright All Rights Reserved by <strong style="font-weight: 600;">The ICFAI Group.</strong></p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Intersection Observer for Animation Trigger
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            const elements = document.querySelectorAll('.top-nav, .navbar, .hero-text, .content-text, .card-grid, .founder-profile, .footer, .footer-bottom');
+            elements.forEach(element => observer.observe(element));
+        });
+
+        function startProcess() {
+            alert("Starting Clubs Process...");
+        }
+    </script>
+</body>
+</html>

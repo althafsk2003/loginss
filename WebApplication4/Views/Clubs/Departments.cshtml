@@ -1,0 +1,386 @@
+﻿@model List<WebApplication4.Models.DEPARTMENT>
+
+@{
+    Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+    ViewBag.Title = "IFHE Departments";
+}
+
+<div class="departments-section">
+    <div class="container">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var department = Model[i];
+            <div class="row department-row @(i % 2 == 0 ? "even" : "odd")">
+                @if (i % 2 == 0)
+                {
+                    <div class="col-md-6 image-column">
+                        <img src="~/wwwroot/Images/@(department.DepartmentName.Replace(" ", "")).jpg" alt="@department.DepartmentName" class="img-fluid department-image" />
+                    </div>
+                    <div class="col-md-6 text-column">
+                        <h3>@department.DepartmentName</h3>
+                        <p><b>Head of the school:</b> @department.HOD</p>
+                        <p>
+                            @switch (department.DepartmentName)
+                            {
+                                case "ICFAI School Of Architecture":
+                                    @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
+                                    break;
+                                case "ICFAI Law School":
+                                    @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
+                                    break;
+                                case "ICFAI School Of Social Sciences":
+                                    @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
+                                    break;
+                                default:
+                                    @:Learn more about the exciting programs and research opportunities offered by this department.
+                                    break;
+                            }
+                        </p>
+                        <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-6 text-column">
+                        <h3>@department.DepartmentName</h3>
+                        <p><b>Head of the school:</b> @department.HOD</p>
+                        <p>
+                            @switch (department.DepartmentName)
+                            {
+                                case "ICFAI School Of Architecture":
+                                    @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
+                                    break;
+                                case "ICFAI Law School":
+                                    @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
+                                    break;
+                                case "ICFAI School Of Social Sciences":
+                                    @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
+                                    break;
+                                default:
+                                    @:Learn more about the exciting programs and research opportunities offered by this department.
+                                    break;
+                            }
+                        </p>
+                        <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
+                    </div>
+                    <div class="col-md-6 image-column">
+                        <img src="~/wwwroot/Images/@(department.DepartmentName.Replace(" ", "")).jpg" alt="@department.DepartmentName" class="img-fluid department-image" />
+                    </div>
+                }
+            </div>
+
+            <div class="club-logos" id="club-logos-@department.DepartmentID" style="display: none;">
+                <h3>Clubs under @department.DepartmentName</h3>
+                <div class="club-logos-grid">
+                    @foreach (var club in department.CLUBS)
+                    {
+                        <img src="@club.LogoImagePath" alt="@club.ClubName" class="club-logo" />
+                    }
+                </div>
+
+            </div>
+
+            <div class="club-details" id="club-details-@department.DepartmentID" style="display: none;">
+
+            </div>
+        }
+    </div>
+</div>
+
+<div id="imageModal" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
+<style>
+    .departments-section {
+        padding: 50px 0;
+    }
+
+    .department-row {
+        margin-bottom: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+        .department-row:hover {
+            transform: translateY(-5px);
+        }
+    /* Slight lift on hover */
+    .image-column img {
+        width: 538px;
+        height: 571px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+        .image-column img:hover {
+            transform: scale(1.05);
+        }
+    /* Slight zoom on hover */
+    .text-column {
+        padding: 30px;
+    }
+
+        .text-column h3 {
+            font-size: 2.2rem;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .text-column p {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.7;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+    .even {
+        background-color: #f9f9f9;
+    }
+
+    .odd {
+        background-color: #fff;
+    }
+
+    .image-column {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .text-column {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .custom-button {
+        display: inline-block;
+        padding: 12px 25px;
+        border: 2px solid #a00;
+        color: #a00;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+        .custom-button:hover {
+            background-color: #a00;
+            color: white;
+        }
+    .club-logos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* Further reduce minmax */
+        gap: 2px; /* Reduce gap further */
+        padding: 90px; /* Reduce padding further */
+        justify-content: center; /* Center the logos */
+    }
+
+    .club-logo {
+        width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    /* Key change here */
+    .department-row:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+        .department-row:nth-child(even) .image-column {
+            order: 2; /* Place image column second on even rows */
+        }
+
+    .department-row:nth-child(odd) {
+        background-color: #fff;
+    }
+
+    /* Animations */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.9);
+    }
+
+    .modal-content {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+    }
+
+    .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+        .close:hover, .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .club-logos-grid img {
+        width: 224px; /* Adjust size as needed */
+        height: 206px; /* Ensures a square shape */
+        border-radius: 50%; /* Makes it circular */
+        object-fit: cover; /* Ensures the image fits within the circle */
+        margin: 2px; /* Adds spacing between logos */
+        border: 2px solid #ccc; /* Optional: adds a border */
+        transition: transform 0.3s ease-in-out; /* Adds hover effect */
+    }
+
+        .club-logos-grid img:hover {
+            transform: scale(1.1); /* Slight zoom effect on hover */
+        }
+
+       
+
+    .club-logo {
+        transition: transform 0.5s ease-in-out;
+        backface-visibility: hidden;
+    }
+
+    .club-logos-grid.show img {
+        animation: spin 0.8s ease-in-out;
+    }
+
+
+@@keyframes spin {
+    from {
+        transform: rotateY(90deg); /* Initially hide the logo by rotating it 90 degrees */
+        opacity: 0; /* Initially set opacity to 0 */
+    }
+    to {
+        transform: rotateY(0deg); /* Rotate back to 0 degrees to show the logo */
+        opacity: 1; /* Set opacity to 1 to fully reveal the logo */
+    }
+}
+
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Image Modal Functionality
+        document.querySelectorAll('.department-image').forEach(img => {
+            img.onclick = function () {
+                document.getElementById('imageModal').style.display = "block";
+                document.getElementById('modalImage').src = this.src;
+            };
+        });
+
+       // document.querySelector('.close').onclick = function () {
+           // document.getElementById('imageModal').style.display = "none";
+        //};
+
+        document.querySelectorAll('.show-clubs').forEach(button => {
+            button.addEventListener("click", function () {
+                let departmentId = this.getAttribute("data-department-id");
+                let clubLogosDiv = document.getElementById(`club-logos-${departmentId}`);
+                let clubLogosGrid = clubLogosDiv.querySelector('.club-logos-grid'); // Get the grid
+
+                if (clubLogosDiv.style.display === "none" || clubLogosDiv.style.display === "") {
+                    clubLogosDiv.style.display = "block";
+
+                    // Load logos first, then add the show class
+                    fetchClubLogos(departmentId).then(() => {
+                        clubLogosGrid.classList.add("show");
+                    });
+                } else {
+                    clubLogosGrid.classList.remove("show"); // Remove class before hiding
+                    clubLogosDiv.style.display = "none";
+                }
+            });
+        });
+    });
+
+    // Function to fetch club logos dynamically (modified to return a Promise)
+    function fetchClubLogos(departmentId) {
+        return fetch(`/Clubs/GetClubLogos?departmentId=${departmentId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not OK");
+                }
+                return response.json();
+            })
+            .then(clubs => {
+                const clubLogosGrid = document.querySelector(`#club-logos-${departmentId} .club-logos-grid`);
+                if (!clubLogosGrid) return;
+
+                clubLogosGrid.innerHTML = ''; // Clear previous images
+
+                if (clubs.length === 0) {
+                    clubLogosGrid.innerHTML = '<p>No clubs found for this department.</p>';
+                    return;
+                }
+
+                clubs.forEach(club => {
+                    const logo = document.createElement('img');
+                    logo.src = club.LogoImagePath ? club.LogoImagePath : '/Uploads/default-logo.png';
+                    logo.alt = club.ClubName;
+                    logo.classList.add('club-logo');
+
+                    // Add click event listener
+                    logo.addEventListener('click', function () {
+                        window.location.href = `/Clubs/ClubDetails/${club.ClubID}`; // Redirect to ClubDetails view
+                    });
+
+                    clubLogosGrid.appendChild(logo);
+                });
+            })
+            .catch(error => console.error("Error fetching club logos:", error));
+    }
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

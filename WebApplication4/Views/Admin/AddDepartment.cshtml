@@ -1,0 +1,195 @@
+﻿@model List<WebApplication4.Models.DEPARTMENT>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Add Department (School)";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<h2 class="text-center mb-4">Add Departments (Schools)</h2>
+@using (Html.BeginForm("AddDepartment", "Admin", FormMethod.Post))
+{
+    <div class="form-container">
+        <!-- University Dropdown -->
+        <div class="form-group">
+            <label class="form-label">Select University</label>
+            <select id="Universityid" name="Universityid" class="form-control" required>
+                <option value="">Select University</option>
+                @foreach (var university in ViewBag.Universities as SelectList)
+                {
+                    <option value="@university.Value">@university.Text</option>
+                }
+            </select>
+        </div>
+
+        <!-- Dynamic Department Fields -->
+        <div id="dynamic-departments">
+            <div class="department-entry">
+                <div class="form-group">
+                    <label class="form-label">Department Name</label>
+                    <input type="text" name="Departments[0].DepartmentName" class="form-control department-name" required placeholder="Enter Department Name" />
+                    <span class="text-danger" id="DepartmentNameError0"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">HOD Name</label>
+                    <input type="text" name="Departments[0].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
+                    <span class="text-danger" id="HODError0"></span>
+                </div>
+
+                <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
+            </div>
+        </div>
+
+        <button type="button" id="add-department" class="btn btn-secondary mt-2">+ Add Another Department</button>
+
+        <div class="form-group text-center mt-4">
+            <button type="submit" class="btn btn-primary submit-btn">
+                <i class="fas fa-save"></i> Save Departments
+            </button>
+        </div>
+    </div>
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var departmentCount = 1;
+
+        $("#add-department").click(function () {
+            var departmentHtml = `
+                <div class="department-entry">
+                    <div class="form-group">
+                        <label class="form-label">Department Name</label>
+                        <input type="text" name="Departments[${departmentCount}].DepartmentName" class="form-control department-name" required placeholder="Enter Department Name" />
+                        <span class="text-danger" id="DepartmentNameError${departmentCount}"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">HOD Name</label>
+                        <input type="text" name="Departments[${departmentCount}].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
+                        <span class="text-danger" id="HODError${departmentCount}"></span>
+                    </div>
+
+                    <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
+                </div>`;
+            $("#dynamic-departments").append(departmentHtml);
+            departmentCount++;
+        });
+
+        $(document).on("click", ".remove-department", function () {
+            $(this).closest(".department-entry").remove();
+        });
+
+        $("form").submit(function (e) {
+            let isValid = true;
+            $(".department-name, .department-hod").each(function (index) {
+                const value = $(this).val().trim();
+                const isDepartment = $(this).hasClass("department-name");
+                const errorId = "#" + (isDepartment ? "DepartmentNameError" : "HODError") + index;
+
+                if (value === "") {
+                    $(errorId).text("This field is required.");
+                    isValid = false;
+                } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+                    $(errorId).text("Only letters, spaces, hyphens, and apostrophes are allowed.");
+                    isValid = false;
+                } else {
+                    $(errorId).text("");
+                }
+            });
+            if (!isValid) e.preventDefault();
+            return isValid;
+        });
+
+        // Real-time validation
+        $(".department-name, .department-hod").on("input", function () {
+            const value = $(this).val().trim();
+            const isDepartment = $(this).hasClass("department-name");
+            const index = $(this).closest(".department-entry").index();
+            const errorId = "#" + (isDepartment ? "DepartmentNameError" : "HODError") + index;
+
+            if (value === "") {
+                $(errorId).text("This field is required.");
+            } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+                $(errorId).text("Only letters, spaces, hyphens, and apostrophes are allowed.");
+            } else {
+                $(errorId).text("");
+            }
+        });
+    });
+</script>
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+    }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-danger {
+        margin-top: 10px;
+        font-size: 15px;
+    }
+
+    select.form-control {
+        width: 100% !important;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+        white-space: normal;
+        overflow: visible;
+        height: 50px;
+    }
+
+    .text-danger {
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+
+    }
+</style>

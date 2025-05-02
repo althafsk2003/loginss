@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "University Administrator Dashboard";
+}
+
+<h2 class="text-center">Welcome, @Session["UniversityName"]</h2>
+<p class="text-center"><strong>Location:</strong> @Session["UniversityLocation"]</p>
+
+<!-- ✅ Department List -->
+<h4 class="mt-4">Departments in @Session["UniversityName"]</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Department Name</th>
+            <th>HOD</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var department in ViewBag.Departments)
+        {
+            <tr>
+                <td>@department.DepartmentName</td>
+                <td>@department.HOD</td>
+                <td>
+                    @if (department.IsActive == true)
+                    {
+                         <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Deactivated</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- ✅ Actions -->
+<div class="text-center mt-3">
+    <a href="@Url.Action("AddDepartment", "UniversityAdmin")" class="btn btn-primary">Add School</a>
+    <a href="@Url.Action("ManageDepartments", "UniversityAdmin")" class="btn btn-secondary">Manage Schools</a>
+</div>
+

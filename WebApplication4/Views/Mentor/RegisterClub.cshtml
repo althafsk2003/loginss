@@ -1,0 +1,68 @@
+﻿@model WebApplication4.Models.CLUB
+
+@{
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+    ViewBag.Title = "Register a Club";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Register a Club</h2>
+
+    <!-- ✅ Display Success Message -->
+    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+    {
+        <div class="alert alert-success text-center">@ViewBag.SuccessMessage</div>
+    }
+
+    <!-- ❌ Display Error Message -->
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger text-center">@ViewBag.ErrorMessage</div>
+    }
+
+    <div class="card shadow p-4">
+        @using (Html.BeginForm("RegisterClub", "Mentor", FormMethod.Post, new { @class = "needs-validation", novalidate = "true", enctype = "multipart/form-data" }))
+        {
+
+
+            <div class="mb-3">
+                <label for="ClubName" class="form-label">Club Name</label>
+                @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control", required = "required" })
+            </div>
+
+            <div class="mb-3">
+                <label for="Abbreviation" class="form-label">Abbreviation</label>
+                @Html.TextBoxFor(m => m.Abbreviation, new { @class = "form-control" })
+            </div>
+
+            <div class="mb-3">
+                <label for="Description" class="form-label">Description</label>
+                @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, required = "required" })
+            </div>
+
+            <div class="mb-3">
+                <label for="TotalClubCommitteeSeats" class="form-label">Total Committee Seats</label>
+                @Html.TextBoxFor(m => m.TotalClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required" })
+            </div>
+
+            <div class="mb-3">
+                <label for="AvailableClubCommitteeSeats" class="form-label">Available Seats</label>
+                @Html.TextBoxFor(m => m.AvailableClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required" })
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Department</label>
+                <input type="text" class="form-control" value="@ViewBag.DepartmentName" readonly />
+                @Html.HiddenFor(m => m.DepartmentID)
+            </div>
+
+
+            <div class="mb-3">
+                <label for="LogoImagePath" class="form-label">Club Logo (Upload File)</label>
+                <input type="file" name="LogoImage" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Request Club</button>
+        }
+    </div>
+</div>

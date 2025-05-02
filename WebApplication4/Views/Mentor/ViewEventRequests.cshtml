@@ -1,0 +1,262 @@
+﻿@model List<WebApplication4.Models.EVENT>
+
+@{
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+}
+
+<style>
+    .event-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: box-shadow 0.3s ease;
+        padding: 20px;
+        border: 1px solid #e0e0e0; /* Light gray border */
+        border-radius: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #f9f9f9; /* Light background color */
+    }
+
+        .event-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+        }
+
+    .event-content {
+        display: flex;
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .event-card-image {
+        max-width: 250px;
+        flex-shrink: 0;
+        margin-right: 300px; /* Reduced right margin */
+        display: flex;
+        align-items: flex-start; /* Align to the top */
+    }
+
+        .event-card-image img {
+            max-width: 100%; /* Changed to 100% to fit within container */
+            height: auto; /* Changed to auto to maintain aspect ratio */
+            display: block;
+            margin-top: 64px; /* Add some margin to move image down */
+            margin-left: 189px; /* Removed left margin */
+        }
+
+    .event-card-details {
+        flex: 1;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-gap: 11px;
+        align-self: stretch;
+    }
+
+        .event-card-details strong {
+            text-align: right;
+            padding-right: 5px;
+            color: #333; /* Darker text color */
+        }
+
+        .event-card-details span {
+            color: #555; /* Slightly lighter text color for values */
+        }
+
+    .event-card-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px; /* Increased margin */
+        width: 100%;
+    }
+
+        .event-card-buttons button {
+            margin: 0 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+            .event-card-buttons button.btn-success {
+                background-color: #4CAF50; /* Green background for approve */
+                color: white;
+            }
+
+            .event-card-buttons button.btn-danger {
+                background-color: #f44336; /* Red background for reject */
+                color: white;
+            }
+
+    .event-card-details strong:nth-child(n+10) {
+        grid-column: 1;
+    }
+
+    .form-control {
+        display: block;
+        width: 170%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border: var(--bs-border-width) solid var(--bs-border-color);
+
+        @@media (max-width: 768px) {
+            .event-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .event-card-image {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+</style>
+
+<h2>View Event Requests</h2>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
+@using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
+{
+    <div class="form-group">
+        <label for="selectedClubId">Select Club:</label>
+        @Html.DropDownList("selectedClubId", new SelectList(ViewBag.Clubs, "ClubID", "ClubName"), "Select a Club", new { @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+}
+
+@if (Model != null && Model.Count > 0)
+{
+    <div class="row row-cols-1 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow event-card">
+                    <div class="event-content">
+                        @if (!string.IsNullOrEmpty(item.EventPoster))
+                        {
+                            <div class="event-card-image">
+                                <img src="@item.EventPoster" class="img-fluid rounded" alt="Event Poster" style="max-height: 150px;">
+                            </div>
+                        }
+                    <div class="card-body event-card-details">
+                        <strong>Event Name:</strong> @item.EventName
+                        <strong>Description:</strong> @item.EventDescription
+                        <strong>Event Type:</strong> @item.EventType
+                        <strong>Start Date:</strong> @item.EventStartDateAndTime
+                        <strong>End Date:</strong> @item.EventEndDateAndTime
+                        @if (ViewBag.OrganizerNames.ContainsKey(item.EventOrganizerID.ToString()))
+                        {
+                            <strong>Organizer:</strong> @ViewBag.OrganizerNames[item.EventOrganizerID.ToString()]
+                        }
+                        else
+                        {
+                            <strong>Organizer: unknown</strong>
+                        }
+
+
+                        <strong>Club Name:</strong> @ViewBag.ClubNames[(int)item.ClubID]
+                        @*<strong>Department:</strong> @item.Department*@
+                        <strong>University:</strong> ICFAI foundation for higher education
+                    </div>
+                    </div>
+                    <div class="event-card-buttons">
+                        <form action="@Url.Action("ApproveEventRequest", new { eventId = item.EventID })" method="post">
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </form>
+
+                        <div style="display: flex; flex-direction: column;">
+                            <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
+
+                            <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
+                                @Html.AntiForgeryToken()
+                                <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..." required></textarea>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+
+
+
+
+<!-- ✅ jQuery if still needed elsewhere -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- ✅ Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+<script>
+    function toggleRejectBox(eventId) {
+        var rejectBox = $("#reject-box-" + eventId);
+
+        if (rejectBox.is(":visible")) {
+            rejectBox.hide();
+        } else {
+            $(".reject-box").hide();
+            rejectBox.show();
+        }
+    }
+    function submitRejection(eventId) {
+        const reason = $("#rejection-text-" + eventId).val().trim();
+
+        if (reason === "") {
+            alert("Please enter a rejection reason.");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("RejectEventRequest", "Mentor")',
+            type: 'POST',
+            data: {
+                eventId: eventId,
+                rejectionReason: reason,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    alert("Rejected successfully.");
+                    location.reload(); // Or update the UI accordingly
+                } else {
+                    alert(response.message || "Failed to reject.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+                alert("Error occurred: " + error);
+            }
+        });
+    }
+</script>

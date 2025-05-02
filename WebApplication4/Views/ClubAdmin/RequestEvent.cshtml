@@ -1,0 +1,108 @@
+﻿@model WebApplication4.Models.EVENT
+@{
+    Layout = "~/Views/Shared/_ClubAdminLayout.cshtml";
+    ViewBag.Title = "Request a Club";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<style>
+    .form-container {
+        max-width: 100%;
+        max-height: 100vh;
+        overflow: hidden;
+        padding: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 8px;
+    }
+
+    input, select, textarea {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+    }
+</style>
+
+<div class="container mt-3 form-container">
+    <div class="card shadow-lg p-3">
+        <h4 class="text-center text-primary mb-2">Request an Event</h4>
+
+        <form action="@Url.Action("RequestEvent", "ClubAdmin")" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="EventOrganizerID" value="@Model.EventOrganizerID" />
+
+            <div class="row g-1">
+                <div class="col-md-6 form-group">
+                    <label>Organizer Name:</label>
+                    <input type="text" class="form-control bg-light" value="@ViewBag.OrganizerName" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Club Name:</label>
+                    <input type="text" class="form-control bg-light" value="@Model.ClubName" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Department:</label>
+                    <input type="text" class="form-control bg-light" value="@Model.Department" readonly />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>University:</label>
+                    <input type="text" class="form-control bg-light" value="@Model.University" readonly />
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label>Event Name:</label>
+                    <input type="text" name="EventName" class="form-control" required />
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label>Event Description:</label>
+                    <textarea name="EventDescription" class="form-control" rows="2" required></textarea>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Event Type:</label>
+                    <select name="EventType" class="form-select" required>
+                        <option value="Open" @(Model.EventType == "Open" ? "selected" : "")>Open</option>
+                        <option value="Campus" @(Model.EventType == "Campus" ? "selected" : "")>Campus</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Start Date & Time:</label>
+                    <input type="datetime-local" name="EventStartDateAndTime" class="form-control" required />
+                </div>
+           
+                <div class="col-md-6 form-group">
+                    <label>End Date & Time:</label>
+                    <input type="datetime-local" name="EventEndDateAndTime" class="form-control" required />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Event Poster:</label>
+                    <input type="file" name="EventPoster" class="form-control" required />
+                </div>
+
+                <div class="col-md-12 text-center mt-2">
+                    <button type="submit" class="btn btn-primary">Submit Event</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

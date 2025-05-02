@@ -1,0 +1,211 @@
+﻿@model WebApplication4.Models.UNIVERSITY
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "Add University";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<h2 class="text-center mb-4">Add University</h2>
+
+@using (Html.BeginForm("AddUniversity", "Admin", FormMethod.Post, new { @id = "universityForm" }))
+{
+    <div class="form-container">
+        <div class="row">
+            <!-- University Name -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">University Name</label>
+                    <input type="text" id="universityName" name="UniversityNAME" class="form-control" placeholder="Enter University Name">
+                    <small id="universityNameError" class="text-danger"></small>
+                </div>
+    </div>
+            <!-- Abbreviation -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Abbreviation</label>
+                    <input type="text" id="abbreviation" name="Abbreviation" class="form-control" placeholder="Enter Abbreviation">
+                    <small id="abbreviationError" class="text-danger"></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Location -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" id="location" name="Location" class="form-control" placeholder="Enter Location">
+                    <small id="locationError" class="text-danger"></small>
+                </div>
+            </div>
+
+            <!-- Administrator Name -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Administrator Name</label>
+                    <input type="text" id="adminName" name="AdministratorName" class="form-control" placeholder="Enter Administrator Name">
+                    <small id="adminNameError" class="text-danger"></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Contact -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Contact</label>
+                    <input type="text" id="contact" name="Contact" class="form-control" placeholder="Enter Contact Number">
+                    <small id="contactError" class="text-danger"></small>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="email" name="Email" class="form-control" placeholder="Enter Email Address">
+                    <small id="emailError" class="text-danger"></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary submit-btn">
+                <i class="fas fa-save"></i> Add University
+            </button>
+        </div>
+    </div>
+}
+
+<script>document.addEventListener("DOMContentLoaded", function () {
+        let form = document.getElementById("universityForm");
+
+        let universityNameInput = document.getElementById("universityName");
+        let abbreviationInput = document.getElementById("abbreviation");
+        let locationInput = document.getElementById("location");
+        let adminNameInput = document.getElementById("adminName");
+        let contactInput = document.getElementById("contact");
+        let emailInput = document.getElementById("email");
+
+        let emailPattern = /^[a-zA-Z0-9._%+-]+@@gmail\.com$/;
+        let phonePattern = /^[6-9]\d{9}$/;
+        let abbreviationPattern = /^[A-Z]+$/; // Only uppercase letters allowed
+
+        function validateField(input, errorElement, message) {
+            if (input.value.trim() === "") {
+                errorElement.innerText = message;
+                input.classList.add("is-invalid");
+                return false;
+            } else {
+                errorElement.innerText = "";
+                input.classList.remove("is-invalid");
+                return true;
+            }
+        }
+
+        function validatePattern(input, errorElement, pattern, message) {
+            if (!pattern.test(input.value.trim())) {
+                errorElement.innerText = message;
+                input.classList.add("is-invalid");
+                return false;
+            } else {
+                errorElement.innerText = "";
+                input.classList.remove("is-invalid");
+                return true;
+            }
+        }
+
+        // Event Listeners for Validation
+        universityNameInput.addEventListener("blur", function () {
+            validateField(universityNameInput, document.getElementById("universityNameError"), "University Name is required.");
+        });
+
+        abbreviationInput.addEventListener("blur", function () {
+            validatePattern(abbreviationInput, document.getElementById("abbreviationError"), abbreviationPattern, "Abbreviation must be in uppercase letters only.");
+        });
+
+        locationInput.addEventListener("blur", function () {
+            validateField(locationInput, document.getElementById("locationError"), "Location is required.");
+        });
+
+        adminNameInput.addEventListener("blur", function () {
+            validateField(adminNameInput, document.getElementById("adminNameError"), "Administrator Name is required.");
+        });
+
+        contactInput.addEventListener("blur", function () {
+            validatePattern(contactInput, document.getElementById("contactError"), phonePattern, "Enter a valid 10-digit phone number (starting with 6-9).");
+        });
+
+        emailInput.addEventListener("blur", function () {
+            validatePattern(emailInput, document.getElementById("emailError"), emailPattern, "Please enter a valid Gmail address (e.g., user@gmail.com).");
+        });
+
+        form.addEventListener("submit", function (event) {
+            let isValid = true;
+
+            let universityNameValid = validateField(universityNameInput, document.getElementById("universityNameError"), "University Name is required.");
+            let abbreviationValid = validatePattern(abbreviationInput, document.getElementById("abbreviationError"), abbreviationPattern, "Abbreviation must be in uppercase letters only.");
+            let locationValid = validateField(locationInput, document.getElementById("locationError"), "Location is required.");
+            let adminNameValid = validateField(adminNameInput, document.getElementById("adminNameError"), "Administrator Name is required.");
+            let contactValid = validatePattern(contactInput, document.getElementById("contactError"), phonePattern, "Enter a valid 10-digit phone number.");
+            let emailValid = validatePattern(emailInput, document.getElementById("emailError"), emailPattern, "Please enter a valid Gmail address (e.g., user@gmail.com).");
+
+            isValid = universityNameValid && abbreviationValid && locationValid && adminNameValid && contactValid && emailValid;
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });</script>
+
+<style>
+    .form-container {
+        width: 100%;
+        max-width: 700px;
+        margin: auto;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 20px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        border: none;
+        width: 100%;
+    }
+
+    @@media (max-width: 768px) {
+        .row .col-md-6 {
+            width: 100%;
+        }
+
+
+    }
+</style>

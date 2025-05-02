@@ -1,0 +1,26 @@
+﻿@model WebApplication4.Models.Comment
+
+<div class="comment" style="margin-left: @(Model.ParentCommentID.HasValue ? "40px" : "0")">
+    <p><strong>@Model.UserName</strong> (@Model.PostedDate.ToShortDateString())</p>
+    <p>@Model.CommentText</p>
+
+    <!-- Reply Form -->
+    <form action="/Clubs/AddComment" method="post" class="comment-form" style="margin-top:10px;">
+        <input type="hidden" name="EventID" value="@Model.EventID" />
+        <input type="hidden" name="ParentCommentID" value="@Model.CommentID" />
+        <textarea name="CommentText" class="form-control" placeholder="Write a reply..." required></textarea>
+        <br />
+        <input type="text" name="UserName" class="form-control" placeholder="Your name" required />
+        <br />
+        <button type="submit" class="btn btn-sm btn-secondary">Reply</button>
+    </form>
+
+    <!-- Nested Replies -->
+    @if (Model.Comments1 != null && Model.Comments1.Any())
+    {
+        foreach (var reply in Model.Comments1)
+        {
+            @Html.Partial("_CommentWithReplies", reply)
+        }
+    }
+</div>

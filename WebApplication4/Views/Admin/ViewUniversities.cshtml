@@ -1,0 +1,164 @@
+﻿@using PagedList
+@using PagedList.Mvc
+@model List<WebApplication4.Models.UNIVERSITY>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewBag.Title = "View Universities";
+    string currentFilter = ViewBag.Filter ?? "All"; // Can be "All", "Active", or "Deactivated"
+}
+
+<h2 class="text-center mb-4">@ViewBag.Title</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
+}
+
+<div class="text-center mt-3 mb-4">
+    <a href="@Url.Action("ViewUniversities", "Admin", new { page = 1 })" class="btn btn-primary">View All Universities</a>
+    <a href="@Url.Action("ViewActiveUniversities", "Admin", new { page = 1 })" class="btn btn-success">View Active Universities</a>
+    <a href="@Url.Action("ViewDeactivatedUniversities", "Admin", new { page = 1 })" class="btn btn-danger">View Deactivated Universities</a>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>University Name</th>
+            <th>Abbreviation</th>
+            <th>Location</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var university in Model)
+        {
+            <tr>
+                <td>@university.UniversityNAME</td>
+                <td>@university.Abbreviation</td>
+                <td>@university.Location</td>
+                <td>
+                    @if (university.IsActive == true)
+                    {
+                        <span class="badge badge-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Deactivated</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Pagination Container -->
+<div class="pagination-container">
+    <div class="pagination-info">
+        Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
+    </div>
+    <div class="d-flex justify-content-center">
+        <ul class="pagination">
+            @{
+                int currentPage = ViewBag.CurrentPage;
+                int totalPages = ViewBag.TotalPages;
+                int maxPagesToShow = 5;
+
+                int startPage = Math.Max(1, currentPage - maxPagesToShow / 2);
+                int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+                if ((endPage - startPage) < maxPagesToShow - 1)
+                {
+                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                }
+
+                // Page Numbers
+                for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action(ViewBag.ViewType, new { page = i })">@i</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+<!-- ✅ CSS Styling -->
+<style>
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 10px;
+        }
+
+    .alert-success {
+        font-size: 16px;
+        font-weight: bold;
+        color: green;
+        text-align: center;
+    }
+
+    .btn {
+        margin: 5px;
+    }
+
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .page-item {
+        display: flex;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 14px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .page-link:hover {
+            background-color: #d0d0d0;
+        }
+
+    .pagination li.active .page-link {
+        background-color: #007bff;
+        color: white;
+
+    }
+</style>

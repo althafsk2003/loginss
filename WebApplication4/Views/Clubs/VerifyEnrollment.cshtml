@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Verify Enrollment";
+    Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+}
+
+<h2>Enter Your Enrollment ID</h2>
+
+<form method="post" action="@Url.Action("VerifyEnrollment", "Clubs")">
+    <input type="hidden" name="eventId" value="@ViewBag.EventID" />
+
+    <label>Enrollment ID:</label>
+    <input type="text" name="enrollmentId" required />
+
+    <br /><br />
+    <button type="submit">Submit</button>
+</form>
+

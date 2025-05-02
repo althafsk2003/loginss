@@ -1,0 +1,164 @@
+﻿@model IEnumerable<WebApplication4.Models.ClubRegistration>
+
+
+@{
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+    ViewBag.Title = "Club Registrations";
+}
+
+<h2>Club Registrations</h2>
+
+<!-- Dropdown for selecting a club -->
+<label for="clubDropdown">Select a Club:</label>
+<select id="clubDropdown" class="form-control">
+    <option value="">-- Select Club --</option>
+    @foreach (var club in ViewBag.Clubs)
+    {
+        <option value="@club.Value">@club.Text</option>
+    }
+</select>
+
+<!-- Table to display registrations -->
+<table class="table table-bordered mt-3" id="registrationsTable">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Contact Number</th>
+            <th>Preferred Role</th>
+            <th>Role Justification</th>
+            <th>Assigned Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be dynamically loaded here -->
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+     $(document).ready(function () {
+    // When a club is selected, fetch its registrations
+    $("#clubDropdown").change(function () {
+        var clubId = $(this).val();
+        if (clubId) {
+            $.ajax({
+                url: '@Url.Action("GetClubRegistrations", "Mentor")',
+                type: "GET",
+                data: { clubId: clubId },
+                success: function (data) {
+                    var tableBody = $("#registrationsTable tbody");
+                    tableBody.empty(); // Clear previous data
+
+                    if (data.length === 0) {
+                        tableBody.append("<tr><td colspan='7' class='text-center'>No registrations found.</td></tr>");
+                    } else {
+                        $.each(data, function (index, reg) {
+                            var preferredRole = reg.PreferredRole || "Not Specified";
+                            var assignedRole = reg.AssignedRole || "Not Assigned";
+                            var justification = reg.RoleJustification || "No justification provided";
+                            var preferredRoleBtnText = "Make as " + preferredRole;
+
+                            // Determine button states
+                            var disableAssign = "";
+                            var disableLeave = "";
+
+                            if (assignedRole === "Not Assigned") {
+                                // If "Not Assigned", both buttons should be enabled
+                                disableAssign = "";
+                                disableLeave = "";
+                            } else if (assignedRole === preferredRole) {
+                                // If assigned role matches preferred role, disable assign button
+                                disableAssign = "disabled";
+                                disableLeave = "";
+                            } else {
+                                // If assigned role does not match preferred role, disable leave button
+                                disableAssign = "";
+                                disableLeave = "disabled";
+                            }
+
+                            var row = "<tr>" +
+                                "<td>" + reg.FullName + "</td>" +
+                                "<td>" + reg.Email + "</td>" +
+                                "<td>" + reg.ContactNumber + "</td>" +
+                                "<td>" + preferredRole + "</td>" +
+                                "<td>" + justification + "</td>" +
+                                "<td id='assignedRole_" + reg.RegistrationID + "'>" + assignedRole + "</td>" +
+                                "<td>" +
+                                "<button class='btn btn-success btn-sm assignPreferredRoleBtn' data-id='" + reg.RegistrationID + "' data-role='" + preferredRole + "' " + disableAssign + ">" + preferredRoleBtnText + "</button> " +
+                                "<button class='btn btn-danger btn-sm leaveClubBtn' data-id='" + reg.RegistrationID + "' " + disableLeave + ">Leave as Club Member</button>" +
+                                "</td>" +
+                                "</tr>";
+                            tableBody.append(row);
+                        });
+                    }
+                },
+                error: function () {
+                    alert("Error loading registrations.");
+                }
+            });
+        } else {
+            $("#registrationsTable tbody").empty(); // Clear table when no club is selected
+        }
+    });
+
+    // Assign Preferred Role Button Click Event
+    $(document).on("click", ".assignPreferredRoleBtn", function () {
+        var regId = $(this).data("id");
+        var preferredRole = $(this).data("role");
+
+        if (preferredRole !== "Not Specified") {
+            $.ajax({
+                url: '@Url.Action("AssignRole", "Mentor")',
+                type: "POST",
+                data: { registrationId: regId, role: preferredRole },
+                success: function () {
+                    $("#assignedRole_" + regId).text(preferredRole);
+                    $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", true); // Disable assign button
+                    $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", false); // Enable leave button
+                },
+                error: function () {
+                    alert("Error assigning preferred role.");
+                }
+            });
+        } else {
+            alert("No preferred role specified.");
+        }
+    });
+
+    // Leave as Club Member Button Click Event
+   $(document).on("click", ".leaveClubBtn", function () {
+    var regId = $(this).data("id");
+    if (confirm("Are you sure you want to leave as a club member?")) {
+        $.ajax({
+            url: '@Url.Action("LeaveClub", "Mentor")',
+            type: "POST",
+            data: { registrationId: regId },
+            success: function (response) {
+                if (response.success) {
+                    // ✅ Update assigned role in the table
+                    $("#assignedRole_" + regId).text("Club Member");
+
+                    // ✅ Disable "Leave Club" button since the action is completed
+                    $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", true);
+
+                    // ✅ Enable "Assign Preferred Role" button
+                    $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", false);
+                } else {
+                    alert("Error leaving the club.");
+                }
+            },
+            error: function () {
+                alert("Error processing request.");
+            }
+        });
+    }
+});
+
+});
+
+
+
+</script>

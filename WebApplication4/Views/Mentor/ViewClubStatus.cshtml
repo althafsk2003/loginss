@@ -1,0 +1,142 @@
+﻿@model IEnumerable<WebApplication4.Models.CLUB>
+
+@{
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>View Club Status</title>
+
+    <!-- ✅ Styling for Status Labels -->
+    <style>
+        .status-approved {
+            color: white;
+            background-color: green;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .status-pending {
+            color: white;
+            background-color: orange;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .status-rejected {
+            color: white;
+            background-color: red;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .reason-col {
+            display: none; /* Hide rejection reason column by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Club Status</h2>
+
+        <!-- ✅ Filter Buttons -->
+        <div class="text-center">
+            <button class="btn btn-warning btn-filter" onclick="filterTable('pending')">Pending Requests</button>
+            <button class="btn btn-success btn-filter" onclick="filterTable('approved')">Approved Requests</button>
+            <button class="btn btn-danger btn-filter" onclick="filterTable('rejected')">Rejected Requests</button>
+            <button class="btn btn-primary btn-filter" onclick="filterTable('all')">View All Requests</button>
+        </div>
+
+        <!-- ✅ Club Status Table -->
+        <table class="table club-table mt-3">
+            <thead>
+                <tr>
+                    <th>Club Name</th>
+                    <th>Description</th>
+                    <th>University</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Total Slots</th>
+                    <th>Available Slots</th>
+                    <th class="reason-col">Rejection Reason</th> <!-- Hidden by default -->
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
+                }
+
+                @foreach (var club in Model)
+                {
+                    var mentorID = (int?)club.MentorID;
+                    var notification = notifications?.FirstOrDefault(n => n.LoginID == mentorID);
+
+                    // Extract rejection reason
+                    string rejectionReason = "";
+                    if (club.ApprovalStatusID == 3 && notification != null)
+                    {
+                        var reasonParts = notification.Message.Split(new string[] { "Reason: " }, StringSplitOptions.None);
+                        if (reasonParts.Length > 1)
+                        {
+                            rejectionReason = reasonParts[1];  // Extracted reason
+                        }
+                    }
+
+                    <tr class="club-row" data-status="@club.ApprovalStatusID">
+                        <td>@club.ClubName</td>
+                        <td>@club.Description</td>
+
+                        <td>@club.DEPARTMENT.UNIVERSITY.UniversityNAME</td>
+                        <td>@club.DEPARTMENT.DepartmentName</td>
+                        <td>
+                            @if (club.ApprovalStatusID == 1)
+                            {
+                                <span class="status-pending">Pending</span>
+                            }
+                            else if (club.ApprovalStatusID == 2)
+                            {
+                                <span class="status-approved">Approved</span>
+                            }
+                            else if (club.ApprovalStatusID == 3)
+                            {
+                                <span class="status-rejected">Rejected</span>
+                            }
+                        </td>
+                        <td>@club.TotalClubCommitteeSeats</td>
+                        <td>@club.AvailableClubCommitteeSeats</td>
+                        <td class="reason-col">
+                            @if (!string.IsNullOrEmpty(rejectionReason))
+                            {
+                                @rejectionReason
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ✅ JavaScript for Filtering -->
+    <script>
+        function filterTable(status) {
+            $(".club-row").hide();
+            $(".reason-col").hide(); // Hide reason column by default
+
+            if (status === "pending") {
+                $(".club-row[data-status='1']").show();
+            } else if (status === "approved") {
+                $(".club-row[data-status='2']").show();
+            } else if (status === "rejected") {
+                $(".club-row[data-status='3']").show();
+                $(".reason-col").show(); // Show rejection reason only for rejected rows
+            } else {
+                $(".club-row").show();
+                $(".reason-col").show();
+            }
+        }
+    </script>
+</body>
+</html>

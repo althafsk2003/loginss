@@ -1,0 +1,644 @@
+﻿@model WebApplication4.Models.EVENT
+@{
+    Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+    ViewBag.Title = "Event Highlights";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css" />
+
+<style>
+    :root {
+        --primary: #E96C20;
+        --primary-gradient: linear-gradient(135deg, #E96C20 0%, #F9A825 100%);
+        --dark-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        --text-dark: #1e293b;
+        --text-light: #f8fafc;
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
+        color: var(--text-dark);
+        overflow-x: hidden;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Event Banner */
+    .event-banner {
+        height: 400px;
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        animation: fadeInZoom 1.2s ease;
+    }
+
+        .event-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        .event-banner:hover img {
+            transform: scale(1.15);
+        }
+
+    /* Event Header */
+    .event-header {
+        display: flex;
+        gap: 2.5rem;
+        margin-bottom: 4rem;
+        align-items: flex-start;
+    }
+
+    .event-poster {
+        width: 300px;
+        height: 450px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+        flex-shrink: 0;
+        position: relative;
+        transition: var(--transition);
+    }
+
+        .event-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-poster:hover {
+            transform: translateY(-10px) rotate(2deg);
+        }
+
+    .event-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        animation: bounceIn 1.2s ease;
+    }
+
+    .event-date {
+        display: inline-flex;
+        align-items: center;
+        background: var(--dark-gradient);
+        color: var(--text-light);
+        padding: 0.7rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        animation: slideInLeft 1s ease;
+    }
+
+    .event-description {
+        max-width: 950px;
+    }
+
+        .event-description p {
+            font-size: 1.3rem;
+            line-height: 2.2;
+            margin-bottom: 1.5rem;
+            color: #4b5563;
+            background: linear-gradient(90deg, rgba(233, 108, 32, 0.1), rgba(249, 168, 37, 0.1));
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            opacity: 0;
+            animation: fadeInUp 1.2s ease forwards;
+            animation-delay: calc(var(--order) * 0.4s);
+            transition: transform 0.3s ease;
+        }
+
+            .event-description p:hover {
+                transform: scale(1.02);
+            }
+
+    /* Centered Winners Section */
+    .winners-section {
+        margin: 5rem auto;
+        max-width: 1200px;
+        text-align: center;
+        padding: 3rem 0;
+        position: relative;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        position: relative;
+        display: inline-block;
+        animation: fadeInDown 1.2s ease;
+    }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 6px;
+            background: var(--primary-gradient);
+            border-radius: 3px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+    .winners-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        perspective: 1000px;
+        margin: 0 auto;
+    }
+
+    .winner-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-xl);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        animation: flipInY 1.2s ease;
+        transform-style: preserve-3d;
+        text-align: center;
+    }
+
+        .winner-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: -1;
+            transform: translateZ(-1px);
+        }
+
+        .winner-card:hover {
+            transform: translateY(-8px) rotateX(5deg);
+        }
+
+            .winner-card:hover:before {
+                opacity: 0.85;
+            }
+
+            .winner-card:hover .winner-name,
+            .winner-card:hover .winner-desc {
+                color: var(--text-light);
+            }
+
+    .winner-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        color: var(--text-dark);
+        transition: var(--transition);
+    }
+
+    .winner-prize {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 1px;
+    }
+
+    .winner-desc {
+        font-size: 0.95rem;
+        color: #4b5563;
+        transition: var(--transition);
+        line-height: 1.6;
+    }
+
+    /* Enhanced Auto-Scrolling Gallery */
+    .gallery-section {
+        margin: 5rem 0;
+        position: relative;
+        overflow: hidden;
+        padding: 3rem 0;
+    }
+
+    .gallery-container {
+        display: flex;
+        gap: 2rem;
+        padding: 1rem 0;
+    }
+
+    .gallery-item {
+        min-width: 500px;
+        height: 350px;
+        border-radius: 18px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        flex-shrink: 0;
+        transition: var(--transition);
+    }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+            .gallery-item:hover img {
+                transform: scale(1.15);
+            }
+
+    /* Modal Zoom Effect */
+    .mfp-with-zoom .mfp-container,
+    .mfp-with-zoom.mfp-bg {
+        opacity: 0;
+        transition: all 0.4s ease-out;
+    }
+
+    .mfp-with-zoom.mfp-ready .mfp-container {
+        opacity: 1;
+    }
+
+    .mfp-with-zoom.mfp-ready.mfp-bg {
+        opacity: 0.85;
+    }
+
+    .mfp-with-zoom.mfp-removing .mfp-container,
+    .mfp-with-zoom.mfp-removing.mfp-bg {
+        opacity: 0;
+    }
+
+    /* Animations */
+    @@keyframes fadeInZoom {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @@keyframes flipInY {
+        from {
+            transform: perspective(400px) rotateY(90deg);
+            opacity: 0;
+        }
+
+        to {
+            transform: perspective(400px) rotateY(0deg);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes pulse {
+        from {
+            width: 60px;
+        }
+
+        to {
+            width: 80px;
+        }
+    }
+
+    @@keyframes scroll {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(calc(-500px * var(--item-count)));
+        }
+    }
+
+    .gallery-scroll {
+        animation: scroll 60s linear infinite;
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .event-title {
+            font-size: 3rem;
+        }
+
+        .gallery-item {
+            min-width: 400px;
+            height: 300px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .event-header {
+            flex-direction: column;
+        }
+
+        .event-poster {
+            width: 100%;
+            height: 400px;
+        }
+
+        .winners-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .event-title {
+            font-size: 2.5rem;
+        }
+
+        .event-description p {
+            font-size: 1.1rem;
+        }
+
+        .gallery-item {
+            min-width: 300px;
+            height: 250px;
+        }
+
+        .winner-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Event Banner -->
+    <div class="event-banner">
+        @if (!string.IsNullOrEmpty(Model.EventBannerPath))
+        {
+            <img src="@Url.Content(Model.EventBannerPath)" alt="@Model.EventName" />
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/1400x400?text=Event+Banner" alt="Event Banner" />
+        }
+    </div>
+
+    <!-- Event Header with Poster and Description -->
+    <div class="event-header">
+        <div class="event-poster">
+            @if (!string.IsNullOrEmpty(Model.EventPoster))
+            {
+                <img src="@Url.Content(Model.EventPoster)" alt="@Model.EventName" />
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/300x450?text=Event+Poster" alt="Event Poster" />
+            }
+        </div>
+        <div>
+            <h1 class="event-title">@Model.EventName</h1>
+            <div class="event-date">
+                <i class="bi bi-calendar-event me-2"></i>
+                @Model.EventStartDateAndTime.ToString("MMMM dd, yyyy") - @Model.EventEndDateAndTime.ToString("MMMM dd, yyyy")
+            </div>
+            <div class="event-description">
+                @{
+                    string[] descriptionLines = Model.EventDescription
+                        .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    int order = 0;
+                    int maxLinesToShow = 5;
+                    int linesShown = 0;
+
+                    foreach (var line in descriptionLines)
+                    {
+                        if (linesShown >= maxLinesToShow)
+                        {
+                            break;
+                        }
+
+                        if (line.TrimEnd().EndsWith(":"))
+                        {
+                            <p style="--order: @order" class="bold-heading">@line</p>
+                        }
+                        else if (line.Contains("&#x"))
+                        {
+                            <span style="--order: @order" class="emoji-line">@Html.Raw(line)</span>
+                        }
+                        else
+                        {
+                            <p style="--order: @order">@line</p>
+                        }
+
+                        order++;
+                        linesShown++;
+                    }
+                }
+
+                <!-- Read More Button -->
+                <button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
+                    Read More
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Gallery Section with Auto-Scrolling -->
+    <div class="gallery-section">
+        <h2 class="section-title"><i class="bi bi-images me-2"></i> Event Gallery</h2>
+        @if (Model.EventPhotos != null && Model.EventPhotos.Any())
+        {
+            <div style="overflow: hidden;">
+                <div class="gallery-container gallery-scroll" style="--item-count: @Model.EventPhotos.Count">
+                    @foreach (var photo in Model.EventPhotos)
+                    {
+                        <a href="@Url.Content(photo.PhotoPath)" class="gallery-item image-popup">
+                            <img src="@Url.Content(photo.PhotoPath)" alt="Event photo" />
+                        </a>
+                    }
+                    <!-- Duplicate items for seamless looping -->
+                    @foreach (var photo in Model.EventPhotos)
+                    {
+                        <a href="@Url.Content(photo.PhotoPath)" class="gallery-item image-popup">
+                            <img src="@Url.Content(photo.PhotoPath)" alt="Event photo" />
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No photos available yet.</p>
+        }
+    </div>
+
+    <!-- Centered Winners Section -->
+    <div class="winners-section">
+        <h2 class="section-title"><i class="bi bi-trophy me-2"></i> Winners</h2>
+        @if (Model.EventWinners != null && Model.EventWinners.Any())
+        {
+            <div class="winners-grid">
+                @foreach (var winner in Model.EventWinners)
+                {
+                    <div class="winner-card">
+                        <h3 class="winner-name">@winner.WinnerName</h3>
+                        <div class="winner-prize"><i class="bi bi-award me-2"></i>@winner.Prize</div>
+                        <p class="winner-desc">@winner.Description</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No winners announced yet.</p>
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Image popup with zoom effect
+        $('.image-popup').magnificPopup({
+            type: 'image',
+            closeOnContentClick: true,
+            closeBtnInside: false,
+            fixedContentPos: true,
+            mainClass: 'mfp-with-zoom',
+            image: {
+                verticalFit: true
+            },
+            zoom: {
+                enabled: true,
+                duration: 400,
+                easing: 'ease-in-out',
+                opener: function (element) {
+                    return element.find('img');
+                }
+            }
+        });
+
+        // Auto-scroll gallery with pause on hover
+        const gallery = $('.gallery-container');
+        let scrollInterval;
+
+        function startAutoScroll() {
+            scrollInterval = setInterval(function () {
+                const scrollLeft = gallery.scrollLeft();
+                const maxScroll = gallery[0].scrollWidth - gallery.width();
+
+                if (scrollLeft >= maxScroll / 2) {
+                    gallery.scrollLeft(0);
+                } else {
+                    gallery.scrollLeft(scrollLeft + 1);
+                }
+            }, 30);
+        }
+
+        function stopAutoScroll() {
+            clearInterval(scrollInterval);
+        }
+
+        startAutoScroll();
+
+        gallery.hover(
+            function () { stopAutoScroll(); },
+            function () { startAutoScroll(); }
+        );
+
+        // Animate elements on scroll
+        function animateOnScroll() {
+            $('.animate__animated').each(function () {
+                const elementTop = $(this).offset().top;
+                const elementBottom = elementTop + $(this).outerHeight();
+                const viewportTop = $(window).scrollTop();
+                const viewportBottom = viewportTop + $(window).height();
+
+                if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                    $(this).addClass('animate__fadeIn');
+                }
+            });
+        }
+
+        $(window).on('scroll', animateOnScroll);
+        animateOnScroll();
+    });
+</script>

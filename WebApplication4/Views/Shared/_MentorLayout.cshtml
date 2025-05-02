@@ -1,0 +1,244 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Mentor Dashboard</title>
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+
+
+    <style>
+        /* General Styling */
+        body {
+            background-color: #f4f5f7;
+            transition: margin-left 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, #004d40, #00796b);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -20px;
+            border-radius: 15px 15px 0 0;
+            padding: 10px 20px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            transition: 0.3s ease-in-out;
+        }
+
+            .menu-icon:hover {
+                color: #ffcc00;
+            }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            position: fixed;
+            top: 0;
+            left: -260px;
+            height: 100%;
+            background: #004d40;
+            color: white;
+            padding-top: 60px;
+            transition: left 0.4s ease-in-out;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .sidebar ul {
+                list-style: none;
+                padding: 0;
+            }
+
+            .sidebar .nav-link {
+                display: block;
+                color: white;
+                font-size: 16px;
+                padding: 12px 20px;
+                text-decoration: none;
+                transition: background 0.3s;
+                font-weight: 500;
+            }
+
+                .sidebar .nav-link:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 5px;
+                }
+
+                .sidebar .nav-link i {
+                    margin-right: 10px;
+                }
+
+        /* Main Content */
+        .content {
+            margin-left: 0;
+            padding: 20px;
+            transition: margin-left 0.4s ease-in-out;
+            margin-top: 50px;
+        }
+
+            .content.shift {
+                margin-left: 260px;
+            }
+
+        /* Card Styling */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #004d40, #00796b);
+            color: white;
+            border-radius: 10px;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="nav flex-column">
+            <li>@Html.ActionLink("🏠 Dashboard", "Index", "Mentor", new { area = "" }, new { @class = "nav-link" })</li>
+            <li>@Html.ActionLink("📌 Club Registration", "RegisterClub", "Mentor", new { area = "" }, new { @class = "nav-link" })</li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="viewClubsDropdown" role="button" data-bs-toggle="dropdown">
+                    📋 View Clubs
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="viewClubsDropdown">
+                    <li>@Html.ActionLink("📌 View Club Status", "ViewClubStatus", "Mentor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                    <li>@Html.ActionLink("📝 View Club Registrations", "ViewClubRegistrations", "Mentor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                </ul>
+            </li>
+
+            <li>@Html.ActionLink("🔔 Club Approvals", "ClubApprovals", "Mentor", new { area = "" }, new { @class = "nav-link" })</li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="eventsDropdown" role="button" data-bs-toggle="dropdown">
+                    📅 Events
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="eventsDropdown">
+                    <li>@Html.ActionLink("📝 View Event Requests", "ViewEventRequests", "Mentor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                    <li>@Html.ActionLink("📊 View Statistics", "ViewEventStatistics", "Mentor", new { area = "" }, new { @class = "dropdown-item" })</li>
+                </ul>
+            </li>
+            <li>@Html.ActionLink("🔑 Profile", "Profile", "Mentor", new { area = "" }, new { @class = "nav-link" })</li>
+            <li>@Html.ActionLink("🚪 Logout", "Logout", "Admin", new { area = "" }, new { @class = "nav-link text-danger" })</li>
+        </ul>
+    </div>
+
+    <div class="content" id="main-content">
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <span class="menu-icon" onclick="toggleSidebar()">☰</span>
+                <span class="navbar-brand">Mentor Dashboard</span>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            @if (ViewBag.Notifications != null && ViewBag.Notifications.Count > 0)
+                            {
+                                <span class="badge bg-danger">@ViewBag.Notifications.Count</span>
+                            }
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown">
+                            @if (ViewBag.Notifications != null && ViewBag.Notifications.Count > 0)
+                            {
+                                <text>
+                                    @foreach (var notification in ViewBag.Notifications)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item d-flex justify-content-between align-items-center"
+                                               href="@Url.Action("MarkNotificationAsRead", "Mentor", new { notificationId = notification.NotificationID })">
+                                                <span>@notification.Message</span>
+                                                <small class="text-muted">@notification.StartDate.ToString("MMM dd, yyyy")</small>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
+                                </text>
+                            }
+                            
+                            else
+                            {
+                                <li><span class="dropdown-item text-center">No new notifications</span></li>
+                            }
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="card">
+                @RenderBody()
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; @DateTime.Now.Year - ICFAI University | All Rights Reserved</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var content = document.getElementById("main-content");
+
+            if (sidebar.classList.contains("open")) {
+                sidebar.classList.remove("open");
+                content.classList.remove("shift");
+            } else {
+                sidebar.classList.add("open");
+                content.classList.add("shift");
+            }
+        }
+    </script>
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

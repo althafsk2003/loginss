@@ -1,0 +1,430 @@
+﻿@model WebApplication4.Models.USER
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "Add Mentor";
+}
+
+<h2 class="text-center mb-5">Add Mentor</h2>
+
+@if (ViewBag.Errors != null)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewBag.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success text-center" id="successMessage">
+        @TempData["SuccessMessage"]
+    </div>
+
+    <script>// Automatically hide success message after 3 seconds
+        setTimeout(function () {
+            document.getElementById("successMessage").style.display = "none";
+        }, 3000);</script>
+}
+
+
+@using (Html.BeginForm("AddMentor", "UniversityAdmin", FormMethod.Post, new { enctype = "multipart/form-data", id = "mentorForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-container">
+        <div class="form-group">
+            <label class="form-label">First Name</label>
+            @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", id = "firstName", placeholder = "Enter First Name" })
+            <span class="text-danger" id="firstNameError"></span>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Department</label>
+            @if (ViewBag.Departments != null)
+            {
+                @Html.DropDownList("DepartmentID", (SelectList)ViewBag.Departments, "Select Department", new { @class = "form-control" })
+            }
+            else
+            {
+                <p class="text-danger">Error loading departments.</p>
+            }
+            <span class="text-danger" id="departmentError"></span>
+        </div>
+
+        <script>document.getElementById("DepartmentID").addEventListener("change", function () {
+            var departmentError = document.getElementById("departmentError");
+            if (this.value === "") {
+                departmentError.textContent = "Please select a department.";
+            } else {
+                departmentError.textContent = "";
+            }
+});
+        </script>
+
+        <div class="form-group">
+            <label class="form-label">Last Name</label>
+            @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", id = "lastName", placeholder = "Enter Last Name" })
+            <span class="text-danger" id="lastNameError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            @Html.TextBoxFor(model => model.Email, new { @class = "form-control", id = "email", placeholder = "Enter Email Address" })
+            <span class="text-danger" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+                @Html.PasswordFor(model => model.Password, new { @class = "form-control", id = "password", placeholder = "Enter Password", value = "Mentor@123" })
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <span class="text-danger" id="passwordError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", id = "mobile", placeholder = "Enter Mobile Number" })
+            <span class="text-danger" id="mobileError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Whats App Number</label>
+            @Html.TextBoxFor(model => model.WhatsAppNumber, new { @class = "form-control", id = "whatsapp", placeholder = "Enter WhatsApp Number" })
+            <span class="text-danger" id="whatsappError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Address</label>
+            @Html.TextBoxFor(model => model.Address, new { @class = "form-control", id = "address", placeholder = "Enter Address" })
+            <span class="text-danger" id="addressError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">City</label>
+            @Html.TextBoxFor(model => model.City, new { @class = "form-control", id = "city", placeholder = "Enter City" })
+            <span class="text-danger" id="cityError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">State</label>
+            @Html.DropDownListFor(model => model.State, new SelectList(new List<string> {
+            "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
+            "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
+            "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+            "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+            "Uttarakhand", "West Bengal"
+        }), "Select State", new { @class = "form-control", id = "state" })
+            <span class="text-danger" id="stateError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">District</label>
+            <select id="district" name="District" class="form-control">
+                <option value="">Select District</option>
+            </select>
+            <span class="text-danger" id="districtError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Pin Code</label>
+            @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control", id = "pincode", placeholder = "Enter Pin Code" })
+            <span class="text-danger" id="pincodeError"></span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Subscription Status</label>
+            @Html.DropDownListFor(model => model.SubscriptionStatus,
+                     new SelectList(new List<string> { "Normal", "Premium" }),
+                     "Select Subscription Status", new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">User Type</label>
+            @Html.DropDownListFor(model => model.UserType,
+                     new SelectList(new List<string> { "Campus", "Open" }),
+                     "Select User Type", new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">User Role</label>
+            @Html.DropDownListFor(model => model.Userrole,
+                     new SelectList(new List<string> { "Admin", "Mentor", "Student" }),
+                     "Select User Role", new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Photo Path</label>
+            <input type="file" name="Photo" class="form-control-file" id="photo" />
+            <span class="text-danger" id="photoError"></span>
+        </div>
+
+        <!-- Hidden fields for Registration Date and Is Active Date (to be set in controller) -->
+        @Html.HiddenFor(model => model.RegistrationDate)
+        @Html.HiddenFor(model => model.IsActiveDate)
+
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Add Mentor
+            </button>
+        </div>
+    </div>
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-fill Pincode</title>
+</head>
+<body>
+
+    <script>// State and District Mapping
+        const districtsByState = {
+            "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+            "Arunachal Pradesh": ["Tawang", "West Kameng", "East Kameng", "Papum Pare", "Kurung Kumey", "Kra Daadi", "Lower Subansiri", "Upper Subansiri", "West Siang", "East Siang", "Siang", "Upper Siang", "Lower Siang", "Dibang Valley", "Lower Dibang Valley", "Anjaw", "Lohit", "Changlang", "Tirap", "Longding"],
+            "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Dima Hasao", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+            "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+            "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Koriya", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+            "Goa": ["North Goa", "South Goa"],
+            "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+            "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+            "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahebganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"],
+            "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+            "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+            "Madhya Pradesh": ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+            "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana",
+                "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur",
+                "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik",
+                "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara",
+                "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+            "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam",
+                "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong",
+                "Tengnoupal", "Thoubal", "Ukhrul"],
+            "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills",
+                "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills",
+                "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+            "Mizoram": ["Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei",
+                "Mamit", "Saiha", "Saitual", "Serchhip"],
+            "Nagaland": ["Chümoukedima", "Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon",
+                "Niuland", "Noklak", "Peren", "Phek", "Shamator", "Tseminyü", "Tuensang", "Wokha", "Zunheboto"],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh",
+                "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi",
+                "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj",
+                "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"],
+            "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur",
+                "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Malerkotla", "Mansa",
+                "Moga", "Mohali", "Muktsar", "Nawanshahr", "Pathankot", "Patiala", "Rupnagar", "Sangrur", "Tarn Taran"],
+            "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner",
+                "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh",
+                "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli",
+                "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar",
+                "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+            "Sikkim": ["Gangtok", "Gyalshing", "Mangan", "Namchi", "Pakyong", "Soreng"],
+            "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul",
+                "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai",
+                "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai",
+                "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni",
+                "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupattur", "Tiruppur", "Tiruvallur",
+                "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+            "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hanamkonda", "Hyderabad", "Jagitial", "Jangaon",
+                "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam",
+                "Komaram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal–Malkajgiri",
+                "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli",
+                "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad",
+                "Wanaparthy", "Warangal", "Yadadri Bhuvanagiri"],
+            "Tripura": [
+                "Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+            "Uttar Pradesh": ["Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Ayodhya",
+                "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki",
+                "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli",
+                "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad",
+                "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur",
+                "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat",
+                "Kanpur Nagar", "Kasganj", "Kaushambi", "Kushinagar", "Lakhimpur Kheri", "Lalitpur",
+                "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur",
+                "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli",
+                "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli",
+                "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+            "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+            "West Bengal":
+                ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+        };
+
+        // Function to populate states dropdown
+        function populateStates() {
+            const stateDropdown = document.getElementById("state");
+            for (let state in districtsByState) {
+                let option = document.createElement("option");
+                option.value = state;
+                option.textContent = state;
+                stateDropdown.appendChild(option);
+            }
+        }
+
+        // Function to populate districts based on selected state
+        document.getElementById("state").addEventListener("change", function () {
+            const state = this.value;
+            const districtDropdown = document.getElementById("district");
+            districtDropdown.innerHTML = `<option value="">--Select District--</option>`;
+
+            if (state && districtsByState[state]) {
+                districtsByState[state].forEach(district => {
+                    let option = document.createElement("option");
+                    option.value = district;
+                    option.textContent = district;
+                    districtDropdown.appendChild(option);
+                });
+            }
+        });
+
+
+
+        // Fetch pincode when district is selected
+        document.getElementById("district").addEventListener("change", function () {
+            const district = this.value;
+            if (district) {
+                fetch(`https://api.postalpincode.in/postoffice/${district}`)
+
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data[0].Status === "Success") {
+                            document.getElementById("pincode").value = data[0].PostOffice[0].Pincode;
+                        } else {
+                            document.getElementById("pincode").value = "Not Found";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching pincode:", error);
+                        document.getElementById("pincode").value = "Error";
+                    });
+            }
+        });
+        document.getElementById("togglePassword").addEventListener("click", function () {
+            let passwordField = document.getElementById("password");
+            let icon = this.querySelector("i");
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash"); // Change to "eye-slash" when visible
+            } else {
+                passwordField.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye"); // Change back to "eye" when hidden
+            }
+        });
+
+        // Initialize state dropdown on page load
+        populateStates();</script>
+
+</body>
+</html>
+<script>document.addEventListener("DOMContentLoaded", function () {
+        let form = document.getElementById("mentorForm");
+        let firstNameInput = document.getElementById("firstName");
+        let lastNameInput = document.getElementById("lastName");
+        let addressInput = document.getElementById("address");
+        let cityInput = document.getElementById("city");
+        let stateInput = document.getElementById("state");
+        let emailInput = document.getElementById("email");
+        let mobileInput = document.getElementById("mobile");
+        let whatsappInput = document.getElementById("whatsapp");
+
+        let gmailPattern = /^[a-zA-Z0-9._%+-]+@@gmail\.com$/; // Fixed email regex
+        let mobilePattern = /^[0-9]{10}$/;
+
+        function validateField(input, errorElement, message) {
+            if (input.value.trim() === "") {
+                errorElement.innerText = message;
+                input.classList.add("is-invalid");
+                return false;
+            } else {
+                errorElement.innerText = "";
+                input.classList.remove("is-invalid");
+                return true;
+            }
+        }
+
+        function validatePattern(input, errorElement, pattern, message) {
+            if (!pattern.test(input.value.trim())) {
+                errorElement.innerText = message;
+                input.classList.add("is-invalid");
+                return false;
+            } else {
+                errorElement.innerText = "";
+                input.classList.remove("is-invalid");
+                return true;
+            }
+        }
+
+        // Adding event listeners for all required fields
+        firstNameInput.addEventListener("blur", function () {
+            validateField(firstNameInput, document.getElementById("firstNameError"), "First name is required.");
+        });
+
+        lastNameInput.addEventListener("blur", function () {
+            validateField(lastNameInput, document.getElementById("lastNameError"), "Last name is required.");
+        });
+
+        addressInput.addEventListener("blur", function () {
+            validateField(addressInput, document.getElementById("addressError"), "Address is required.");
+        });
+
+        cityInput.addEventListener("blur", function () {
+            validateField(cityInput, document.getElementById("cityError"), "City is required.");
+        });
+
+        emailInput.addEventListener("blur", function () {
+            validatePattern(emailInput, document.getElementById("emailError"), gmailPattern, "Please enter a valid Gmail address (e.g., user@gmail.com).");
+        });
+
+        mobileInput.addEventListener("blur", function () {
+            validatePattern(mobileInput, document.getElementById("mobileError"), mobilePattern, "Enter a valid 10-digit mobile number.");
+        });
+
+        whatsappInput.addEventListener("blur", function () {
+            if (whatsappInput.value.trim() !== "") {
+                validatePattern(whatsappInput, document.getElementById("whatsappError"), mobilePattern, "Enter a valid 10-digit WhatsApp number.");
+            } else {
+                document.getElementById("whatsappError").innerText = "";
+                whatsappInput.classList.remove("is-invalid");
+            }
+        });
+
+        form.addEventListener("submit", function (event) {
+            let isValid = true; // Start with true
+
+            let firstNameValid = validateField(firstNameInput, document.getElementById("firstNameError"), "First name is required.");
+            let lastNameValid = validateField(lastNameInput, document.getElementById("lastNameError"), "Last name is required.");
+            let addressValid = validateField(addressInput, document.getElementById("addressError"), "Address is required.");
+            let cityValid = validateField(cityInput, document.getElementById("cityError"), "City is required.");
+            let stateValid = validateField(stateInput, document.getElementById("stateError"), "State is required.");
+            let emailValid = validatePattern(emailInput, document.getElementById("emailError"), gmailPattern, "Please enter a valid Gmail address (e.g., user@gmail.com).");
+            let mobileValid = validatePattern(mobileInput, document.getElementById("mobileError"), mobilePattern, "Enter a valid 10-digit mobile number.");
+
+            let whatsappValid = true; // Default true if empty
+            if (whatsappInput.value.trim() !== "") {
+                whatsappValid = validatePattern(whatsappInput, document.getElementById("whatsappError"), mobilePattern, "Enter a valid 10-digit WhatsApp number.");
+            }
+
+            // Check if all validations passed
+            isValid = firstNameValid && lastNameValid && addressValid && cityValid && stateValid && emailValid && mobileValid && whatsappValid;
+
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission
+            }
+        });
+    });</script>
