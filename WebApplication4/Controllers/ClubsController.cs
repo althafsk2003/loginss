@@ -325,6 +325,7 @@ namespace WebApplication4.Controllers
                     EventID = e.EventID,
                     EventName = e.EventName,
                     EventPoster = e.EventPoster,
+                    EventStartDateAndTime=e.EventStartDateAndTime,
                     EventEndDateAndTime = e.EventEndDateAndTime,
                     EventStatus = e.EventStatus,
                     IsActive = e.IsActive
@@ -403,7 +404,7 @@ namespace WebApplication4.Controllers
 
             // Replace localhost with your ngrok URL
             string registrationLink = Url.Action("VerifyEnrollment", "Clubs", new { id = eventItem.EventID }, protocol: "https");
-            registrationLink = registrationLink.Replace("localhost:44368", "02b2-110-235-224-51.ngrok-free.app");
+            registrationLink = registrationLink.Replace("localhost:44368", "2f3b-123-63-49-246.ngrok-free.app");
 
 
             // Generate the QR code for this URL
@@ -440,27 +441,22 @@ namespace WebApplication4.Controllers
                 db.SaveChanges();
             }
 
-            return RedirectToAction("EventDetails", "Events", new { id = comment.EventID });
+            return RedirectToAction("EventDetails", "Clubs", new { id = comment.EventID });
         }
 
         [HttpPost]
-        public async Task<JsonResult> RegisterUser(int eventId, string enrollmentId)
+        public async Task<ActionResult> RegisterUser(int eventId, string enrollmentId)
         {
             var eventEntity = await db.EVENTS.FindAsync(eventId);
 
             if (eventEntity == null || string.IsNullOrEmpty(eventEntity.RegistrationURL))
             {
-                return Json(new { success = false, message = "Registration link not found." });
+                return Content("Registration link not found.");
             }
 
-            string googleFormUrl = eventEntity.RegistrationURL;
-
-            // Optional DB save logic...
-
-            return Json(new { success = true, redirectUrl = googleFormUrl });
+            // Redirect to the Google form URL
+            return Redirect(eventEntity.RegistrationURL);
         }
-
-
 
         // Action to get the registration link based on EventID
         /* [HttpGet]

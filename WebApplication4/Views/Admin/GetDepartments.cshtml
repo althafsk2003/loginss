@@ -1,0 +1,78 @@
+﻿@model List<WebApplication4.Models.DEPARTMENT>
+@{
+    ViewBag.Title = "Departments";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Font Awesome (Optional) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+
+<style>
+    .department-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .department-block {
+        display: flex;
+        align-items: center;
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(30px);
+        opacity: 0;
+        animation-name: revealUp;
+        animation-duration: 0.6s;
+        animation-fill-mode: forwards;
+    }
+
+    .icon-block {
+        font-size: 2.3rem;
+        color: #28a745;
+        margin-right: 1.5rem;
+    }
+
+    .info-block h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .info-block small {
+        color: #555;
+    }
+
+    @@keyframes revealUp {
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <h3 class="text-center mb-5">📚 Departments under <span class="text-primary">@ViewBag.UniversityName</span></h3>
+
+    <div class="department-list">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var dept = Model[i];
+            var delay = i * 0.2; // reveal delay
+
+            <div class="department-block" style="animation-delay: @($"{delay}s");">
+                <div class="icon-block">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="info-block flex-grow-1">
+                    <h5>@dept.DepartmentName</h5>
+                    <small>HOD: @dept.HOD</small>
+                </div>
+                <a href="@Url.Action("GetClubs", "Admin", new { departmentId = dept.DepartmentID })"
+                   class="btn btn-outline-success btn-sm">
+                    View Clubs
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -55,6 +55,7 @@ namespace WebApplication4.Controllers
 
                     if (user.Role == "Admin")
                     {
+                        Session["User1Email"] = user.Email;
                         return RedirectToAction("Index", "Admin");
                     }
                     else if (user.Role == "UniversityAdministrator")
@@ -89,12 +90,15 @@ namespace WebApplication4.Controllers
 
                         Session["UserRole"] = user.Role;
 
+                        Session["UserEmail"] = user.Email;
+
 
                         return RedirectToAction("Index", "Mentor");
 
                     }
                     else if(user.Role== "Club Admin")
                     {
+                        Session["UserID"] = user.LoginID;
                         return RedirectToAction("Index", "ClubAdmin");
                     }
                     else
@@ -447,7 +451,7 @@ namespace WebApplication4.Controllers
 
         // ✅ Show Manage Universities Page
         // ManageUniversities
-        public ActionResult ManageUniversities(int page = 1, int pageSize = 9)
+        public ActionResult ManageUniversities(int page = 1, int pageSize = 7)
         {
             var totalUniversities = _db.UNIVERSITies.Count();
 
@@ -475,7 +479,7 @@ namespace WebApplication4.Controllers
             if (university == null)
             {
                 TempData["ErrorMessage"] = "University not found!";
-                return RedirectToAction("ManageUniversities", new { page = page, pageSize = 9 });
+                return RedirectToAction("ManageUniversities", new { page = page, pageSize = 7 });
             }
 
             university.IsActive = false;
@@ -490,7 +494,7 @@ namespace WebApplication4.Controllers
 
             await _db.SaveChangesAsync();
             TempData["SuccessMessage"] = "University and its departments have been deactivated!";
-            return RedirectToAction("ManageUniversities", new { page = page, pageSize = 9 });
+            return RedirectToAction("ManageUniversities", new { page = page, pageSize = 7 });
         }
 
         [HttpPost]
@@ -500,7 +504,7 @@ namespace WebApplication4.Controllers
             if (university == null)
             {
                 TempData["ErrorMessage"] = "University not found!";
-                return RedirectToAction("ManageUniversities", new { page = page, pageSize = 9 });
+                return RedirectToAction("ManageUniversities", new { page = page, pageSize = 7 });
             }
 
             university.IsActive = true;
@@ -515,7 +519,7 @@ namespace WebApplication4.Controllers
 
             await _db.SaveChangesAsync();
             TempData["SuccessMessage"] = "University and its departments have been activated!";
-            return RedirectToAction("ManageUniversities", new { page = page, pageSize = 9 });
+            return RedirectToAction("ManageUniversities", new { page = page, pageSize = 7 });
         }
 
         [HttpPost]
@@ -722,6 +726,7 @@ namespace WebApplication4.Controllers
 
         // Show All Schools (Departments)
         //view schools
+        
         public ActionResult ViewSchools(int? page, string filter = "all")
         {
             int pageSize = 5;
@@ -954,36 +959,82 @@ namespace WebApplication4.Controllers
 
 
 
-        // viewmentors
-        public ActionResult ViewMentors()
+        // View Mentors
+        public ActionResult ViewMentors(int page = 1)
         {
-            var universities = _db.USERs.ToList();
-            return View(universities);
+            int pageSize = 5;
+            var allMentors = _db.USERs.ToList();
+            var pagedMentors = allMentors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalItemCount = allMentors.Count;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)allMentors.Count / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, allMentors.Count);
+            ViewBag.ViewType = "ViewMentors";
+
+            return View("ViewMentors", pagedMentors);
         }
 
-        public ActionResult ViewActiveMentors()
+        public ActionResult ViewActiveMentors(int page = 1)
         {
-            var universities = _db.USERs.Where(u => u.IsActive == true).ToList();
-            return View("ViewMentors", universities);
+            int pageSize = 5;
+            var activeMentors = _db.USERs.Where(u => u.IsActive == true).ToList();
+            var pagedMentors = activeMentors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalItemCount = activeMentors.Count;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)activeMentors.Count / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, activeMentors.Count);
+            ViewBag.ViewType = "ViewActiveMentors";
+
+            return View("ViewMentors", pagedMentors);
         }
 
-        public ActionResult ViewDeactivatedMentors()
+        public ActionResult ViewDeactivatedMentors(int page = 1)
         {
-            var universities = _db.USERs.Where(u => u.IsActive == false).ToList();
-            return View("ViewMentors", universities);
+            int pageSize = 5;
+            var inactiveMentors = _db.USERs.Where(u => u.IsActive == false).ToList();
+            var pagedMentors = inactiveMentors.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalItemCount = inactiveMentors.Count;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)inactiveMentors.Count / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, inactiveMentors.Count);
+            ViewBag.ViewType = "ViewDeactivatedMentors";
+
+            return View("ViewMentors", pagedMentors);
         }
+
 
 
 
         // 1. Manage Mentors (View and Actions)
-        // GET: Manage Mentors Page
-        public ActionResult ManageMentors()
+        // Manage Mentors
+        public ActionResult ManageMentors(int page = 1)
         {
-            var mentors = _db.USERs.Where(u => u.Userrole == "Mentor").ToList(); // Get all mentors from the USER table
+            int pageSize = 5;
+
+            var totalMentors = _db.USERs.Count(u => u.Userrole == "Mentor");
+            var mentors = _db.USERs
+                            .Where(u => u.Userrole == "Mentor")
+                            .OrderBy(u => u.UserID)
+                            .Skip((page - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalMentors / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, totalMentors);
+            ViewBag.TotalItemCount = totalMentors;
+
             return View(mentors);
         }
 
-        // POST: Deactivate Mentor
+        // Deactivate Mentor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeactivateMentor(int mentorId)
@@ -991,21 +1042,21 @@ namespace WebApplication4.Controllers
             var mentor = _db.USERs.FirstOrDefault(m => m.UserID == mentorId);
             if (mentor != null)
             {
-                mentor.IsActive = false; // Set IsActive to false
-                mentor.IsActiveDate = DateTime.Now; // Set deactivation timestamp
-                _db.SaveChanges(); // Save changes to database
+                mentor.IsActive = false;
+                mentor.IsActiveDate = DateTime.Now;
+                _db.SaveChanges();
 
-                TempData["SuccessMessage"] = "Mentor has been deactivated successfully."; // Success message
+                TempData["SuccessMessage"] = "Mentor has been deactivated successfully.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Mentor not found."; // Error message if mentor is not found
+                TempData["ErrorMessage"] = "Mentor not found.";
             }
 
-            return RedirectToAction("ManageMentors"); // Redirect back to ManageMentors page
+            return RedirectToAction("ManageMentors");
         }
 
-        // POST: Activate Mentor
+        // Activate Mentor
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ActivateMentor(int mentorId)
@@ -1013,19 +1064,21 @@ namespace WebApplication4.Controllers
             var mentor = _db.USERs.FirstOrDefault(m => m.UserID == mentorId);
             if (mentor != null)
             {
-                mentor.IsActive = true; // Set IsActive to true
-                mentor.IsActiveDate = DateTime.Now; // Set activation timestamp
-                _db.SaveChanges(); // Save changes to database
+                mentor.IsActive = true;
+                mentor.IsActiveDate = DateTime.Now;
+                _db.SaveChanges();
 
-                TempData["SuccessMessage"] = "Mentor has been activated successfully."; // Success message
+                TempData["SuccessMessage"] = "Mentor has been activated successfully.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Mentor not found."; // Error message if mentor is not found
+                TempData["ErrorMessage"] = "Mentor not found.";
             }
 
-            return RedirectToAction("ManageMentors"); // Redirect back to ManageMentors page
+            return RedirectToAction("ManageMentors");
         }
+
+        
 
 
         // Club Requests (for approving or rejecting clubs)
@@ -1151,120 +1204,193 @@ namespace WebApplication4.Controllers
             return RedirectToAction("ClubRequests");
         }
 
-        public ActionResult ClubStatus()
+        public ActionResult ClubStatus(int page = 1, int? status = null)
         {
-            var clubss = _db.CLUBS.Include(c => c.DEPARTMENT)
-                                 .Include(c => c.DEPARTMENT.UNIVERSITY)
-                                 .ToList();
+            int pageSize = 5;
 
-            var mentorIds = clubss.Select(c => c.MentorID).ToList();
+            var clubsQuery = _db.CLUBS
+                .Include(c => c.DEPARTMENT)
+                .Include(c => c.DEPARTMENT.UNIVERSITY)
+                .Include(c => c.ApprovalStatusTable)
+                .Include(c => c.Login)
+                .AsQueryable();
 
+            if (status.HasValue)
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == status.Value);
+            }
 
-            var notifications = _db.Notifications
-                                   .Where(n => n.LoginID.HasValue && mentorIds.Contains(n.LoginID.Value) && n.Message.Contains("rejected"))
-                                   .ToList();
+            var totalClubs = clubsQuery.Count();
+            var clubs = clubsQuery
+                .OrderBy(c => c.ClubName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            var clubs = _db.CLUBS
-               .Include(c => c.DEPARTMENT)
-               .Include(c => c.DEPARTMENT.UNIVERSITY)
-               .Include(c => c.ApprovalStatusTable)
-               .Include(c => c.Login) // Ensure Login table is included
-               .ToList();
-
-            // Fetch Mentor Names using Email from Users table
             var mentorEmails = clubs.Select(c => c.Login.Email).Distinct().ToList();
             var mentorNames = _db.USERs
                 .Where(u => mentorEmails.Contains(u.Email))
                 .ToDictionary(u => u.Email, u => u.FirstName);
 
-            // Assign Mentor Name to each club
             foreach (var club in clubs)
             {
-                if (!string.IsNullOrEmpty(club.Login?.Email) && mentorNames.ContainsKey(club.Login.Email))
-                {
-                    club.MentorName = mentorNames[club.Login.Email]; // Assign Name
-                }
-                else
-                {
-                    club.MentorName = "Unknown Mentor"; // Fallback if no mentor found
-                }
+                club.MentorName = mentorNames.ContainsKey(club.Login?.Email)
+                    ? mentorNames[club.Login.Email]
+                    : "Unknown Mentor";
             }
 
+            var mentorIds = clubs.Select(c => c.MentorID).ToList();
+            var notifications = _db.Notifications
+                .Where(n => n.LoginID.HasValue && mentorIds.Contains(n.LoginID.Value) && n.Message.Contains("rejected"))
+                .ToList();
 
             ViewBag.Notifications = notifications;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalClubs / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, totalClubs);
+            ViewBag.TotalItemCount = totalClubs;
+            ViewBag.CurrentStatus = status;
+
             return View(clubs);
         }
-        //public ActionResult ClubStatus()
-        //{
-        //    var clubs = _db.CLUBS
-        //        .Include(c => c.DEPARTMENT)
-        //        .Include(c => c.DEPARTMENT.UNIVERSITY)
-        //        .Include(c => c.ApprovalStatusTable)
-        //        .Include(c => c.Login) // Ensure Login table is included
-        //        .ToList();
-
-        //    // Fetch Mentor Names using Email from Users table
-        //    var mentorEmails = clubs.Select(c => c.Login.Email).Distinct().ToList();
-        //    var mentorNames = _db.USERs
-        //        .Where(u => mentorEmails.Contains(u.Email))
-        //        .ToDictionary(u => u.Email, u => u.FirstName);
-
-        //    // Assign Mentor Name to each club
-        //    foreach (var club in clubs)
-        //    {
-        //        if (!string.IsNullOrEmpty(club.Login?.Email) && mentorNames.ContainsKey(club.Login.Email))
-        //        {
-        //            club.MentorName = mentorNames[club.Login.Email]; // Assign Name
-        //        }
-        //        else
-        //        {
-        //            club.MentorName = "Unknown Mentor"; // Fallback if no mentor found
-        //        }
-        //    }
-
-        //    return View(clubs);
-        //}
 
 
-
-        // Manage Clubs (activate or deactivate)
-        public ActionResult ManageClubs()
+        // ManageClubs action with pagination
+        public ActionResult ManageClubs(int page = 1)
         {
-            var clubs = _db.CLUBS.ToList(); // Fetch all clubs
-            return View(clubs);
+            int pageSize = 5; // Number of clubs per page
+
+            // Get the list of all clubs and order them by ClubName
+            var clubs = _db.CLUBS.OrderBy(c => c.ClubName).ToList();
+
+            // Apply pagination logic
+            var pagedClubs = clubs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            // Calculate the total number of items, pages, and which items are displayed on the current page
+            ViewBag.TotalItemCount = clubs.Count;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)clubs.Count / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, clubs.Count);
+
+            // Pass the list of paged clubs to the view
+            return View(pagedClubs);
         }
 
-        // Activate Club
-        public ActionResult ActivateClub(int id)
+        // ActivateClub action to change club status to active
+        public ActionResult ActivateClub(int id, int page = 1)
         {
             var club = _db.CLUBS.Find(id);
             if (club != null)
             {
-                club.IsActive = true; // Set club to active
-                _db.SaveChanges();
+                club.IsActive = true; // Activate the club
+                _db.SaveChanges(); // Save the changes to the database
             }
 
-            return RedirectToAction("ManageClubs");
+            // Redirect back to the ManageClubs action with the current page
+            return RedirectToAction("ManageClubs", new { page });
         }
 
-        // Deactivate Club
-        public ActionResult DeactivateClub(int id)
+        // DeactivateClub action to change club status to inactive
+        public ActionResult DeactivateClub(int id, int page = 1)
         {
             var club = _db.CLUBS.Find(id);
             if (club != null)
             {
-                club.IsActive = false; // Set club to inactive
-                _db.SaveChanges();
+                club.IsActive = false; // Deactivate the club
+                _db.SaveChanges(); // Save the changes to the database
             }
 
-            return RedirectToAction("ManageClubs");
+            // Redirect back to the ManageClubs action with the current page
+            return RedirectToAction("ManageClubs", new { page });
         }
 
-        // View All Universities (for "View More" section)
+
+
+        //quickstats
         public ActionResult ViewAllUniversities()
         {
-            var universities = _db.UNIVERSITies.ToList();
-            return View(universities); // Pass universities to the view
+            var universities = _db.UNIVERSITies
+                .Where(u => u.IsActive == true) // Filter only active universities
+                .ToList();
+
+            return View(universities);
+        }
+
+        public ActionResult GetDepartments(int universityId)
+        {
+            var departments = _db.DEPARTMENTs
+                .Where(d => d.Universityid == universityId && d.IsActive == true) // Filter active departments
+                .ToList();
+
+            ViewBag.UniversityName = _db.UNIVERSITies
+                .Where(u => u.UniversityID == universityId)
+                .Select(u => u.UniversityNAME)
+                .FirstOrDefault();
+
+            return View(departments);
+        }
+
+        public ActionResult GetClubs(int departmentId)
+        {
+            var clubs = _db.CLUBS
+                .Where(c => c.DepartmentID == departmentId && c.IsActive == true) // Filter active clubs
+                .ToList();
+
+            return View(clubs);
+        }
+
+
+
+        //chnagepassword
+        [HttpGet]
+        public ActionResult ChangePassword()
+        {
+         
+            if (Session["User1Email"] == null)
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var userEmail = Session["User1Email"]?.ToString();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin");
+            }
+
+            var user = _db.Logins.FirstOrDefault(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(model);
+            }
+
+            if (user.PasswordHash != model.CurrentPassword)
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View(model);
+            }
+
+            user.PasswordHash = model.NewPassword;
+            _db.SaveChanges();
+
+            TempData["SuccessMessage"] = "Password changed successfully!";
+            return RedirectToAction("Index", "Admin"); // Updated to point to dashboard
         }
 
 

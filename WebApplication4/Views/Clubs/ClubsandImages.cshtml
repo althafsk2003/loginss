@@ -2,6 +2,7 @@
     Layout = "~/Views/Shared/_ClubsLayout.cshtml";
     ViewBag.Title = "Clubs and Experiences";
 }
+<div class="container">
 
 <div class="clubs-section">
     <div class="row align-items-center">
@@ -75,11 +76,12 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-6 text-content">
-                
-                    <h2>Campus Traditions</h2>
-                
+
+                <h2>Campus Traditions</h2>
+
                 <p>Embrace RIT's tradition of tiger pride by taking part in one of our many campus-wide events and programs. Join us to celebrate the season, showcase innovation and creativity, and bookend your chapter at RIT with moments you'll cherish forever.</p>
-                <a href="@Url.Action("Departments", "Clubs")" class="explore-link">Explore our clubs ></a>
+                <a href="@Url.Action("Departments", "Clubs")" class="explore-link" style="text-decoration: none;">Explore our clubs ></a>
+
             </div>
             <div class="col-md-6 image-content">
                 <img src="~/wwwroot/Images/icfai.jpg" alt="RIT Men's Hockey" class="img-fluid">
@@ -88,7 +90,7 @@
     </div>
 </div>
 
-
+</div>
 
 <style>
     .clubs-section {
@@ -100,7 +102,9 @@
        */
         margin-top: 15px;
     }
-
+    .container{
+        padding-bottom:30px;
+    }
     .text-container h1 {
         font-size: 3rem;
         font-weight: bold;
@@ -224,6 +228,7 @@
         color: white;
         text-align: left;
         position: relative;
+        padding-bottom:40px;
         overflow: hidden;
         margin-top: 56px;
         width: 100%; /* Make it full width */

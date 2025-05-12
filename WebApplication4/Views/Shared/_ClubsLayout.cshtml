@@ -128,14 +128,14 @@
 
 
         /* Footer */
-        .footer {
+        /*.footer {
             background: #222;
             color: white;
             text-align: center;
             padding: 10px 0;
             margin-top: 10px;
             font-size: 14px;
-        }
+        }*/
 
         /* Smooth Hover Effect for Buttons */
         .btn-custom {
@@ -214,10 +214,10 @@
 
     </div>-->
     <!-- Footer -->
-    <footer class="footer">
+    @*<footer class="footer">
         <p>© 2025 ICFAI Foundation for Higher Education. All Rights Reserved.</p>
     </footer>
-
+*@
 
 
 
@@ -250,3 +250,239 @@
 </body>
 </html>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICFAI Foundation for Higher Education</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Basic styling to match the image - you might have more in your actual CSS */
+        body {
+            font-family: sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .footer {
+            background-color: #1D1744;
+            color: #ccc;
+            padding: 40px 0;
+            position: relative; /* Needed for absolute positioning of the map */
+            z-index: 1; /* Ensure footer is below the map if overlap occurs */
+        }
+
+        .footer-col {
+            margin-bottom: 20px;
+        }
+
+        .footer-content h4 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-content p, .footer-content a {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-decoration: none;
+        }
+
+            .footer-content a:hover {
+                color: #fff;
+            }
+
+        .list-unstyled {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .footer-col i {
+            margin-right: 5px;
+            color: #ffc107;
+        }
+
+        .route-map-container {
+            position: absolute;
+            top: 35%; /* Decrease this percentage to move the map up */
+            right: 2%;
+            z-index: 0;
+            width: 65%;
+        }
+
+            .route-map-container h2 {
+                color: #ffc107;
+                text-align: left;
+                margin-bottom: 5px;
+                font-size: 1.5em;
+            }
+
+            .route-map-container iframe {
+                display: block;
+                width: 80%;
+                min-height: 250px;
+                border: 1px solid #ccc;
+            }
+    </style>
+</head>
+<body>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content" style="color: #fff; font-size: 14px;">
+                        <div style="background-color: white; padding: 10px; margin-bottom: 20px;">
+                            <img src="https://www.ifheindia.org/assets/img/Logo.svg"
+                                 alt="ICFAI Logo"
+                                 style="max-width: 100%; height: auto;">
+                        </div>
+                        <p style="color: #ffc107; font-weight: bold; margin-bottom: 8px;">
+                            <i class="fas fa-map-marker-alt"></i> CAMPUS ADDRESS
+                        </p>
+                        <p>
+                            The ICFAI Foundation for Higher Education (IFHE),<br>
+                            Hyderabad<br>
+                            Donthanapally, Shankarapalli Road<br>
+                            Hyderabad - 501203, Telangana, India.
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-phone-alt"></i> ADMISSION CONTACT
+                        </p>
+                        <p>
+                            Toll Free Number: 18005990767<br>
+                            Telangana: 8498053801<br>
+                            Andhra Pradesh: 9160191166
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-headset"></i> SSD (STUDENT SERVICES)
+                        </p>
+                        <p>
+                            08417-226663 / 08417-226662
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Useful Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#" style="color: #ccc;">About IFHE</a></li>
+                            <li><a href="#" style="color: #ccc;">ICFAI Business School</a></li>
+                            <li><a href="#" style="color: #ccc;">Faculty of Science & Technology</a></li>
+                            <li><a href="#" style="color: #ccc;">ICFAI Law School</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Quick Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#" style="color: #ccc;">Careers</a></li>
+                            <li><a href="#" style="color: #ccc;">Contact Us</a></li>
+                            <li><a href="#" style="color: #ccc;">Sitemap</a></li>
+                            <li><a href="#" style="color: #ccc;">Alumni</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Connect with Us</h4>
+                        <ul class="list-unstyled d-flex gap-2">
+                            <li>
+                                <a rel="noreferrer" title="facebook ICFAI University Hyderabad" href="https://www.facebook.com/IFHEHyderabadOfficial/" target="_blank" style="color: #ccc;">
+                                    <i class="bi bi-facebook"></i> Facebook
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://twitter.com/IFHE_Hyderabad" target="_blank" rel="noreferrer" title="Twitter ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.linkedin.com/school/icfai-foundation-for-higher-education-ifhe-hyderabad/" target="_blank" rel="noreferrer" title="LinkedIn ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-linkedin-in"></i> LinkedIn
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.instagram.com/ifhe_hyderabad/" target="_blank" rel="noreferrer" title="Instagram ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-instagram"></i> Instagram
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="route-map-container">
+            <h2 class="route-map-heading">ROUTE MAP TO IFHE HYDERABAD CAMPUS</h2>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3807.838918799798!2d78.2324844742829!3d17.374845483290986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb95703d119557%3A0x6a0e99997b8c5e5a!2sICFAI%20Foundation%20for%20Higher%20Education%20(IFHE)%2C%20Hyderabad!5e0!3m2!1sen!2sin!4v1712578528895!5m2!1sen!2sin"
+                    width="50"
+                    height="150"
+                    style="border:0;"
+                    loading="lazy"></iframe>
+        </div>
+
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Title</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1;
+        }
+    </style>
+
+</head>
+<body>
+
+    <!-- Main content -->
+    <div class="content">
+        <!-- Your page content goes here -->
+    </div>
+
+    <!-- Footer Bottom Bar -->
+    <div style="background-color: #fd7e14; padding: 16px 0; text-align: center;">
+        <p style="margin: 0; color: white; font-size: 16px; font-weight: 500;">
+            © 2024 Copyright All Rights Reserved by
+            <strong style="font-weight: 600;">The ICFAI Group.</strong>
+        </p>
+    </div>
+</body>
+</html>

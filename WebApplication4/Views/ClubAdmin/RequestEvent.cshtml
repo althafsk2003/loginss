@@ -4,6 +4,80 @@
     ViewBag.Title = "Request a Club";
 }
 
+<style>
+    html, body {
+        margin: 0;
+        padding: 15px;
+        height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .form-container {
+        max-width: 100%;
+        max-height: calc(100vh - 34px);
+        padding: 0px 10px 10px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 2px;
+        display: none;
+    }
+
+    .is-invalid {
+        border-color: red !important;
+    }
+
+    @@media (max-width: 768px) {
+        .form-container {
+            padding: 3px 5px 5px;
+        }
+
+        .card {
+            padding: 15px;
+            margin-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 4px;
+        }
+
+        input, select, textarea {
+            padding: 4px;
+        }
+
+        .btn {
+            padding: 5px 8px;
+        }
+    }
+</style>
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
@@ -14,33 +88,11 @@
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 
-<style>
-    .form-container {
-        max-width: 100%;
-        max-height: 100vh;
-        overflow: hidden;
-        padding: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 8px;
-    }
-
-    input, select, textarea {
-        font-size: 14px;
-        padding: 6px;
-    }
-
-    .btn {
-        padding: 8px 12px;
-    }
-</style>
-
-<div class="container mt-3 form-container">
+<div class="container mt-1 form-container">
     <div class="card shadow-lg p-3">
         <h4 class="text-center text-primary mb-2">Request an Event</h4>
 
-        <form action="@Url.Action("RequestEvent", "ClubAdmin")" method="post" enctype="multipart/form-data">
+        <form id="eventForm" action="@Url.Action("RequestEvent", "ClubAdmin")" method="post" enctype="multipart/form-data" onsubmit="return validateForm(event)">
             @Html.AntiForgeryToken()
 
             <input type="hidden" name="EventOrganizerID" value="@Model.EventOrganizerID" />
@@ -68,41 +120,185 @@
 
                 <div class="col-md-12 form-group">
                     <label>Event Name:</label>
-                    <input type="text" name="EventName" class="form-control" required />
+                    <input type="text" name="EventName" id="EventName" class="form-control" required />
+                    <div id="EventNameError" class="error-message"></div>
                 </div>
 
                 <div class="col-md-12 form-group">
                     <label>Event Description:</label>
-                    <textarea name="EventDescription" class="form-control" rows="2" required></textarea>
+                    <textarea name="EventDescription" id="EventDescription" class="form-control" rows="2" required></textarea>
+                    <div id="EventDescriptionError" class="error-message"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label>Event Type:</label>
-                    <select name="EventType" class="form-select" required>
+                    <select name="EventType" id="EventType" class="form-select" required>
+                        <option value="">Select Type</option>
                         <option value="Open" @(Model.EventType == "Open" ? "selected" : "")>Open</option>
                         <option value="Campus" @(Model.EventType == "Campus" ? "selected" : "")>Campus</option>
                     </select>
+                    <div id="EventTypeError" class="error-message"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label>Start Date & Time:</label>
-                    <input type="datetime-local" name="EventStartDateAndTime" class="form-control" required />
+                    <input type="datetime-local" name="EventStartDateAndTime" id="EventStartDateAndTime" class="form-control" required />
+                    <div id="EventStartDateAndTimeError" class="error-message"></div>
                 </div>
-           
+
                 <div class="col-md-6 form-group">
                     <label>End Date & Time:</label>
-                    <input type="datetime-local" name="EventEndDateAndTime" class="form-control" required />
+                    <input type="datetime-local" name="EventEndDateAndTime" id="EventEndDateAndTime" class="form-control" required />
+                    <div id="EventEndDateAndTimeError" class="error-message"></div>
                 </div>
 
                 <div class="col-md-6 form-group">
                     <label>Event Poster:</label>
-                    <input type="file" name="EventPoster" class="form-control" required />
+                    <input type="file" name="EventPoster" id="EventPoster" class="form-control" required accept="image/png,image/jpeg,image/jpg" />
+                    <div id="EventPosterError" class="error-message"></div>
                 </div>
 
-                <div class="col-md-12 text-center mt-2">
+                <div class="col-md-12 text-center mt-1">
                     <button type="submit" class="btn btn-primary">Submit Event</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('EventName').addEventListener('input', validateEventName);
+        document.getElementById('EventDescription').addEventListener('input', validateEventDescription);
+        document.getElementById('EventType').addEventListener('change', validateEventType);
+        document.getElementById('EventStartDateAndTime').addEventListener('input', validateStartDateTime);
+        document.getElementById('EventEndDateAndTime').addEventListener('input', validateEndDateTime);
+        document.getElementById('EventPoster').addEventListener('change', validateEventPoster);
+    });
+
+   /* function validateEventName() {
+        const eventName = document.getElementById('EventName');
+        const error = document.getElementById('EventNameError');
+        if (eventName.value.trim().length < 5) {
+            error.textContent = "Event Name must be at least 5 characters.";
+            error.style.display = "block";
+            eventName.classList.add('is-invalid');
+            return false;
+        } else {
+            error.style.display = "none";
+            eventName.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    function validateEventDescription() {
+        const desc = document.getElementById('EventDescription');
+        const error = document.getElementById('EventDescriptionError');
+        if (desc.value.trim().length < 10) {
+            error.textContent = "Description must be at least 10 characters.";
+            error.style.display = "block";
+            desc.classList.add('is-invalid');
+            return false;
+        } else {
+            error.style.display = "none";
+            desc.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    function validateEventType() {
+        const type = document.getElementById('EventType');
+        const error = document.getElementById('EventTypeError');
+        if (!type.value) {
+            error.textContent = "Please select an Event Type.";
+            error.style.display = "block";
+            type.classList.add('is-invalid');
+            return false;
+        } else {
+            error.style.display = "none";
+            type.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    function validateStartDateTime() {
+        const start = document.getElementById('EventStartDateAndTime');
+        const error = document.getElementById('EventStartDateAndTimeError');
+        if (!start.value) {
+            error.textContent = "Start Date & Time is required.";
+            error.style.display = "block";
+            start.classList.add('is-invalid');
+            return false;
+        } else {
+            error.style.display = "none";
+            start.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    function validateEndDateTime() {
+        const end = document.getElementById('EventEndDateAndTime');
+        const error = document.getElementById('EventEndDateAndTimeError');
+        if (!end.value) {
+            error.textContent = "End Date & Time is required.";
+            error.style.display = "block";
+            end.classList.add('is-invalid');
+            return false;
+        } else {
+            error.style.display = "none";
+            end.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    function validateEventPoster() {
+        const poster = document.getElementById('EventPoster');
+        const error = document.getElementById('EventPosterError');
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const maxSize = 1 * 1024 * 1024; // 1 MB
+
+        if (!poster.files.length) {
+            error.textContent = "Event Poster is required.";
+            error.style.display = "block";
+            poster.classList.add('is-invalid');
+            return false;
+        }
+
+        const file = poster.files[0];
+        if (!allowedTypes.includes(file.type)) {
+            error.textContent = "Only JPG, JPEG, or PNG files are allowed.";
+            error.style.display = "block";
+            poster.classList.add('is-invalid');
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            error.textContent = "Image must be smaller than 1MB.";
+            error.style.display = "block";
+            poster.classList.add('is-invalid');
+            return false;
+        }
+
+        error.style.display = "none";
+        poster.classList.remove('is-invalid');
+        return true;
+    }
+
+    function validateForm(event) {
+        event.preventDefault();
+
+        const isValid =
+            validateEventName() &
+            validateEventDescription() &
+            validateEventType() &
+            validateStartDateTime() &
+            validateEndDateTime() &
+            validateEventPoster();
+
+        if (isValid) {
+            document.getElementById('eventForm').submit();
+        }
+
+        return false;
+    }*/
+</script>

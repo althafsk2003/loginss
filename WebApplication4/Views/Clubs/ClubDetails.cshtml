@@ -5,150 +5,124 @@
     Layout = "~/Views/Shared/_ClubsLayout.cshtml";
 }
 
-<div class="container club-details-container">
-    <h2>@Model.ClubName</h2>
-    <img src="@Model.LogoImagePath" alt="@Model.ClubName" class="club-details-logo" />
-
-    <p><strong>Abbreviation:</strong> @Model.Abbreviation</p>
-    <p><strong>Description:</strong> @Model.Description</p>
-    <p><strong>Total Club Committee Seats:</strong> @Model.TotalClubCommitteeSeats</p>
-    <p><strong>Available Club Committee Seats:</strong> @Model.AvailableClubCommitteeSeats</p>
-    @*<p><strong>Created Date:</strong> @Model.CreatedDate.ToString("dd MMMM yyyy")</p>*@
-    <p><strong>Department:</strong> @ViewBag.DepartmentName</p>
-    <p><strong>Mentor Name:</strong> @ViewBag.MentorName</p>
-    <p><strong>Mentor Email:</strong> @ViewBag.MentorEmail</p>
-    <p>
-        name:  @ViewBag.UniversityName
-    </p>
-
-    @*<p><strong>Is Active:</strong> @Model.IsActive</p>*@
-    @*<p><strong>Approval Status ID:</strong> @Model.ApprovalStatusID</p>*@
-    @*<p><strong>Approval Status:</strong> @Model.ApprovalStatusTable.ApprovalStatus</p>*@
-</div>
-
-<!-- Next Steps Section -->
-<div class="next-step-section">
-    <h2 class="next-step-title">Ready to Take the Next Step?</h2>
-    <div class="next-step-buttons">
-        <a href="#" class="next-step-button" id="openModalBtn" data-club-id="@Model.ClubID">Register as a Club Leader/Member</a>
-
-        <a href="@Url.Action("BrowseEvents", "Clubs", new { clubId = Model.ClubID })" class="next-step-button">Browse Events</a>
+<div style="display: flex; max-width: 1000px; margin: 30px auto; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); font-family: 'Segoe UI', sans-serif;">
+    <!-- Left Image Panel -->
+    <div style="flex: 1; min-height: 300px; background-image: url('@Model.LogoImagePath'); background-size: cover; background-position: center;">
+    </div>
+    <!-- Right Text Panel -->
+    <div style="flex: 1; background-color: #f8f9fa; color: #333; padding: 25px 30px;">
+        <h2 style="font-size: 24px; margin-bottom: 14px; color: #5a2c8c;">@Model.ClubName</h2>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Abbreviation:</strong> @Model.Abbreviation</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Description:</strong> @Model.Description</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Total Seats:</strong> @Model.TotalClubCommitteeSeats</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Available:</strong> @Model.AvailableClubCommitteeSeats</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Department:</strong> @ViewBag.DepartmentName</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Mentor:</strong> @ViewBag.MentorName</p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>Email:</strong> <a href="mailto:@ViewBag.MentorEmail" style="color: #007bff;">@ViewBag.MentorEmail</a></p>
+        <p style="margin: 8px 0; font-size: 16px;"><strong>University:</strong> @ViewBag.UniversityName</p>
     </div>
 </div>
-
-<!-- Modal Popup for Registration -->
-<div id="registerModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Club Registration</h2>
-        <form id="clubRegistrationForm" action="/Clubs/Register" method="post" enctype="multipart/form-data">
-            <label for="fullName">Full Name:</label>
-            <input type="text" id="fullName" name="fullName" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="clubID">Club ID:</label>
-            <input type="text" id="clubID" name="clubID" value="@Model.ClubID" readonly required>
-
-
-
-            <label for="contactNumber">Contact Number:</label>
-            <input type="text" id="contactNumber" name="contactNumber" required>
-
-            <label for="preferredRole">Preferred Role:</label>
-            <select id="preferredRole" name="preferredRole" required>
-                <option value="">Select Role</option>
-                <option value="Club Admin">Club Admin</option>
-                <option value="President">President</option>
-                <option value="Vice President">Vice President</option>
-                <option value="Treasurer">Treasurer</option>
-                <option value="Secretary">Secretary</option>
-                <option value="Member">Member</option>
-            </select>
-
-            <label for="university">University:</label>
-            
-            <input type="text" id="university" name="universityName" value="@ViewBag.UniversityName" readonly required>
-
-            <!-- Hidden input to send University ID -->
-            <input type="hidden" id="universityId" name="universityId" value="@ViewBag.UniversityId">
-
-
-            <label for="department">Department:</label>
-            <select id="department" name="departmentId" required>
-
-                <option value="">Select Department</option>
-                @if (ViewBag.Departments != null)
-                {
-                    foreach (var dept in ViewBag.Departments)
-                    {
-                        <option value="@dept.Id">@dept.Name</option>
-                    }
-                }
-            </select>
-
-
-
-
-            <label for="roleJustification">Why do you fit this role?</label>
-            <textarea id="roleJustification" name="roleJustification" required></textarea>
-
-            <!-- Image Upload -->
-            <label for="profileImage">Upload Profile Picture:</label>
-            <input type="file" id="profileImage" name="profileImage" accept="image/*" required>
-            <div id="imagePreviewContainer">
-                <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
-            </div>
-
-            <button type="submit" class="submit-button">Submit</button>
-        </form>
-    </div>
-</div>
-
-<div class="social-media-handlers">
-    @if (!string.IsNullOrEmpty(Model.ClubName))
-    {
-        <a href="https://www.facebook.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="facebook-icon">
-            <i class="fab fa-facebook-f"></i>
-        </a>
-    }
-
-    @if (!string.IsNullOrEmpty(Model.ClubName))
-    {
-        <a href="https://www.instagram.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="instagram-icon">
-            <i class="fab fa-instagram"></i>
-        </a>
-    }
-
-    @if (!string.IsNullOrEmpty(Model.ClubName))
-    {
-        <a href="https://twitter.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="twitter-icon">
-            <i class="fab fa-twitter"></i>
-        </a>
-    }
-
-    @if (!string.IsNullOrEmpty(Model.ClubName))
-    {
-        <a href="https://www.linkedin.com/in/club.@Url.Encode(Model.ClubName)" target="_blank" class="linkedin-icon">
-            <i class="fab fa-linkedin-in"></i>
-        </a>
-    }
-
-    @if (!string.IsNullOrEmpty(Model.ClubName))
-    {
-        <a href="https://wa.me/club.@Url.Encode(Model.ClubName)" target="_blank" class="whatsapp-icon">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-    }
-
-    <a href="mailto:@ViewBag.MentorEmail" class="email-icon">
-        <i class="fas fa-envelope"></i>
-    </a>
-</div>
-
 
 <style>
+    @@keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 153, 51, 0.4);
+        }
+
+        50% {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 10px rgba(255, 153, 51, 0);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 153, 51, 0);
+        }
+    }
+
+    @@keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    div[style*="max-width: 1000px"] {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @@media (max-width: 768px) {
+        .club-details-container {
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+            .club-details-container img {
+                margin-bottom: 20px;
+            }
+
+        .club-profile {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+    }
+
     .club-details-container {
         padding: 20px;
     }
@@ -167,156 +141,309 @@
     .custom-button.show-clubs {
         display: inline-block;
         padding: 12px 25px;
-        border: 2px solid #ffcc00; /* Yellow border */
-        color: white; /* White text */
+        border: 2px solid #ffcc00;
+        color: white;
         text-decoration: none;
         border-radius: 5px;
         font-weight: 600;
         margin-top: 20px;
-        background-color: transparent; /* Make the button background transparent */
-        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Add transition for smooth effects */
-        outline: 2px solid white; /* Add white outline */
+        background-color: transparent;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        outline: 2px solid white;
     }
 
         .custom-button.show-clubs:hover {
-            background-color: #ffcc00; /* Yellow background on hover */
-            color: #333; /* Dark text on hover */
-            border-color: #ffcc00; /* Keep yellow border */
-            outline-color: #ffcc00; /* Change outline color to yellow on hover */
+            background-color: #ffcc00;
+            color: #333;
+            border-color: #ffcc00;
+            outline-color: #ffcc00;
         }
 
-    /* ... other styles ... */
-
     .next-step-section {
-        /*background: transparent;*/ /* No background color */
         text-align: center;
-        padding: 21px 0;
-        width: 78%;
+        padding: 30px 0;
+        max-width: 1000px;
         box-sizing: border-box;
         border-radius: 15px;
-        margin-left: 154px;
-        border: 2px solid rgba(255, 102, 0, 0.3); /* Light orange border */
-        box-shadow: 0 0 10px 3px rgba(255, 153, 51, 0.5), /* Softer orange glow */
-        0 0 15px 6px rgba(255, 153, 51, 0.3), 0 0 20px 8px rgba(255, 153, 51, 0.2);
-        filter: drop-shadow(0 0 10px rgba(255, 153, 51, 0.4)); /* Smooth orange glow */
-        /*// color: white;*/ /* Ensuring text visibility */
+        margin: 40px auto;
+        background: linear-gradient(135deg, rgba(255, 245, 235, 0.9), rgba(255, 255, 255, 0.95));
+        box-shadow: 0 4px 15px rgba(255, 153, 51, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 0.8s ease-out;
+        overflow: hidden;
+        position: relative;
     }
 
-
-
-
-    /* ... other styles ... */
+        .next-step-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ff9900, #ffd700);
+            z-index: -1;
+        }
 
     .next-step-title {
-        font-size: 2rem; /* Adjust font size as needed */
-        color: orange; /* White text color */
-        font-weight: bold;
-        margin-bottom: 12px;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, #ff9900, #ffd700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .next-step-buttons {
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
     }
 
     .next-step-button {
         display: inline-block;
-        padding: 8px 23px;
-        border: 2px solid #ffd700; /* Yellow border */
-        color: darkgray; /* White text color */
+        padding: 10px 22px;
+        border: 2px solid #ff9900;
+        color: #333;
         text-decoration: none;
-        border-radius: 5px;
-        font-weight: bold;
-        margin: 0 20px; /* Spacing between buttons */
-        background-color: transparent; /* Transparent background */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        background-color: #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
     }
 
         .next-step-button:hover {
-            background-color: #ffd700; /* Yellow background on hover */
-            color: #333; /* Dark text on hover */
+            background: #ffd700;
+            color: #333;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
+            animation: pulse 0.6s ease;
         }
 
-    /* Modal Styles */
     .modal {
         display: none;
         position: fixed;
-        z-index: 1;
+        z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
     }
 
     .modal-content {
-        background-color: white;
-        margin: 10% auto;
-        padding: 20px;
-        width: 50%;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #fff;
+        width: 85%;
+        max-width: 950px;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        border: 1px solid #ffd700;
+        animation: modalFadeIn 0.4s ease-out;
+        position: relative;
     }
 
     .close {
-        float: right;
-        font-size: 25px;
+        position: absolute;
+        top: 12px;
+        right: 24px;
+        font-size: 26px;
         font-weight: bold;
         cursor: pointer;
+        color: #333;
     }
 
         .close:hover {
-            color: red;
+            color: #ff4d4d;
         }
 
-    /* Form Styling */
-    input, select, textarea {
+    #clubRegistrationForm {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        align-items: center;
+    }
+
+        #clubRegistrationForm label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        #clubRegistrationForm input,
+        #clubRegistrationForm select {
+            width: 100%;
+            min-width: 170px;
+            height: 38px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+            #clubRegistrationForm input:focus,
+            #clubRegistrationForm select:focus,
+            #clubRegistrationForm textarea:focus {
+                border-color: #007bff;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+            }
+
+        #clubRegistrationForm textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        #clubRegistrationForm .left-field label {
+            grid-column: 1;
+        }
+
+        #clubRegistrationForm .left-field input,
+        #clubRegistrationForm .left-field select {
+            grid-column: 2;
+        }
+
+        #clubRegistrationForm .left-field .error {
+            grid-column: 2;
+        }
+
+        #clubRegistrationForm .right-field label {
+            grid-column: 3;
+        }
+
+        #clubRegistrationForm .right-field input,
+        #clubRegistrationForm .right-field select {
+            grid-column: 4;
+        }
+
+        #clubRegistrationForm .right-field .error {
+            grid-column: 4;
+        }
+
+        #clubRegistrationForm .full-width {
+            grid-column: 1 / -1;
+        }
+
+            #clubRegistrationForm .full-width label {
+                text-align: left;
+                padding-right: 0;
+                padding-top: 0;
+            }
+
+            #clubRegistrationForm .full-width input,
+            #clubRegistrationForm .full-width textarea {
+                grid-column: 1 / -1;
+            }
+
+            #clubRegistrationForm .full-width .error {
+                grid-column: 1 / -1;
+            }
+
+    .custom-file-upload {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
         width: 100%;
-        padding: 10px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
     }
 
-    /* Image Preview */
-    #imagePreviewContainer {
-        margin-top: 10px;
-        text-align: center;
-    }
+        .custom-file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
 
-    #imagePreview {
-        max-width: 150px;
-        height: auto;
-        border-radius: 5px;
-        border: 2px solid #ccc;
-        padding: 5px;
-    }
+        .custom-file-upload .file-name {
+            display: inline-block;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .custom-file-upload input[type="file"]:focus + .file-name {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+        }
+
+        .custom-file-upload input[type="file"]:invalid + .file-name {
+            border-color: #d32f2f;
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
 
     .submit-button {
-        background-color: orange;
+        background-color: #ff9900;
         color: white;
-        padding: 10px 20px;
+        padding: 12px 24px;
         border: none;
         border-radius: 5px;
         cursor: pointer;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 14px;
+        grid-column: 1 / -1;
+        font-size: 15px;
+        transition: background-color 0.2s ease;
     }
 
         .submit-button:hover {
-            background-color: darkorange;
+            background-color: #e68a00;
         }
 
-    .social-media-handlers {
-        position: fixed;
-        top: 56%;
+    .error {
+        color: #d32f2f;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .invalid {
+        border-color: #d32f2f;
+        box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+    }
+
+    .social-media-handles {
+        position: absolute;
+        top: 230px;
         right: 20px;
-        transform: translateY(-50%);
         display: flex;
         flex-direction: column;
         gap: 10px;
-        z-index: 100; /* Ensure it's above other elements */
+        z-index: 9999;
     }
 
-        .social-media-handlers a {
+        .social-media-handles a {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -324,15 +451,14 @@
             height: 40px;
             border-radius: 50%;
             background-color: #f0f0f0;
-            text-decoration: none; /* Add this line to remove underlines */
-            /*            color: #333;*/
+            text-decoration: none;
             font-size: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-            .social-media-handlers a:hover {
+            .social-media-handles a:hover {
                 background-color: #ddd;
-                color: black; /* Change color on hover */
+                color: black;
             }
 
     .facebook-icon {
@@ -358,131 +484,456 @@
     .email-icon {
         color: darkgrey;
     }
+
+    @@media (max-width: 768px) {
+        .modal-content {
+            width: 85%;
+            padding: 15px;
+        }
+
+        #clubRegistrationForm {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+            #clubRegistrationForm label {
+                text-align: left;
+                grid-column: 1;
+                padding-right: 0;
+                font-size: 13px;
+            }
+
+            #clubRegistrationForm input,
+            #clubRegistrationForm select {
+                grid-column: 1;
+                height: 40px;
+                padding: 10px;
+                font-size: 14px;
+                min-width: 0;
+            }
+
+            #clubRegistrationForm textarea {
+                grid-column: 1;
+                padding: 10px;
+                font-size: 14px;
+                min-height: 80px;
+            }
+
+            #clubRegistrationForm .left-field label,
+            #clubRegistrationForm .right-field label {
+                grid-column: 1;
+            }
+
+            #clubRegistrationForm .left-field input,
+            #clubRegistrationForm .left-field select,
+            #clubRegistrationForm .right-field input,
+            #clubRegistrationForm .right-field select {
+                grid-column: 1;
+            }
+
+            #clubRegistrationForm .left-field .error,
+            #clubRegistrationForm .right-field .error {
+                grid-column: 1;
+            }
+
+            #clubRegistrationForm .full-width input,
+            #clubRegistrationForm .full-width textarea {
+                grid-column: 1;
+            }
+
+        .custom-file-upload .file-name {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .submit-button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .close {
+            top: 8px;
+            right: 12px;
+            font-size: 22px;
+        }
+
+        .error {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .next-step-section {
+            max-width: 90%;
+            padding: 25px 0;
+            margin: 30px auto;
+            border-radius: 12px;
+        }
+
+            .next-step-section::before {
+                border-radius: 12px;
+            }
+
+        .next-step-title {
+            font-size: 1.5rem;
+        }
+
+        .next-step-button {
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            border: 2px solid #ff9900;
+        }
+    }
 </style>
 
-<script>
+<!-- Next Steps Section -->
+<div class="next-step-section">
+    <h2 class="next-step-title">Ready to Take the Next Step?</h2>
+    <div class="next-step-buttons">
+        <a href="#" class="next-step-button" id="openModalBtn" data-club-id="@Model.ClubID" style="text-decoration:none;">Register as a Club Leader/Member</a>
+        <a href="@Url.Action("BrowseEvents", "Clubs", new { clubId = Model.ClubID })" class="next-step-button" style="text-decoration:none;">Browse Events</a>
+    </div>
+</div>
 
+<!-- Modal Popup for Registration -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2 style="font-size: 20px; margin-bottom: 16px;">Club Registration</h2>
+        <form id="clubRegistrationForm" action="/Clubs/Register" method="post" enctype="multipart/form-data">
+            <!-- Left Side Fields -->
+            <div class="left-field">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" name="fullName" required>
+                <span class="error" id="fullNameError"></span>
+            </div>
+            <div class="left-field">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <span class="error" id="emailError"></span>
+            </div>
+            <div class="left-field">
+                <label for="clubID">Club ID:</label>
+                <input type="text" id="clubID" name="clubID" value="@Model.ClubID" readonly required>
+                <span class="error" id="clubIDError"></span>
+            </div>
+            <div class="left-field">
+                <label for="contactNumber">Contact Number:</label>
+                <input type="text" id="contactNumber" name="contactNumber" required>
+                <span class="error" id="contactNumberError"></span>
+            </div>
+            <!-- Right Side Fields -->
+            <div class="right-field">
+                <label for="preferredRole">Preferred Role:</label>
+                <select id="preferredRole" name="preferredRole" required>
+                    <option value="">Select Role</option>
+                    <option value="Club Admin">Club Admin</option>
+                    <option value="President">President</option>
+                    <option value="Vice President">Vice President</option>
+                    <option value="Treasurer">Treasurer</option>
+                    <option value="Secretary">Secretary</option>
+                    <option value="Member">Member</option>
+                </select>
+                <span class="error" id="preferredRoleError"></span>
+            </div>
+            <div class="right-field">
+                <label for="university">University:</label>
+                <input type="text" id="university" name="universityName" value="@ViewBag.UniversityName" readonly required>
+                <input type="hidden" id="universityId" name="universityId" value="@ViewBag.UniversityId">
+                <span class="error" id="universityError"></span>
+            </div>
+            <div class="right-field">
+                <label for="department">Department:</label>
+                <select id="department" name="departmentId" required>
+                    <option value="">Select Department</option>
+                    @if (ViewBag.Departments != null)
+                    {
+                        foreach (var dept in ViewBag.Departments)
+                        {
+                            <option value="@dept.Id">@dept.Name</option>
+                        }
+                    }
+                </select>
+                <span class="error" id="departmentError"></span>
+            </div>
+            <!-- Full-Width Fields -->
+            <div class="full-width">
+                <label for="roleJustification">Why do you fit this role?</label>
+                <textarea id="roleJustification" name="roleJustification" required></textarea>
+                <span class="error full-width" id="roleJustificationError"></span>
+            </div>
+            <div class="full-width">
+                <label for="profileImage">Upload Profile Picture:</label>
+                <div class="custom-file-upload">
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" required>
+                    <span class="file-name">No file chosen</span>
+                </div>
+                <span class="error full-width" id="profileImageError"></span>
+            </div>
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+</div>
+
+<div class="club-profile-container">
+    <!-- Social Media Icons -->
+    <div class="social-media-handles">
+        @if (!string.IsNullOrEmpty(Model.ClubName))
+        {
+            <a href="https://www.facebook.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="facebook-icon">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(Model.ClubName))
+        {
+            <a href="https://www.instagram.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="instagram-icon">
+                <i class="fab fa-instagram"></i>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(Model.ClubName))
+        {
+            <a href="https://twitter.com/club.@Url.Encode(Model.ClubName)" target="_blank" class="twitter-icon">
+                <i class="fab fa-twitter"></i>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(Model.ClubName))
+        {
+            <a href="https://www.linkedin.com/in/club.@Url.Encode(Model.ClubName)" target="_blank" class="linkedin-icon">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        }
+        @if (!string.IsNullOrEmpty(Model.ClubName))
+        {
+            <a href="https://wa.me/club.@Url.Encode(Model.ClubName)" target="_blank" class="whatsapp-icon">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+        }
+        <a href="mailto:@ViewBag.MentorEmail" class="email-icon">
+            <i class="fas fa-envelope"></i>
+        </a>
+    </div>
+</div>
+
+<script>
     document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById("registerModal");
         const openModalBtn = document.getElementById("openModalBtn");
-        const closeBtn = document.getElementsByClassName("close")[0];
-        const universityField = document.getElementById("university");
-        const departmentDropdown = document.getElementById("department");
-        var form = document.getElementById("clubRegistrationForm");
+        const closeBtn = document.querySelector("#registerModal .close");
+        const form = document.getElementById("clubRegistrationForm");
         const imageInput = document.getElementById("profileImage");
-        const imagePreview = document.getElementById("imagePreview");
+        const fileNameDisplay = document.querySelector('.file-name');
 
-        // Open Modal and Fetch University & Departments
+        const fields = {
+            fullName: document.getElementById("fullName"),
+            email: document.getElementById("email"),
+            clubID: document.getElementById("clubID"),
+            contactNumber: document.getElementById("contactNumber"),
+            preferredRole: document.getElementById("preferredRole"),
+            university: document.getElementById("university"),
+            department: document.getElementById("department"),
+            roleJustification: document.getElementById("roleJustification"),
+            profileImage: document.getElementById("profileImage")
+        };
+
+        const errors = {
+            fullName: document.getElementById("fullNameError"),
+            email: document.getElementById("emailError"),
+            clubID: document.getElementById("clubIDError"),
+            contactNumber: document.getElementById("contactNumberError"),
+            preferredRole: document.getElementById("preferredRoleError"),
+            university: document.getElementById("universityError"),
+            department: document.getElementById("departmentError"),
+            roleJustification: document.getElementById("roleJustificationError"),
+            profileImage: document.getElementById("profileImageError")
+        };
+
+        // Reset Form State
+        function resetForm(clearError = true) {
+            imageInput.value = "";
+            fileNameDisplay.textContent = "No file chosen";
+            if (clearError) {
+                errors.profileImage.textContent = "";
+                fields.profileImage.classList.remove("invalid");
+            }
+        }
+
+        // Validation Functions
+        function validateField(field, errorElement, validationFn, errorMessage) {
+            const result = validationFn(field);
+            if (typeof result === "object" && result.isValid === false) {
+                field.classList.add("invalid");
+                errorElement.textContent = result.errorMessage;
+                return false;
+            }
+            field.classList.remove("invalid");
+            errorElement.textContent = "";
+            return true;
+        }
+
+        function validateFullName(field) {
+            return field.value.trim().length > 0;
+        }
+
+        function validateEmail(field) {
+            const gmailRegex = /^[a-zA-Z0-9._%+-]+@@gmail\.com$/;
+            return gmailRegex.test(field.value.trim());
+        }
+
+        function validateClubID(field) {
+            return field.value.trim().length > 0;
+        }
+
+        function validateContactNumber(field) {
+            const mobileRegex = /^[6-9]\d{9}$/;
+            return mobileRegex.test(field.value.trim());
+        }
+
+        function validatePreferredRole(field) {
+            return field.value !== "";
+        }
+
+        function validateUniversity(field) {
+            return field.value.trim().length > 0;
+        }
+
+        function validateDepartment(field) {
+            return field.value !== "";
+        }
+
+        function validateRoleJustification(field) {
+            return field.value.trim().length > 0;
+        }
+
+        function validateProfileImage(field) {
+            if (!field.files || field.files.length === 0) {
+                return { isValid: false, errorMessage: "Please select an image" };
+            }
+            const file = field.files[0];
+            const validTypes = ["image/jpeg", "image/png", "image/gif"];
+            if (!validTypes.includes(file.type)) {
+                return { isValid: false, errorMessage: "Image must be JPG, PNG, or GIF" };
+            }
+            if (file.size > 1048576) { // 1MB
+                return { isValid: false, errorMessage: "Image must be ≤1MB" };
+            }
+            return { isValid: true };
+        }
+
+        // Live Validation
+        function addLiveValidation(field, errorElement, validateFn, errorMessage) {
+            ["input", "change", "blur"].forEach(event => {
+                field.addEventListener(event, () => {
+                    validateField(field, errorElement, validateFn, errorMessage);
+                });
+            });
+        }
+
+        // Initialize Live Validations
+        addLiveValidation(fields.fullName, errors.fullName, validateFullName, "Full name is required");
+        addLiveValidation(fields.email, errors.email, validateEmail, "Enter a valid Gmail address");
+        addLiveValidation(fields.clubID, errors.clubID, validateClubID, "Club ID is required");
+        addLiveValidation(fields.contactNumber, errors.contactNumber, validateContactNumber, "Enter a valid 10-digit Indian mobile number");
+        addLiveValidation(fields.preferredRole, errors.preferredRole, validatePreferredRole, "Please select a role");
+        addLiveValidation(fields.university, errors.university, validateUniversity, "University is required");
+        addLiveValidation(fields.department, errors.department, validateDepartment, "Please select a department");
+        addLiveValidation(fields.roleJustification, errors.roleJustification, validateRoleJustification, "Justification is required");
+        addLiveValidation(fields.profileImage, errors.profileImage, validateProfileImage, "Select a valid image (JPG, PNG, GIF, ≤1MB)");
+
+        // Update File Name Display
+        imageInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = file.name.length > 20 ? file.name.substring(0, 20) + "..." : file.name;
+            } else {
+                fileNameDisplay.textContent = "No file chosen";
+            }
+            validateField(fields.profileImage, errors.profileImage, validateProfileImage, "Select a valid image (JPG, PNG, GIF, ≤1MB)");
+        });
+
+        // Form Submission Validation
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const validations = [
+                validateField(fields.fullName, errors.fullName, validateFullName, "Full name is required"),
+                validateField(fields.email, errors.email, validateEmail, "Enter a valid Gmail address"),
+                validateField(fields.clubID, errors.clubID, validateClubID, "Club ID is required"),
+                validateField(fields.contactNumber, errors.contactNumber, validateContactNumber, "Enter a valid 10-digit Indian mobile number"),
+                validateField(fields.preferredRole, errors.preferredRole, validatePreferredRole, "Please select a role"),
+                validateField(fields.university, errors.university, validateUniversity, "University is required"),
+                validateField(fields.department, errors.department, validateDepartment, "Please select a department"),
+                validateField(fields.roleJustification, errors.roleJustification, validateRoleJustification, "Justification is required"),
+                validateField(fields.profileImage, errors.profileImage, validateProfileImage, "Select a valid image (JPG, PNG, GIF, ≤1MB)")
+            ];
+
+            if (validations.every(valid => valid)) {
+                const formData = new FormData(form);
+                formData.delete("universityName");
+
+                fetch("/Clubs/Register", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Registration successful!");
+                            form.reset();
+                            resetForm();
+                            modal.style.display = "none";
+                            Object.values(errors).forEach(error => error.textContent = "");
+                            Object.values(fields).forEach(field => field.classList.remove("invalid"));
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error("Error submitting form:", error));
+            }
+        });
+
+        // Open Registration Modal and Fetch University & Departments
         openModalBtn.addEventListener("click", function (event) {
             event.preventDefault();
-            modal.style.display = "block"; // Show modal
+            modal.style.display = "flex";
+            resetForm();
+            const clubId = openModalBtn.getAttribute("data-club-id");
+            fields.clubID.value = clubId;
 
-            const clubId = openModalBtn.getAttribute("data-club-id"); // Get Club ID
-            document.getElementById("clubID").value = clubId; // Store in hidden field
-
-            // Fetch University Name & Departments
             fetch(`/Clubs/GetUniversityAndDepartments?clubId=${clubId}`)
                 .then(response => response.json())
                 .then(data => {
-                    universityField.value = data.UniversityName || "N/A";
-
-                    departmentDropdown.innerHTML = '<option value="">Select Department</option>';
+                    fields.university.value = data.UniversityName || "N/A";
+                    fields.department.innerHTML = '<option value="">Select Department</option>';
                     data.Departments.forEach(dept => {
-                        let option = document.createElement("option");
+                        const option = document.createElement("option");
                         option.value = dept.Id;
                         option.textContent = dept.Name;
-                        departmentDropdown.appendChild(option);
+                        fields.department.appendChild(option);
                     });
+                    validateField(fields.clubID, errors.clubID, validateClubID, "Club ID is required");
+                    validateField(fields.university, errors.university, validateUniversity, "University is required");
                 })
                 .catch(error => console.error("Error fetching data:", error));
         });
 
-        // Close Modal
+        // Close Registration Modal
         closeBtn.addEventListener("click", function () {
             modal.style.display = "none";
+            form.reset();
+            resetForm();
+            Object.values(errors).forEach(error => error.textContent = "");
+            Object.values(fields).forEach(field => field.classList.remove("invalid"));
         });
 
+        // Close Modals on Outside Click
         window.addEventListener("click", function (event) {
             if (event.target === modal) {
                 modal.style.display = "none";
+                form.reset();
+                resetForm();
+                Object.values(errors).forEach(error => error.textContent = "");
+                Object.values(fields).forEach(field => field.classList.remove("invalid"));
             }
-        });
-
-        // Image Preview
-        imageInput.addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = "block";
-                };
-                reader.readAsDataURL(file);
-            } else {
-                alert("Please select a valid image file (JPG,JPEG, PNG, GIF).");
-                imageInput.value = "";
-                imagePreview.style.display = "none";
-            }
-        });
-
-        
-        document.querySelector("form").addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            var formData = new FormData(this);
-            formData.delete("universityName"); // Remove universityName from submission
-
-            console.log("DepartmentID before submission:", formData.get("departmentId"));
-
-            fetch(this.action, {
-                method: this.method,
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => console.log(data))
-                .catch(error => console.error("Error:", error));
-        });
-
-
-        //document.getElementById("form").addEventListener("submit", function (event) {
-        //    event.preventDefault();
-
-        //    let formData = new FormData(this);
-        //    formData.delete("universityName"); // Remove universityName from submission
-
-        //    fetch("/your-api-endpoint", {
-        //        method: "POST",
-        //        body: formData
-        //    }).then(response => response.json())
-        //        .then(data => console.log(data));
-        //});
-
-
-        // Handle Form Submission via AJAX
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const formData = new FormData(form);
-
-            fetch("/Clubs/Register", {
-                method: "POST",
-                body: formData,
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Registration successful!");
-                        form.reset(); // Reset the form
-                        imagePreview.style.display = "none"; // Hide image preview
-                        modal.style.display = "none";
-                    } else {
-                        alert("Error: " + data.message);
-                    }
-                })
-                .catch(error => console.error("Error submitting form:", error));
         });
     });
-
-
 </script>
-

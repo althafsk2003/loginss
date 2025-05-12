@@ -8,6 +8,7 @@ using WebApplication4.Models;
 using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using PagedList;
 
 namespace WebApplication4.Controllers
 {
@@ -20,46 +21,65 @@ namespace WebApplication4.Controllers
         public ActionResult Index()
         {
             if (!IsMentorLoggedIn())
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
-            int mentorID = GetMentorID();  // ✅ Fetch Mentor ID
-
-            // ✅ Debug: Check if Mentor ID is retrieved correctly
+            int mentorID = GetMentorID();
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Mentor LoginID: {mentorID}");
 
-            // Fetch mentor details
-            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role == "Mentor");
+            // 🔹 Fetch mentor info
+            var mentor = _db.Logins
+                            .FirstOrDefault(m => m.LoginID == mentorID && m.Role == "Mentor");
             if (mentor == null)
             {
                 TempData["ErrorMessage"] = "Mentor not found!";
                 return RedirectToAction("Login", "Admin");
             }
 
-            // Fetch university details
-            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == mentor.UniversityID);
-            if (university == null)
+            var user = _db.USERs.FirstOrDefault(u => u.Email == mentor.Email);
+            if (user == null)
             {
-                TempData["ErrorMessage"] = "University not assigned!";
+                TempData["ErrorMessage"] = "User profile not found!";
                 return RedirectToAction("Login", "Admin");
             }
 
-            // ✅ Debug: Check if university data is retrieved
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] University ID: {university.UniversityID}, Name: {university.UniversityNAME}");
+            // 🔹 University
+            var university = _db.UNIVERSITies
+                                .FirstOrDefault(u => u.UniversityID == mentor.UniversityID);
 
-            // Fetch notifications
+            // 🔹 Department
+            var department = _db.DEPARTMENTs
+                                .FirstOrDefault(d => d.DepartmentID == mentor.DepartmentID);
+
+            // 🔹 Notifications
             var notifications = _db.Notifications
-                                   .Where(n => n.LoginID == mentorID && n.IsRead == false && n.EndDate > DateTime.Now)
-                                   .ToList();
+                .Where(n => n.LoginID == mentorID &&
+                            (n.IsRead == false || n.IsRead == null) &&  // ✅ Fix nullable bool
+                            n.EndDate > DateTime.Now)
+                .ToList();
 
-            // ✅ Debug: Check if notifications are retrieved
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] Total Unread Notifications: {notifications.Count}");
 
-            // Pass data to the view
+            // 🔹 Clubs + Events under mentor
+            var clubs = _db.CLUBS
+                           .Include(c => c.EVENTS)
+                           .Where(c => c.MentorID == mentorID)
+                           .ToList();
+
+            int clubCount = clubs.Count;
+            int eventCount = clubs.Sum(c => c.EVENTS?.Count() ?? 0);
+
+            var clubNames = clubs.Select(c => c.ClubName).ToList();
+            var eventCounts = clubs.Select(c => c.EVENTS?.Count() ?? 0).ToList();
+
+            // ✅ Send to View
             ViewBag.Mentor = mentor;
             ViewBag.University = university;
+            ViewBag.Department = department;
             ViewBag.Notifications = notifications;
+            ViewBag.ClubsCount = clubCount;
+            ViewBag.EventsCount = eventCount;
+            ViewBag.ClubNames = clubNames;
+            ViewBag.EventCounts = eventCounts;
+            ViewBag.MentorFullName = $"{user.FirstName} {user.LastName}";
 
             return View();
         }
@@ -300,24 +320,51 @@ namespace WebApplication4.Controllers
         }
 
 
-        public ActionResult ViewClubStatus()
+        public ActionResult ViewClubStatus(int? page, string filter = "all")
         {
-            int loggedInMentorID = (int)Session["UserID"]; // Ensure mentor ID is stored in session
-            var clubs = _db.CLUBS
-                           .Include(c => c.DEPARTMENT.UNIVERSITY)
-                           .Where(c => c.MentorID == loggedInMentorID)
-                           .ToList();
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+
+            int loggedInMentorID = (int)Session["UserID"];
+            IQueryable<CLUB> clubsQuery = _db.CLUBS
+                                             .Include(c => c.DEPARTMENT.UNIVERSITY)
+                                             .Where(c => c.MentorID == loggedInMentorID);
+
+            // Apply filter based on the selected filter
+            if (filter == "pending")
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == 1);
+            }
+            else if (filter == "approved")
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == 2);
+            }
+            else if (filter == "rejected")
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == 3);
+            }
+
+            // Apply pagination and order by ClubName
+            var clubs = clubsQuery.OrderBy(c => c.ClubName).ToPagedList(pageNumber, pageSize);
 
             var notifications = _db.Notifications
                                    .Where(n => n.LoginID == loggedInMentorID)
                                    .ToList();
 
+            // Pass the current filter value to the view
+            ViewBag.Filter = filter;
             ViewBag.Notifications = notifications;
+
             return View(clubs);
         }
 
 
-           
+
+
+
+
+
+
         //[Authorize] // Ensures only logged-in users can access
         public ActionResult ViewClubRegistrations()
         {
@@ -363,10 +410,7 @@ namespace WebApplication4.Controllers
 
             return Json(registrations, JsonRequestBehavior.AllowGet);
         }
-
-
-
-      [HttpPost]
+        [HttpPost]
 
 
         public async Task<ActionResult> AssignRole(int registrationId, string role)
@@ -394,8 +438,8 @@ namespace WebApplication4.Controllers
                         PasswordHash = "clubadmin@123", // Default password
                         CreatedDate = DateTime.Now,
                         IsActive = true,
-                        UniversityID = registration.UniversityID,  // Ensure these values are correct
-                        DepartmentID = registration.DepartmentID,
+                        UniversityID = ViewBag.UniversityID,  // Ensure these values are correct
+                        DepartmentID = ViewBag.DepartmentID,
                         Role = "Club Admin"
                     };
 
@@ -433,7 +477,59 @@ namespace WebApplication4.Controllers
             return Json(new { success = false });
         }
 
-        
+
+
+        [HttpGet]
+        public ActionResult ChangePassword()
+        {
+            if (Session["UserEmail"] == null)
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin"); // Redirects to login if session is missing
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var userEmail = Session["Email"]?.ToString();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin");
+            }
+
+            var user = _db.Logins.FirstOrDefault(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(model);
+            }
+
+            // Check current password (assumes plain text for now)
+            if (user.PasswordHash != model.CurrentPassword)
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View(model);
+            }
+
+            // Update password
+            user.PasswordHash = model.NewPassword;
+            _db.SaveChanges();
+
+            TempData["Success"] = "Password changed successfully!";
+            return RedirectToAction("Index", "Mentor"); // ✅ Redirecting to Mentor Dashboard
+        }
+
+
 
 
 
@@ -445,7 +541,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Login", "Admin");
             }
 
-            string userEmail = Session["UserEmail"].ToString();           
+            string userEmail = Session["UserEmail"].ToString();
             var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
 
             if (mentorLogin == null)
@@ -629,6 +725,7 @@ namespace WebApplication4.Controllers
             TempData["SuccessMessage"] = $"Event '{ev.EventName}' rejected successfully! Notification sent to club admin.";
             return RedirectToAction("ViewEventRequests");
         }
+
 
     }
 }

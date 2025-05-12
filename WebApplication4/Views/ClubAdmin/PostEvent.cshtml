@@ -2,94 +2,354 @@
 
 @{
     ViewBag.Title = "Post Event to Website";
-    Layout = "~/Views/Shared/_ClubadminLayout.cshtml"; // Adjust if needed
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
 }
 
-<h2>Post Event</h2>
+<div class="container mt-3 form-container">
+    <div class="card shadow-lg p-4 event-card">
+        <h4 class="text-center mb-4">Post Event to Website</h4>
 
-@using (Html.BeginForm("PostEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.HiddenFor(m => m.EventID)
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventName)
-        @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", @readonly = "readonly" })
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventDescription)
-        @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control", rows = 4 })
-    </div>
-
-    <div class="form-group">
-        @Html.Label("Upload Event Poster (Image)")
-        <input type="file" name="EventPosterFile" class="form-control" />
-        @if (!string.IsNullOrEmpty(Model.EventPoster))
+        @if (!string.IsNullOrEmpty(ViewBag.Message))
         {
-            <div style="margin-top:10px;">
-                <img src="@Model.EventPoster" alt="Event Poster" style="max-height:200px;" />
+            <p style="color: green;">@ViewBag.Message</p>
+
+        }
+
+
+        @using (Html.BeginForm("PostEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data", id = "postEventForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.EventID)
+
+            <div class="row g-3">
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.EventName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control form-control-custom", @readonly = "readonly", id = "EventName" })
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.ClubName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control form-control-custom", id = "ClubName" })
+                </div>
+
+                <div class="col-md-12 form-group">
+                    @Html.LabelFor(m => m.EventDescription, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control form-control-custom", rows = 3, id = "EventDescription" })
+                    <div id="EventDescriptionError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.Label("Event Poster (Image)", new { @class = "form-label" })
+                    <input type="file" name="EventPosterFile" id="EventPosterFile" class="form-control form-control-custom" accept="image/png,image/jpeg,image/jpg" />
+                    <div id="EventPosterError" class="error-message"></div>
+                    @if (!string.IsNullOrEmpty(Model.EventPoster))
+                    {
+                        <div class="image-preview">
+                            <img src="@Model.EventPoster" alt="Event Poster" />
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.Label("Event Banner (Image)", new { @class = "form-label" })
+                    <input type="file" name="EventBannerFile" id="EventBannerFile" class="form-control form-control-custom" accept="image/png,image/jpeg,image/jpg" />
+                    <div id="EventBannerError" class="error-message"></div>
+                    @if (!string.IsNullOrEmpty(Model.EventBanner))
+                    {
+                        <div class="image-preview">
+                            <img src="@Model.EventBanner" alt="Event Banner" />
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.EventStartDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom", id = "EventStartDateAndTime" })
+                    <div id="EventStartDateAndTimeError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.EventEndDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom", id = "EventEndDateAndTime" })
+                    <div id="EventEndDateAndTimeError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.Venue, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control form-control-custom", id = "Venue" })
+                    <div id="VenueError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.RegistrationURL, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control form-control-custom", id = "RegistrationURL" })
+                    <div id="RegistrationURLError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-12 form-group">
+                    @Html.LabelFor(m => m.OrganizerName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control form-control-custom", id = "OrganizerName" })
+                    <div id="OrganizerNameError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-12 text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-submit">Submit Event</button>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                @ViewBag.Message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         }
     </div>
+</div>
 
-    <div class="form-group">
-        @Html.Label("Upload Event Banner (Image)")
-        <input type="file" name="EventBannerFile" class="form-control" />
-        @if (!string.IsNullOrEmpty(Model.EventBanner))
-        {
-            <div style="margin-top:10px;">
-                <img src="@Model.EventBanner" alt="Event Banner" style="max-height:200px;" />
-            </div>
+@section Styles {
+    <style>
+        /* Advanced Color Palette */
+        :root {
+            --primary-gradient-start: #4a00e0;
+            --primary-gradient-end: #8e2de2;
+            --secondary-color: #f7f9fc;
+            --text-primary: #2d2d2d;
+            --text-secondary: #6c757d;
+            --accent-color: #ff6f61;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --error-color: #dc3545;
         }
-    </div>
 
+        /* Global Styles */
+        html, body {
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            background: linear-gradient(180deg, var(--secondary-color), #ffffff);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventStartDateAndTime)
-        @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
-    </div>
+        /* Form Container */
+        .form-container {
+            max-width: 100%;
+            height: auto;
+            padding: 0 10px;
+            display: flex;
+            flex-direction: column;
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventEndDateAndTime)
-        @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
-    </div>
+        /* Event Card */
+        .event-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #ffffff, var(--secondary-color));
+            box-shadow: 0 6px 18px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow-y: auto;
+            max-height: calc(100vh - 80px);
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.Venue)
-        @Html.TextBoxFor(m => m.Venue, new { @class = "form-control" })
-    </div>
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 24px var(--shadow-color);
+        }
 
-    <div class="form-group">
-        @Html.Label("Registration Link")
-        @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control" })
-    </div>
+        /* Heading */
+        .event-card h4 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-gradient-start);
+            position: relative;
+            letter-spacing: 0.5px;
+        }
 
-    @*
-                <div class="form-group">
-            <label for="registrationLink">Google Form Link</label>
-            <input type="url" class="form-control" id="registrationLink" name="registrationFormLink" placeholder="Paste the Google Form link here" />
-        </div>
+        .event-card h4::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            border-radius: 2px;
+        }
 
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
 
-            <div class="form-group">
-                @Html.Label("QR Content (text that will be encoded)")
-                @Html.TextBoxFor(m => m.QRContentText, new { @class = "form-control" })
-            </div>*@
+        .form-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            display: block;
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.OrganizerName)
-        @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control" })
-    </div>
+        .form-control-custom {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 0.65rem;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.ClubName)
-        @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control" })
-    </div>
+        .form-control-custom:focus {
+            border-color: var(--primary-gradient-start);
+            box-shadow: 0 0 8px rgba(74, 0, 224, 0.2);
+            outline: none;
+        }
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+        .form-control-custom[readonly] {
+            background: #f1f3f5;
+            cursor: not-allowed;
+            color: var(--text-secondary);
+        }
+
+        /* Image Preview */
+        .image-preview {
+            margin-top: 0.5rem;
+        }
+
+        .image-preview img {
+            max-height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        .is-invalid {
+            border-color: var(--error-color) !important;
+            box-shadow: 0 0 6px rgba(220, 53, 69, 0.2) !important;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(74, 0, 224, 0.3);
+            background: linear-gradient(135deg, #3a00b8, #751cb8);
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .btn-submit:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 8px;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .btn-close {
+            filter: opacity(0.6);
+            transition: filter 0.3s ease;
+        }
+
+        .btn-close:hover {
+            filter: opacity(1);
+        }
+
+        /* Responsive Adjustments */
+        @@media (max-width: 768px) {
+            html, body {
+                padding: 8px;
+            }
+
+            .form-container {
+                padding: 5px;
+            }
+
+            .event-card {
+                padding: 15px;
+                max-height: calc(100vh - 60px);
+            }
+
+            .event-card h4 {
+                font-size: 1.5rem;
+            }
+
+            .event-card h4::after {
+                width: 50px;
+            }
+
+            .form-group {
+                margin-bottom: 0.6rem;
+            }
+
+            .form-control-custom {
+                padding: 0.55rem;
+                font-size: 0.85rem;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+            }
+
+            .btn-submit {
+                padding: 0.65rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .image-preview img {
+                max-height: 60px;
+            }
+
+            .error-message {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
 }
 
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success mt-3">@ViewBag.Message</div>
-}

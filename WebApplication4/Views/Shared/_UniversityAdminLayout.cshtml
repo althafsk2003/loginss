@@ -1,68 +1,144 @@
-﻿@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewBag.Title - University Administrator Dashboard</title>
+    <title>@ViewBag.Title - University Admin Dashboard</title>
 
-    <!-- Bootstrap CSS -->
+    <!-- Bootstrap & FontAwesome -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+    <!-- Render Styles section from views -->
+    @RenderSection("Styles", required: false)
+
     <style>
-        .sidebar {
-            width: 250px;
-            height: 100vh;
+        /* Header Styling */
+        .header {
             position: fixed;
-            left: 0;
             top: 0;
+            left: 0;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hamburger {
+            font-size: 24px;
+            cursor: pointer;
+            display: block;
+        }
+
+        /* Sidebar Popup Styling */
+        .sidebar-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            z-index: 2000;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .sidebar {
+            width: 350px;
+            height: 100%;
             background: #343a40;
             padding: 20px;
             overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%); /* Hidden by default */
         }
 
-            .sidebar a {
-                display: block;
-                color: white;
-                padding: 10px;
-                text-decoration: none;
-                border-radius: 5px;
-                transition: 0.3s;
+        .sidebar-popup.active {
+            display: flex;
+        }
+
+            .sidebar-popup.active .sidebar {
+                transform: translateX(0); /* Slide in when active */
             }
 
-                .sidebar a:hover {
-                    background: #495057;
-                }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
 
-            .sidebar .collapse {
-                padding-left: 15px;
+            .sidebar a:hover {
+                background: #495057;
             }
 
-            .sidebar .nested-collapse {
-                padding-left: 30px;
-            }
+        .sidebar .collapse {
+            padding-left: 15px;
+        }
+
+        .sidebar .nested-collapse {
+            padding-left: 30px;
+        }
+
+        .close-btn {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: right;
+            padding: 10px;
+        }
 
         .content {
-            margin-left: 260px;
             padding: 20px;
-            width: calc(100% - 260px);
+            width: 100%;
+            margin-top: 70px;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Carousel Styling for Clubs */
+        .carousel-inner {
+            max-height: 1000px;
+        }
+
+        .carousel-item img {
+            object-fit: cover;
+            height: 300px;
+            width: 300px;
+        }
+
+        .sidebar a.quick-stats {
+            padding-left: 8px; /* Same as other links */
+            margin-top: 0; /* Ensure no extra margin */
+            display: block;
         }
     </style>
 </head>
 <body>
 
     <!-- Header -->
-    <div class="header bg-primary text-white text-center py-3">
-        <h2>University Administrator Dashboard</h2>
+    <div class="header bg-primary text-white py-3">
+        <i class="fas fa-bars hamburger"></i>
+        <h2>University Admin Dashboard</h2>
+        <div style="width: 24px;"></div> <!-- Placeholder for symmetry -->
     </div>
 
-    <div class="d-flex">
-        <!-- Sidebar -->
+    <!-- Sidebar Popup -->
+    <div class="sidebar-popup">
         <div class="sidebar bg-dark text-white">
-            <!-- Dashboard -->
+            <div class="close-btn"><i class="fas fa-times"></i></div>
             <a href="@Url.Action("Index", "UniversityAdmin")"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
             <!-- Schools Section -->
@@ -73,7 +149,6 @@
                 <a href="@Url.Action("AddDepartment", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-plus"></i> Add School</a>
                 <a href="@Url.Action("ManageDepartments", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-cogs"></i> Manage Schools</a>
                 <a href="@Url.Action("ViewSchools", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-eye"></i> View Schools</a>
-                <a href="@Url.Action("StatisticsSchools", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-chart-bar"></i> School Statistics</a>
             </div>
 
             <!-- Mentors Section -->
@@ -84,33 +159,74 @@
                 <a href="@Url.Action("AddMentor", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-user-plus"></i> Add Mentor</a>
                 <a href="@Url.Action("ManageMentors", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-users-cog"></i> Manage Mentors</a>
                 <a href="@Url.Action("ViewMentors", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-eye"></i> View Mentors</a>
-                <a href="@Url.Action("StatisticsMentors", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-chart-bar"></i> Mentor Statistics</a>
             </div>
 
-            <!-- Students Section -->
-            <a href="#studentsSubmenu" data-toggle="collapse">
-                <i class="fas fa-user-graduate"></i> Students <i class="fas fa-caret-down float-right"></i>
-            </a>
-            <div id="studentsSubmenu" class="collapse">
-                <a href="@Url.Action("AddStudent", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-user-plus"></i> Add Student</a>
-                <a href="@Url.Action("ManageStudents", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-users"></i> Manage Students</a>
-                <a href="@Url.Action("ViewStudents", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-eye"></i> View Students</a>
-                <a href="@Url.Action("StatisticsStudents", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-chart-bar"></i> Student Statistics</a>
-            </div>
+            <!-- Settings -->
+            <a href="@Url.Action("ChangePassword", "UniversityAdmin")"><i class="fas fa-key"></i> Change Password</a>
 
             <!-- Logout -->
-            <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger mt-3"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </div>
-
-        <!-- Main Content -->
-        <div class="content">
-            @RenderBody()
+            <a href="@Url.Action("Login", "Admin")" class="btn btn-danger mt-3"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
-    <!-- Bootstrap JS (for sidebar collapse) -->
+    <!-- Main Content -->
+    <div class="content">
+        @RenderBody()
+    </div>
+
+    <!-- Bootstrap & jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Toggle sidebar popup on hamburger click
+            $('.hamburger').click(function () {
+                $('.sidebar-popup').addClass('active');
+            });
+
+            // Close sidebar popup on close button click
+            $('.close-btn').click(function () {
+                $('.sidebar-popup').removeClass('active');
+            });
+
+            // Close sidebar popup when clicking outside
+            $('.sidebar-popup').click(function (e) {
+                if ($(e.target).hasClass('sidebar-popup')) {
+                    $('.sidebar-popup').removeClass('active');
+                }
+            });
+
+            // Load Universities dynamically when View All Universities is clicked under Clubs section
+            $(document).on("click", "#viewMoreSubmenu a", function () {
+                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+                $.get("@Url.Action("ViewAllUniversities", "Admin")", function (data) {
+                    $("#content-area").html(data);
+                });
+            });
+
+            // Load Departments dynamically when a University is clicked
+            $(document).on("click", ".university-item", function () {
+                var universityId = $(this).data("id");
+                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+                $.get("@Url.Action("GetDepartments", "Admin")", { universityId: universityId }, function (data) {
+                    $("#content-area").html(data);
+                });
+            });
+
+            // Load Clubs dynamically when a Department is clicked
+            $(document).on("click", ".department-item", function () {
+                var departmentId = $(this).data("id");
+                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
+                $.get("@Url.Action("GetClubs", "Admin")", { departmentId: departmentId }, function (data) {
+                    $("#content-area").html(data);
+                });
+            });
+        });
+    </script>
+
+    <!-- Render custom scripts from views -->
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>

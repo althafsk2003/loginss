@@ -12,26 +12,120 @@
     </div>
 }
 
-<h2 class="text-center mb-4">Add New School</h2>
+<h2 class="text-center mb-5">Add New School</h2>
 
-@using (Html.BeginForm("AddDepartment", "UniversityAdmin", FormMethod.Post))
+@using (Html.BeginForm("AddDepartment", "UniversityAdmin", FormMethod.Post, new { @id = "addSchoolForm", @novalidate = "novalidate" }))
 {
     <div class="form-container">
+
         <input type="hidden" name="Universityid" value="@ViewBag.UniversityID" />
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.DepartmentName, new { @class = "form-label" })
-            @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", required = "required", placeholder = "Enter School Name" })
-        </div>
+        <!-- Card Start -->
+        <div class="card mx-auto" style="max-width: 600px;">
+            <div class="card-body">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DepartmentName, new { @class = "form-label" })
+                    @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", required = "required", placeholder = "Enter School Name", pattern = "[A-Za-z ]{2,50}", title = "Department name must be 2-50 characters long and contain only letters and spaces" })
+                    <div class="invalid-feedback">Please enter a valid department name (2-50 characters, letters and spaces only).</div>
+                </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.HOD, new { @class = "form-label" })
-            @Html.TextBoxFor(model => model.HOD, new { @class = "form-control", required = "required", placeholder = "Enter Head of Department" })
-        </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.HOD, new { @class = "form-label" })
+                    @Html.TextBoxFor(model => model.HOD, new { @class = "form-control", required = "required", placeholder = "Enter Head of Department", pattern = "[A-Za-z ]{2,50}", title = "HOD name must be 2-50 characters long and contain only letters and spaces" })
+                    <div class="invalid-feedback">Please enter a valid HOD name (2-50 characters, letters and spaces only).</div>
+                </div>
 
-        <div class="form-group text-center">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Add School</button>
+                <div class="form-group text-center mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Add School
+                    </button>
+                </div>
+            </div>
         </div>
+        <!-- Card End -->
+
     </div>
 }
 
+<style>
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    .invalid {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 5px rgba(220, 53, 69, 0.5) !important;
+    }
+
+    .valid {
+        border-color: #28a745 !important;
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.5) !important;
+    }
+
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+
+    .show-feedback .invalid-feedback {
+        display: block;
+    }
+</style>
+
+<script>
+    const form = document.getElementById('addSchoolForm');
+    const inputs = form.querySelectorAll('.form-control');
+
+    // Function to validate a single input
+    function validateInput(input) {
+        if (input.value.trim() === '' && input.hasAttribute('required')) {
+            input.classList.add('invalid');
+            input.classList.remove('valid');
+            input.parentElement.classList.add('show-feedback');
+        } else if (!input.checkValidity()) {
+            input.classList.add('invalid');
+            input.classList.remove('valid');
+            input.parentElement.classList.add('show-feedback');
+        } else {
+            input.classList.add('valid');
+            input.classList.remove('invalid');
+            input.parentElement.classList.remove('show-feedback');
+        }
+    }
+
+    // Validate on blur (when user leaves the field)
+    inputs.forEach(input => {
+        input.addEventListener('blur', function () {
+            if (this.value.trim() !== '' || this.classList.contains('touched')) {
+                validateInput(this);
+            }
+            this.classList.add('touched');
+        });
+
+        // Real-time validation while typing, but only after first interaction
+        input.addEventListener('input', function () {
+            if (this.classList.contains('touched')) {
+                validateInput(this);
+            }
+        });
+    });
+
+    // Validate all fields on form submission
+    form.addEventListener('submit', function (event) {
+        let isValid = true;
+        inputs.forEach(input => {
+            validateInput(input);
+            if (!input.checkValidity()) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
+</script>

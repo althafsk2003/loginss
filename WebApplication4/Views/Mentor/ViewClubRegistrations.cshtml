@@ -1,164 +1,487 @@
 ﻿@model IEnumerable<WebApplication4.Models.ClubRegistration>
 
-
 @{
     Layout = "~/Views/Shared/_MentorLayout.cshtml";
     ViewBag.Title = "Club Registrations";
 }
 
-<h2>Club Registrations</h2>
+<div class="registrations-container">
+    <h2 class="page-title">Club Registrations</h2>
 
-<!-- Dropdown for selecting a club -->
-<label for="clubDropdown">Select a Club:</label>
-<select id="clubDropdown" class="form-control">
-    <option value="">-- Select Club --</option>
-    @foreach (var club in ViewBag.Clubs)
-    {
-        <option value="@club.Value">@club.Text</option>
-    }
-</select>
+    <!-- Dropdown for selecting a club -->
+    <div class="form-group">
+        <label for="clubDropdown" class="form-label">Select a Club:</label>
+        <select id="clubDropdown" class="form-control custom-select">
+            <option value="">-- Select Club --</option>
+            @foreach (var club in ViewBag.Clubs)
+            {
+                <option value="@club.Value">@club.Text</option>
+            }
+        </select>
+    </div>
+</div>
 
-<!-- Table to display registrations -->
-<table class="table table-bordered mt-3" id="registrationsTable">
-    <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Contact Number</th>
-            <th>Preferred Role</th>
-            <th>Role Justification</th>
-            <th>Assigned Role</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Data will be dynamically loaded here -->
-    </tbody>
-</table>
+<!-- Modal for displaying registrations -->
+<div class="modal fade" id="registrationsModal" tabindex="-1" aria-labelledby="registrationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registrationsModalLabel">Club Registrations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered custom-table" id="registrationsTable">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="width: 15%;">Full Name</th>
+                                <th style="width: 15%;">Email</th>
+                                <th style="width: 10%;">Contact Number</th>
+                                <th style="width: 10%;">Preferred Role</th>
+                                <th style="width: 25%;">Role Justification</th>
+                                <th style="width: 10%;">Assigned Role</th>
+                                <th style="width: 20%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+@section Styles {
+    <style>
+        .registrations-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
 
-     $(document).ready(function () {
-    // When a club is selected, fetch its registrations
-    $("#clubDropdown").change(function () {
-        var clubId = $(this).val();
-        if (clubId) {
-            $.ajax({
-                url: '@Url.Action("GetClubRegistrations", "Mentor")',
-                type: "GET",
-                data: { clubId: clubId },
-                success: function (data) {
-                    var tableBody = $("#registrationsTable tbody");
-                    tableBody.empty(); // Clear previous data
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
 
-                    if (data.length === 0) {
-                        tableBody.append("<tr><td colspan='7' class='text-center'>No registrations found.</td></tr>");
-                    } else {
-                        $.each(data, function (index, reg) {
-                            var preferredRole = reg.PreferredRole || "Not Specified";
-                            var assignedRole = reg.AssignedRole || "Not Assigned";
-                            var justification = reg.RoleJustification || "No justification provided";
-                            var preferredRoleBtnText = "Make as " + preferredRole;
+        .form-group {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
 
-                            // Determine button states
-                            var disableAssign = "";
-                            var disableLeave = "";
+        .form-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
 
-                            if (assignedRole === "Not Assigned") {
-                                // If "Not Assigned", both buttons should be enabled
-                                disableAssign = "";
-                                disableLeave = "";
-                            } else if (assignedRole === preferredRole) {
-                                // If assigned role matches preferred role, disable assign button
-                                disableAssign = "disabled";
-                                disableLeave = "";
+        .custom-select {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 5px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+        }
+
+            .custom-select:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+                outline: none;
+            }
+
+        /* Modal Styling */
+        .modal-dialog.modal-xl {
+            max-width: 98%;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1rem;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow-x: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+            .table-responsive::-webkit-scrollbar {
+                height: 8px;
+            }
+
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: #007bff;
+                border-radius: 4px;
+            }
+
+            .table-responsive::-webkit-scrollbar-track {
+                background: #f1f1f1;
+            }
+
+        .custom-table {
+            margin-bottom: 0;
+            background: #fff;
+            width: 100%;
+            table-layout: fixed;
+            min-width: 900px;
+        }
+
+        .thead-dark {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+        }
+
+            .thead-dark th {
+                font-weight: 600;
+                padding: 12px;
+                text-align: center;
+            }
+
+        .custom-table tbody tr {
+            min-height: 60px;
+            transition: background-color 0.3s ease;
+        }
+
+            .custom-table tbody tr:nth-child(even) {
+                background: #f8f9fa;
+            }
+
+            .custom-table tbody tr:hover {
+                background: #e9ecef;
+            }
+
+        .custom-table td {
+            vertical-align: middle;
+            padding: 12px;
+            font-size: 0.95rem;
+            color: #333;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+            .custom-table td:nth-child(5) {
+                text-align: left;
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                cursor: pointer;
+            }
+
+            .custom-table td:nth-child(7) {
+                white-space: normal;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 80px;
+            }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            max-width: 200px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border: none;
+        }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #218838, #1c7430);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+        }
+
+            .btn-danger:hover {
+                background: linear-gradient(135deg, #c82333, #b21f2d);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            border: none;
+        }
+
+            .btn-secondary:hover {
+                background: linear-gradient(135deg, #5a6268, #545b62);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-close {
+            z-index: 1050;
+            opacity: 1;
+        }
+
+            .btn-close:hover {
+                opacity: 0.75;
+            }
+
+        .text-center {
+            font-style: italic;
+            color: #666;
+        }
+
+        .tooltip-inner {
+            max-width: 300px;
+            background: #333;
+            color: white;
+            text-align: left;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        @@media (max-width: 768px) {
+            .registrations-container {
+                padding: 10px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .form-group {
+                max-width: 100%;
+            }
+
+            .modal-dialog {
+                margin: 1rem;
+            }
+
+            .custom-table td, .custom-table th {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+
+                .custom-table td:nth-child(5) {
+                    max-width: 120px;
+                }
+
+                .custom-table td:nth-child(7) {
+                    flex-direction: column;
+                    gap: 6px;
+                    min-height: 100px;
+                }
+
+            .btn-sm {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+                max-width: 180px;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("Document ready: ClubRegistrations view loaded");
+
+            // Verify Bootstrap modal is available
+            if (typeof $.fn.modal === 'undefined') {
+                console.error("Bootstrap modal is not available. Ensure Bootstrap JS is loaded after jQuery.");
+                alert("Error: Bootstrap JavaScript is not loaded properly.");
+                return;
+            }
+
+            // Initialize tooltips for Role Justification
+            $('body').tooltip({
+                selector: '.custom-table td:nth-child(5)',
+                trigger: 'hover',
+                placement: 'top',
+                html: true,
+                title: function () {
+                    return $(this).text();
+                }
+            });
+
+            // When a club is selected, fetch its registrations and show modal
+            $("#clubDropdown").change(function () {
+                var clubId = $(this).val();
+                console.log("Club selected: " + clubId);
+
+                if (clubId) {
+                    $.ajax({
+                        url: '@Url.Action("GetClubRegistrations", "Mentor")',
+                        type: 'GET',
+                        data: { clubId: clubId },
+                        success: function (data) {
+                            console.log("AJAX success: Data received", data);
+
+                            var tableBody = $("#registrationsTable tbody");
+                            tableBody.empty();
+
+                            if (data.length === 0) {
+                                tableBody.append("<tr><td colspan='7' class='text-center'>No registrations found.</td></tr>");
                             } else {
-                                // If assigned role does not match preferred role, disable leave button
-                                disableAssign = "";
-                                disableLeave = "disabled";
+                                $.each(data, function (index, reg) {
+                                    var preferredRole = reg.PreferredRole || "Not Specified";
+                                    var assignedRole = reg.AssignedRole || "Not Assigned";
+                                    var justification = reg.RoleJustification || "No justification provided";
+                                    var preferredRoleBtnText = "Make as " + preferredRole;
+
+                                    var disableAssign = assignedRole !== "Not Assigned" || preferredRole === "Not Specified" ? "disabled" : "";
+                                    var disableLeave = "";
+
+                                    var row = "<tr>" +
+                                        "<td>" + reg.FullName + "</td>" +
+                                        "<td>" + reg.Email + "</td>" +
+                                        "<td>" + reg.ContactNumber + "</td>" +
+                                        "<td>" + preferredRole + "</td>" +
+                                        "<td>" + justification + "</td>" +
+                                        "<td id='assignedRole_" + reg.RegistrationID + "'>" + assignedRole + "</td>" +
+                                        "<td>" +
+                                        "<button class='btn btn-success btn-sm assignPreferredRoleBtn' data-id='" + reg.RegistrationID + "' data-role='" + preferredRole + "' " + disableAssign + ">" + preferredRoleBtnText + "</button>" +
+                                        "<button class='btn btn-danger btn-sm leaveClubBtn' data-id='" + reg.RegistrationID + "' " + disableLeave + ">Leave as Club Member</button>" +
+                                        "</td>" +
+                                        "</tr>";
+                                    tableBody.append(row);
+                                });
                             }
 
-                            var row = "<tr>" +
-                                "<td>" + reg.FullName + "</td>" +
-                                "<td>" + reg.Email + "</td>" +
-                                "<td>" + reg.ContactNumber + "</td>" +
-                                "<td>" + preferredRole + "</td>" +
-                                "<td>" + justification + "</td>" +
-                                "<td id='assignedRole_" + reg.RegistrationID + "'>" + assignedRole + "</td>" +
-                                "<td>" +
-                                "<button class='btn btn-success btn-sm assignPreferredRoleBtn' data-id='" + reg.RegistrationID + "' data-role='" + preferredRole + "' " + disableAssign + ">" + preferredRoleBtnText + "</button> " +
-                                "<button class='btn btn-danger btn-sm leaveClubBtn' data-id='" + reg.RegistrationID + "' " + disableLeave + ">Leave as Club Member</button>" +
-                                "</td>" +
-                                "</tr>";
-                            tableBody.append(row);
-                        });
-                    }
-                },
-                error: function () {
-                    alert("Error loading registrations.");
-                }
-            });
-        } else {
-            $("#registrationsTable tbody").empty(); // Clear table when no club is selected
-        }
-    });
-
-    // Assign Preferred Role Button Click Event
-    $(document).on("click", ".assignPreferredRoleBtn", function () {
-        var regId = $(this).data("id");
-        var preferredRole = $(this).data("role");
-
-        if (preferredRole !== "Not Specified") {
-            $.ajax({
-                url: '@Url.Action("AssignRole", "Mentor")',
-                type: "POST",
-                data: { registrationId: regId, role: preferredRole },
-                success: function () {
-                    $("#assignedRole_" + regId).text(preferredRole);
-                    $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", true); // Disable assign button
-                    $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", false); // Enable leave button
-                },
-                error: function () {
-                    alert("Error assigning preferred role.");
-                }
-            });
-        } else {
-            alert("No preferred role specified.");
-        }
-    });
-
-    // Leave as Club Member Button Click Event
-   $(document).on("click", ".leaveClubBtn", function () {
-    var regId = $(this).data("id");
-    if (confirm("Are you sure you want to leave as a club member?")) {
-        $.ajax({
-            url: '@Url.Action("LeaveClub", "Mentor")',
-            type: "POST",
-            data: { registrationId: regId },
-            success: function (response) {
-                if (response.success) {
-                    // ✅ Update assigned role in the table
-                    $("#assignedRole_" + regId).text("Club Member");
-
-                    // ✅ Disable "Leave Club" button since the action is completed
-                    $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", true);
-
-                    // ✅ Enable "Assign Preferred Role" button
-                    $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", false);
+                            console.log("Attempting to show modal");
+                            try {
+                                $('#registrationsModal').modal('show');
+                            } catch (e) {
+                                console.error("Error showing modal: ", e);
+                                alert("Error displaying the modal. Please check the console for details.");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error: ", { status: status, error: error, xhr: xhr });
+                            alert("Error loading registrations: " + error);
+                        }
+                    });
                 } else {
-                    alert("Error leaving the club.");
+                    console.log("No club selected, modal not shown");
                 }
-            },
-            error: function () {
-                alert("Error processing request.");
-            }
+            });
+
+            // Debug close button clicks
+            $(document).on("click", ".btn-close, .btn-secondary[data-bs-dismiss='modal']", function () {
+                console.log("Close button clicked, attempting to hide modal");
+                try {
+                    $('#registrationsModal').modal('hide');
+                } catch (e) {
+                    console.error("Error hiding modal: ", e);
+                }
+            });
+
+            // Assign Preferred Role Button Click Event
+            $(document).on("click", ".assignPreferredRoleBtn", function () {
+                var regId = $(this).data("id");
+                var preferredRole = $(this).data("role");
+                console.log("Assign role clicked: RegistrationID=" + regId + ", Role=" + preferredRole);
+
+                if (preferredRole !== "Not Specified") {
+                    $.ajax({
+                        url: '@Url.Action("AssignRole", "Mentor")',
+                        type: "POST",
+                        data: { registrationId: regId, role: preferredRole },
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                        },
+                        success: function (response) {
+                            console.log("Role assigned successfully", response);
+                            $("#assignedRole_" + regId).text(preferredRole);
+                            $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", true);
+                            $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", false);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Assign role error: ", { status: status, error: error, xhr: xhr });
+                            alert("Error assigning preferred role: " + error);
+                        }
+                    });
+                } else {
+                    alert("No preferred role specified.");
+                }
+            });
+
+            // Leave as Club Member Click Event
+            $(document).on("click", ".leaveClubBtn", function () {
+                var regId = $(this).data("id");
+                console.log("Leave club clicked: RegistrationID=" + regId);
+
+                if (confirm("Are you sure you want to leave as a club member?")) {
+                    $.ajax({
+                        url: '@Url.Action("LeaveClub", "Mentor")',
+                        type: "POST",
+                        data: { registrationId: regId },
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                console.log("Club left successfully", response);
+                                $("#assignedRole_" + regId).text("Not Assigned");
+                                $(".assignPreferredRoleBtn[data-id='" + regId + "']").prop("disabled", false);
+                                $(".leaveClubBtn[data-id='" + regId + "']").prop("disabled", false);
+                            } else {
+                                console.error("Leave club failed: ", response);
+                                alert("Error leaving the club: " + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Leave club error: ", { status: status, error: error, xhr: xhr });
+                            alert("Error processing request: " + error);
+                        }
+                    });
+                }
+            });
         });
-    }
-});
-
-});
-
-
-
-</script>
+    </script>
+}

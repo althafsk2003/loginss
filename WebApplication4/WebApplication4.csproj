@@ -229,6 +229,7 @@
     <Compile Include="Controllers\ClubAdminController.cs" />
     <Compile Include="Controllers\ClubsController.cs" />
     <Compile Include="Controllers\MentorController.cs" />
+    <Compile Include="Controllers\stuloginController.cs" />
     <Compile Include="Controllers\UniversityAdminController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -237,6 +238,7 @@
     <Compile Include="Models\ApprovalStatusTable.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ChangePasswordViewModel.cs" />
     <Compile Include="Models\CLUB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -452,6 +454,14 @@
     <Content Include="Views\ClubAdmin\getconEventDetails.cshtml" />
     <Content Include="Views\Clubs\EventHighlights.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
+    <Content Include="Views\Admin\GetDepartments.cshtml" />
+    <Content Include="Views\Admin\GetClubs.cshtml" />
+    <Content Include="Views\Admin\ChangePassword.cshtml" />
+    <Content Include="Views\UniversityAdmin\ChangePassword.cshtml" />
+    <Content Include="Views\Mentor\ChangePassword.cshtml" />
+    <Content Include="Views\ClubAdmin\ChangePassword.cshtml" />
+    <Content Include="Views\stulogin\Login.cshtml" />
+    <Content Include="Views\stulogin\Dashboard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

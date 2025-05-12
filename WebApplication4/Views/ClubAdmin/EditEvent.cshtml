@@ -2,93 +2,252 @@
 
 @{
     ViewBag.Title = "Edit the Event";
-    Layout = "~/Views/Shared/_ClubadminLayout.cshtml"; // Adjust if needed
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
 }
 
-<h2>Post Event</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
 
-@using (Html.BeginForm("EditEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    @Html.HiddenFor(m => m.EventID)
+        .container {
+            max-width: 1200px; /* Increased from 800px to 1200px */
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventName)
-        @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", @readonly = "readonly" })
-    </div>
+        h2 {
+            color: #2c3e50;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
 
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventDescription)
-        @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control", rows = 4 })
-    </div>
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: #e44d26;
+            margin: 10px auto;
+        }
 
-    <div class="form-group">
-        @Html.Label("Upload Event Poster (Image)")
-        <input type="file" name="EventPosterFile" class="form-control" />
-        @if (!string.IsNullOrEmpty(Model.EventPoster))
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-control:focus {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            padding: 10px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #e44d26;
+            box-shadow: 0 0 5px rgba(228, 77, 38, 0.3);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-control[readonly] {
+            background-color: #f1f1f1;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #e44d26, #ff7f50);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #ff7f50, #e44d26);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(228, 77, 38, 0.4);
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .event-image {
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: #f9f9f9;
+            transition: transform 0.3s ease;
+        }
+
+        .event-image:hover {
+            transform: scale(1.02);
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .container {
+                padding: 20px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-label {
+                font-size: 0.9rem;
+            }
+
+            .form-control {
+                font-size: 0.9rem;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+
+            .row > div {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Post Event</h2>
+
+        @if (ViewBag.Message != null)
         {
-            <div style="margin-top:10px;">
-                <img src="@Model.EventPoster" alt="Event Poster" style="max-height:200px;" />
+            <div class="alert alert-success">@ViewBag.Message</div>
+        }
+
+        @using (Html.BeginForm("EditEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.HiddenFor(m => m.EventID)
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.EventName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.ClubName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control" })
+                </div>
             </div>
+
+            <div class="row">
+                <div class="col-md-12 form-group">
+                    @Html.LabelFor(m => m.EventDescription, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control", rows = 4 })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    @Html.Label("Upload Event Poster (Image)", new { @class = "form-label" })
+                    <input type="file" name="EventPosterFile" class="form-control" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Model.EventPoster))
+                    {
+                        <div class="event-image">
+                            <img src="@Model.EventPoster" alt="Event Poster" style="max-height:200px; width:100%;" />
+                        </div>
+                    }
+                </div>
+                <div class="col-md-6 form-group">
+                    @Html.Label("Upload Event Banner (Image)", new { @class = "form-label" })
+                    <input type="file" name="EventBannerFile" class="form-control" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(Model.EventBanner))
+                    {
+                        <div class="event-image">
+                            <img src="@Model.EventBanner" alt="Event Banner" style="max-height:200px; width:100%;" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(m => m.EventStartDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
+                </div>
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(m => m.EventEndDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
+                </div>
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(m => m.Venue, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    @Html.Label("Registration Link", new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control", @placeholder = "Enter Google Form link" })
+                </div>
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.OrganizerName, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
         }
     </div>
 
-    <div class="form-group">
-        @Html.Label("Upload Event Banner (Image)")
-        <input type="file" name="EventBannerFile" class="form-control" />
-        @if (!string.IsNullOrEmpty(Model.EventBanner))
-        {
-            <div style="margin-top:10px;">
-                <img src="@Model.EventBanner" alt="Event Banner" style="max-height:200px;" />
-            </div>
-        }
-    </div>
-
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventStartDateAndTime)
-        @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.EventEndDateAndTime)
-        @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control" })
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.Venue)
-        @Html.TextBoxFor(m => m.Venue, new { @class = "form-control" })
-    </div>
-
-    @*<div class="form-group">
-            @Html.Label("Registration Link")
-            @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control" })
-        </div>
-
-        <div class="form-group">
-            @Html.Label("QR Content (text that will be encoded)")
-            @Html.TextBoxFor(m => m.QRContentText, new { @class = "form-control" })
-        </div>*@
-
-    <div class="form-group">
-        @Html.Label("Registration Link")
-        @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control", @placeholder = "Enter Google Form link" })
-    </div>
-
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.OrganizerName)
-        @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control" })
-    </div>
-
-    <div class="form-group">
-        @Html.LabelFor(m => m.ClubName)
-        @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control" })
-    </div>
-
-    <button type="submit" class="btn btn-primary">Submit</button>
-}
-
-@if (ViewBag.Message != null)
-{
-    <div class="alert alert-success mt-3">@ViewBag.Message</div>
-}
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

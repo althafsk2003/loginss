@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Student Login";
+}
+
+<h2>Student Login</h2>
+
+<form action="/stulogin/Login" method="post">
+    <label>Enrollment Number:</label>
+    <input type="text" name="enrollmentNumber" required placeholder="Enter your enrollment number" />
+
+    <label>Email:</label>
+    <input type="email" name="email" required placeholder="Enter your registered email" />
+
+    <button type="submit">Login</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <p style="color: red;">@ViewBag.Error</p>
+}

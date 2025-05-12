@@ -1,45 +1,257 @@
 ﻿@{
     Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
     ViewBag.Title = "University Administrator Dashboard";
+
+    var university = ViewBag.University;
+    var departments = ViewBag.Departments as List<WebApplication4.Models.DEPARTMENT>;
+    var mentors = ViewBag.Mentors as List<WebApplication4.Models.USER>;
+    var deptMentorCounts = new Dictionary<string, int>();
+
+    if (departments != null && mentors != null)
+    {
+        foreach (var dept in departments)
+        {
+            var count = mentors.Count(m => m.DepartmentID == dept.DepartmentID);
+            deptMentorCounts.Add(dept.DepartmentName, count);
+        }
+    }
 }
 
-<h2 class="text-center">Welcome, @Session["UniversityName"]</h2>
-<p class="text-center"><strong>Location:</strong> @Session["UniversityLocation"]</p>
+<style>
+    body {
+        background-color: #f5f7fb;
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
 
-<!-- ✅ Department List -->
-<h4 class="mt-4">Departments in @Session["UniversityName"]</h4>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Department Name</th>
-            <th>HOD</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var department in ViewBag.Departments)
-        {
-            <tr>
-                <td>@department.DepartmentName</td>
-                <td>@department.HOD</td>
-                <td>
-                    @if (department.IsActive == true)
-                    {
-                         <span class="badge badge-success">Active</span>
-                    }
-                    else
-                    {
-                        <span class="badge badge-danger">Deactivated</span>
-                    }
-                </td>
-            </tr>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px; /* Increased for more vertical spacing between header and content */
+        padding: 15px;
+        max-width: 1200px;
+        margin: 0 auto;
+        height: 90vh;
+        overflow: hidden;
+    }
+
+    .header-section {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 15px 0;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px; /* Increased to push content further down */
+    }
+
+    h2.text-center {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    p.text-center {
+        margin: 8px 0 0;
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .chart-section {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        overflow: hidden;
+    }
+
+        .chart-section h4 {
+            font-size: 1rem;
+            color: #333;
+            margin: 0 0 10px;
+            text-align: center;
         }
-    </tbody>
-</table>
 
-<!-- ✅ Actions -->
-<div class="text-center mt-3">
-    <a href="@Url.Action("AddDepartment", "UniversityAdmin")" class="btn btn-primary">Add School</a>
-    <a href="@Url.Action("ManageDepartments", "UniversityAdmin")" class="btn btn-secondary">Manage Schools</a>
+    .departments-section {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px; /* Reduced top padding since header margin increased */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        background-color: #fafafa;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background-color: #007bff;
+        border-radius: 6px 6px 0 0;
+        color: #ffffff;
+    }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .card-header small {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            color: #e6f0ff;
+        }
+
+        .card-header .badge {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background-color: #28a745;
+        }
+
+    .card-body {
+        padding: 8px 12px;
+    }
+
+        .card-body h6 {
+            font-size: 0.85rem;
+            color: #333;
+            margin: 0 0 5px;
+            font-weight: 500;
+        }
+
+        .card-body ul {
+            padding-left: 15px;
+            margin: 0;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        .card-body li {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+    .text-muted {
+        font-size: 0.8rem;
+        color: #888 !important;
+        font-style: italic;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="header-section">
+        <h2 class="text-center">Welcome,@(university?.UniversityNAME ?? "University Admin")</h2>
+        <p class="text-center">
+            <strong>Total Departments:</strong> @(departments?.Count ?? 0)
+            <strong>Total Mentors:</strong> @(mentors?.Count ?? 0)
+        </p>
+    </div>
+
+    <!-- 📊 Pie Chart for Mentors per Department -->
+    <div class="chart-section">
+        <h4>Mentor Distribution Across Departments</h4>
+        <canvas id="mentorChart" height="80"></canvas>
+    </div>
+
+    <!-- 🏫 Department Cards -->
+    <div class="departments-section">
+        @if (departments != null && departments.Any())
+        {
+            foreach (var department in departments)
+            {
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <div>
+                            <h5>@department.DepartmentName</h5>
+                            <small>HOD: @department.HOD</small>
+                        </div>
+                        <span class="badge @(department.IsActive ?? false ? "bg-success" : "bg-danger")">
+                            @(department.IsActive ?? false ? "Active" : "Deactivated")
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h6>Mentors:</h6>
+                        @{
+                            var deptMentors = mentors?.Where(m => m.DepartmentID == department.DepartmentID).ToList();
+                        }
+                        @if (deptMentors != null && deptMentors.Any())
+                        {
+                            <ul>
+                                @foreach (var mentor in deptMentors.Take(5))
+                                {
+                                    <li>@mentor.FirstName @mentor.LastName</li>
+                                }
+                                @if (deptMentors.Count > 5)
+                                {
+                                    <li class="text-muted">... and @(deptMentors.Count - 5) more</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No mentors found for this department.</p>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted">No departments found.</p>
+        }
+    </div>
 </div>
 
+<!-- 🧠 Chart.js Script -->
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('mentorChart').getContext('2d');
+        const mentorChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: @Html.Raw(Json.Encode(deptMentorCounts.Keys)),
+                datasets: [{
+                    label: 'Mentors per Department',
+                    data: @Html.Raw(Json.Encode(deptMentorCounts.Values)),
+                    backgroundColor: [
+                        '#007bff', '#28a745', '#ffc107', '#dc3545',
+                        '#6f42c1', '#17a2b8', '#fd7e14', '#20c997'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 9
+                            },
+                            padding: 3
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

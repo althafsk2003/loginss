@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "Student Dashboard";
+}
+
+<h2>Welcome, @ViewBag.EnrollmentId</h2>
+<p>Email: @ViewBag.Email</p>
+
+@if (ViewBag.Events != null && ((List<object>)ViewBag.Events).Count > 0)
+{
+    <h3>Your Registered Events:</h3>
+    <ul>
+        @foreach (var eventItem in (List<dynamic>)ViewBag.Events)
+        {
+            <li>@eventItem.EventName - Registered on: @eventItem.RegisteredAt?.ToString("MMMM d, yyyy")</li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have not registered for any events.</p>
+}

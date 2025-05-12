@@ -11,7 +11,7 @@
         font-family: 'Arial', sans-serif;
         color: #333;
         line-height: 1.6;
-        background: linear-gradient(135deg, #f9f9f9, #eef2f7); /* Gradient background */
+        background: linear-gradient(135deg, #f9f9f9, #eef2f7);
         padding: 40px;
         border-radius: 15px;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -31,7 +31,7 @@
     }
 
         .event-banner:hover {
-            transform: scale(1.03); /* Slight zoom only */
+            transform: scale(1.03);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
 
@@ -43,7 +43,7 @@
         text-align: center;
         position: relative;
         padding-bottom: 15px;
-        background: linear-gradient(to right, #3498db, #8e44ad); /* Gradient text */
+        background: linear-gradient(to right, #3498db, #8e44ad);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -62,7 +62,7 @@
         }
 
         .event-title:hover::after {
-            width: 120px; /* Expands on hover */
+            width: 120px;
         }
 
     .event-poster {
@@ -73,7 +73,7 @@
     }
 
         .event-poster:hover {
-            transform: scale(1.08) translateY(-10px); /* Lift and scale */
+            transform: scale(1.08) translateY(-10px);
             filter: brightness(1.1);
         }
 
@@ -88,11 +88,10 @@
         .event-info p {
             margin-bottom: 15px;
             font-size: 1rem;
-            opacity: 0; /* Start hidden for animation */
-            animation: fadeInLine 0.5s ease forwards; /* Line-by-line animation */
+            opacity: 0;
+            animation: fadeInLine 0.5s ease forwards;
         }
 
-            /* Delay each line */
             .event-info p:nth-child(1) {
                 animation-delay: 0.2s;
             }
@@ -123,7 +122,7 @@
         }
 
         .event-info p:hover strong {
-            color: #e74c3c; /* Color change on hover */
+            color: #e74c3c;
         }
 
     .emoji-line {
@@ -136,10 +135,9 @@
         font-weight: bold;
         font-size: 1.2rem;
         margin-top: 20px;
-        color: #3498db; /* Updated to match description heading color */
+        color: #3498db;
     }
 
-    /* Side Panel Styling */
     .event-details-side {
         background: linear-gradient(to bottom, #f0f8ff, #e6f0fa);
         padding: 25px;
@@ -150,7 +148,7 @@
     }
 
         .event-details-side:hover {
-            transform: translateY(-5px); /* Slight lift on hover */
+            transform: translateY(-5px);
         }
 
         .event-details-side h3 {
@@ -196,7 +194,7 @@
         }
 
             .event-details-side .register-btn:hover, .event-details-side .calendar-btn:hover {
-                transform: scale(1.05) translateY(-2px); /* Pop effect */
+                transform: scale(1.05) translateY(-2px);
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
                 opacity: 1;
             }
@@ -215,11 +213,10 @@
             }
 
                 .event-details-side .social-icons a:hover {
-                    transform: rotate(360deg) scale(1.2); /* Spin and grow */
+                    transform: rotate(360deg) scale(1.2);
                     color: #3498db;
                 }
 
-    /* Animation Keyframes */
     @@keyframes fadeInLine {
         from {
             opacity: 0;
@@ -232,7 +229,6 @@
         }
     }
 
-    /* Comment Section Styling with Toggle */
     .comment-section {
         margin-top: 40px;
         padding: 20px;
@@ -240,7 +236,7 @@
         border-radius: 15px;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease;
-        display: none; /* Initially hidden */
+        display: none;
     }
 
         .comment-section:hover {
@@ -261,7 +257,7 @@
         border-radius: 8px;
         padding: 12px;
         font-size: 1rem;
-        width: 60%; /* Reduced width from full width to 60% */
+        width: 60%;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
@@ -287,7 +283,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-    /* Individual Comment Styling */
     .comment {
         background: white;
         padding: 15px;
@@ -328,7 +323,7 @@
             border-radius: 8px;
             padding: 10px;
             font-size: 0.95rem;
-            width: 50%; /* Reduced width from full width to 50% */
+            width: 50%;
         }
 
         .comment .btn-secondary {
@@ -347,14 +342,12 @@
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
 
-        /* Nested Comments (Replies) */
         .comment[style*="margin-left: 40px"] {
             background: #f8f9fa;
             border-left: 4px solid #3498db;
             padding-left: 20px;
         }
 
-    /* Animation for Comment Load */
     @@keyframes fadeInComment {
         from {
             opacity: 0;
@@ -377,7 +370,7 @@
         <img src="@Model.EventBannerPath" class="event-banner" alt="@Model.EventName Banner" />
     </div>
 
-    <h2 class="event-title">@Model.EventName</h2>
+    <h2 class="event-title">@Model.EventName.Replace("??", "").Trim()</h2>
 
     <div class="row">
         <div class="col-md-4 mb-3">
@@ -392,7 +385,11 @@
 
                 <a href="#" class="register-btn" data-bs-toggle="modal" data-bs-target="#registerModal">Register Now</a>
 
-                <a href="#" class="calendar-btn">Add to Calendar</a>
+                <a href="#" class="calendar-btn"
+                   onclick="addToGoogleCalendar('@Model.EventName', '@Model.EventStartDateAndTime.ToString("yyyy-MM-ddTHH:mm:ss")', '@Model.EventEndDateAndTime.ToString("yyyy-MM-ddTHH:mm:ss")', 'ICFAI Foundation, Hyderabad')">
+                    Add to Calendar
+                </a>
+
 
                 <div class="social-icons">
                     <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -407,8 +404,6 @@
                     <img src="@Html.Raw(ViewBag.QRImage)" alt="QR Code" class="qr-code-img" style="width: 150px; height: 150px;" />
                 </a>
             </div>
-
-
         </div>
 
         <div class="col-md-8 event-info">
@@ -442,11 +437,9 @@
                 }
             }
         </div>
-
     </div>
 </div>
 
-<!-- Toggle Button -->
 <button id="toggleComments" class="btn btn-primary">Enable Comments</button>
 
 <hr />
@@ -469,11 +462,8 @@
     }
 </div>
 
-<!-- Ensure Bootstrap Icons CSS is included -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-
-<!-- 📋 Modal for Enrollment -->
 <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content p-3">
@@ -482,7 +472,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="registrationForm">
+            <form method="post" action="@Url.Action("RegisterUser", "Clubs")">
                 <div class="modal-body">
                     <input type="hidden" id="eventId" name="eventId" value="@Model.EventID" />
                     <div class="mb-3">
@@ -498,10 +488,11 @@
     </div>
 </div>
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-
-<!-- JavaScript for Toggle Functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(document).ready(function () {
         let isEnabled = false;
@@ -510,90 +501,70 @@
 
         $toggleButton.on('click', function () {
             if (!isEnabled) {
-                $commentSection.show(); // Show the comment section
+                $commentSection.show();
                 $toggleButton.text('Disable Comments');
                 isEnabled = true;
             } else {
-                $commentSection.hide(); // Hide the comment section
+                $commentSection.hide();
                 $toggleButton.text('Enable Comments');
                 isEnabled = false;
             }
         });
 
-        // Initially hide the comment section
         $commentSection.hide();
-    });
 
-
-   /* const payload = {
-        eventId: $('#eventId').val(), // From hidden input
-        participationType: "Group",
-        // ... other form fields
-    };
-
-    $.ajax({
-        type: 'POST',
-        url: '/Clubs/StoreResponse',
-        contentType: 'application/json',
-        data: JSON.stringify(payload),
-        success: function (response) {
-            console.log("Success:", response);
-        }
-    });*/
-
-
-    $(document).ready(function () {
-        $('#registrationForm').on('submit', function (e) {
+        $('#scanLink').on('click', function (e) {
             e.preventDefault();
-
-            const enrollmentId = $('#enrollmentId').val();
-            const eventId = $('#eventId').val();
-
+            var eventId = @Model.EventID;
 
             $.ajax({
-                type: 'POST',
-                url: '/Clubs/RegisterUser', // Your controller action
-                data: { eventId: eventId, enrollmentId: enrollmentId },
+                url: '/Clubs/GetRegistrationLink',
+                type: 'GET',
+                data: { eventId: eventId },
                 success: function (response) {
-                    // If the response is a URL, redirect there
-                    if (response.redirectUrl) {
-                        window.location.href = response.redirectUrl;
+                    if (response.success) {
+                        window.location.href = response.registrationLink;
                     } else {
-                        alert("Error: Could not find the registration form.");
+                        alert(response.message);
                     }
                 },
                 error: function () {
-                    alert('Something went wrong. Please try again.');
+                    alert('An error occurred while processing your request');
                 }
             });
         });
     });
 
 
-    $(document).ready(function () {
-        // Scan QR link click handler
-        $('#scanLink').on('click', function (e) {
-            e.preventDefault();
-            var eventId = @Model.EventID; // The EventID from the model
 
-            // Fetch registration link via AJAX
-            $.ajax({
-            url: '/Clubs/GetRegistrationLink',  // Controller endpoint
-            type: 'GET',
-            data: { eventId: eventId },
-            success: function (response) {
-            if (response.success) {
-            // Redirect to the registration link if available
-            window.location.href = response.registrationLink;
-            } else {
-            // Show an error message if the registration link is not found
-            alert(response.message);
-            }
-            },
-            error: function () {
-            alert('An error occurred while processing your request');
-            }
-            });
-            });
-            });
+function addToGoogleCalendar(title, startDateStr, endDateStr, location) {
+    try {
+        // Convert the date strings to JavaScript Date objects
+        const startDate = new Date(startDateStr);
+        const endDate = new Date(endDateStr);
+
+        // Ensure the dates are valid
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            alert("Invalid event date or time. Please check the event details.");
+            return;
+        }
+
+        // Format the dates for Google Calendar (YYYYMMDDTHHMMSSZ)
+        const start = startDate.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+        const end = endDate.toISOString().replace(/-|:|\.\d+/g, '').slice(0, 15) + 'Z';
+
+        // Create the Google Calendar URL
+        const calendarUrl = `https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent(title)}&dates=${start}/${end}&location=${encodeURIComponent(location)}&details=${encodeURIComponent('Join us for this amazing event!')}`;
+
+        // Open the Google Calendar event creation page
+        window.open(calendarUrl, '_blank');
+    } catch (error) {
+        console.error("Error adding to calendar:", error);
+        alert("There was an error adding this event to your calendar.");
+    }
+}
+
+
+
+
 </script>

@@ -4,108 +4,258 @@
     Layout = "~/Views/Shared/_MentorLayout.cshtml";
 }
 
-<style>
-    .event-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transition: box-shadow 0.3s ease;
-        padding: 20px;
-        border: 1px solid #e0e0e0; /* Light gray border */
-        border-radius: 10px;
-        margin-bottom: 20px;
-        width: 100%;
-        box-sizing: border-box;
-        background-color: #f9f9f9; /* Light background color */
-    }
-
-        .event-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+@section Styles {
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-    .event-content {
-        display: flex;
-        width: 100%;
-        align-items: flex-start;
-    }
-
-    .event-card-image {
-        max-width: 250px;
-        flex-shrink: 0;
-        margin-right: 300px; /* Reduced right margin */
-        display: flex;
-        align-items: flex-start; /* Align to the top */
-    }
-
-        .event-card-image img {
-            max-width: 100%; /* Changed to 100% to fit within container */
-            height: auto; /* Changed to auto to maintain aspect ratio */
-            display: block;
-            margin-top: 64px; /* Add some margin to move image down */
-            margin-left: 189px; /* Removed left margin */
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+            text-align: center;
         }
 
-    .event-card-details {
-        flex: 1;
-        display: grid;
-        grid-template-columns: auto 1fr;
-        grid-gap: 11px;
-        align-self: stretch;
-    }
-
-        .event-card-details strong {
-            text-align: right;
-            padding-right: 5px;
-            color: #333; /* Darker text color */
+        /* Alerts Styling */
+        .alert {
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .event-card-details span {
-            color: #555; /* Slightly lighter text color for values */
-        }
-
-    .event-card-buttons {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px; /* Increased margin */
-        width: 100%;
-    }
-
-        .event-card-buttons button {
-            margin: 0 5px;
-            padding: 10px 20px;
+        .alert-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
         }
 
-            .event-card-buttons button.btn-success {
-                background-color: #4CAF50; /* Green background for approve */
-                color: white;
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+        }
+
+        .btn-close {
+            filter: invert(1); /* White close button */
+        }
+
+        /* Dropdown and Filter Button */
+        .form-group {
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+        }
+
+            .form-group label {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 0.5rem;
+                display: block;
             }
 
-            .event-card-buttons button.btn-danger {
-                background-color: #f44336; /* Red background for reject */
-                color: white;
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 5px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+        }
+
+            .form-control:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+                outline: none;
             }
 
-    .event-card-details strong:nth-child(n+10) {
-        grid-column: 1;
-    }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
 
-    .form-control {
-        display: block;
-        width: 170%;
-        padding: .375rem .75rem;
-        font-size: 1rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: var(--bs-body-color);
-        background-color: var(--bs-body-bg);
-        background-clip: padding-box;
-        border: var(--bs-border-width) solid var(--bs-border-color);
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
 
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #0056b3, #520dc2);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        /* Event Card Styling */
+        .event-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+            .event-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            }
+
+        .event-card-header {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .event-content {
+            display: flex;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .event-card-image {
+            max-width: 200px;
+            flex-shrink: 0;
+            margin-right: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+            .event-card-image img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            }
+
+        .event-card-details {
+            flex: 1;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-gap: 12px;
+            align-self: stretch;
+            padding: 10px;
+        }
+
+            .event-card-details strong {
+                text-align: right;
+                padding-right: 10px;
+                color: #333;
+                font-weight: 600;
+            }
+
+            .event-card-details span {
+                color: #555;
+            }
+
+            .event-card-details strong:nth-child(n+10) {
+                grid-column: 1;
+            }
+
+        .event-card-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            width: 100%;
+            gap: 10px;
+        }
+
+            .event-card-buttons button {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+
+            .btn-success:hover {
+                background: linear-gradient(135deg, #218838, #1c7430);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: linear-gradient(135deg, #c82333, #b21f2d);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .reject-box {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+            .reject-box textarea {
+                resize: vertical;
+                border-radius: 6px;
+                border: 1px solid #ced4da;
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+                .reject-box textarea:focus {
+                    border-color: #dc3545;
+                    box-shadow: 0 0 8px rgba(220, 53, 69, 0.2);
+                    outline: none;
+                }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive Design */
         @@media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .form-group {
+                max-width: 100%;
+            }
+
             .event-content {
                 flex-direction: column;
                 align-items: center;
@@ -114,149 +264,166 @@
             .event-card-image {
                 margin-right: 0;
                 margin-bottom: 15px;
+                max-width: 150px;
+            }
+
+            .event-card-details {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+                .event-card-details strong {
+                    text-align: center;
+                    padding-right: 0;
+                    margin-bottom: 5px;
+                }
+
+            .event-card-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+                .event-card-buttons button {
+                    width: 100%;
+                    max-width: 200px;
+                }
+
+            .reject-box {
+                max-width: 100%;
             }
         }
-</style>
-
-<h2>View Event Requests</h2>
-
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    </style>
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+<div class="container">
+    <h2>View Event Requests</h2>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-@using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
-{
-    <div class="form-group">
-        <label for="selectedClubId">Select Club:</label>
-        @Html.DropDownList("selectedClubId", new SelectList(ViewBag.Clubs, "ClubID", "ClubName"), "Select a Club", new { @class = "form-control" })
-    </div>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-    <button type="submit" class="btn btn-primary">Filter</button>
-}
+    @using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
+    {
+        <div class="form-group">
+            <label for="selectedClubId">Select Club:</label>
+            @Html.DropDownList("selectedClubId", new SelectList(ViewBag.Clubs, "ClubID", "ClubName"), "Select a Club", new { @class = "form-control" })
+        </div>
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    }
 
-@if (Model != null && Model.Count > 0)
-{
-    <div class="row row-cols-1 g-4">
-        @foreach (var item in Model)
-        {
-            <div class="col">
-                <div class="card h-100 shadow event-card">
-                    <div class="event-content">
-                        @if (!string.IsNullOrEmpty(item.EventPoster))
-                        {
-                            <div class="event-card-image">
-                                <img src="@item.EventPoster" class="img-fluid rounded" alt="Event Poster" style="max-height: 150px;">
+    @if (Model != null && Model.Count > 0)
+    {
+        <div class="row row-cols-1 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="event-card">
+                        <div class="event-card-header">
+                            Event Details
+                        </div>
+                        <div class="event-content">
+                            @if (!string.IsNullOrEmpty(item.EventPoster))
+                            {
+                                <div class="event-card-image">
+                                    <img src="@item.EventPoster" class="img-fluid rounded" alt="Event Poster">
+                                </div>
+                            }
+                            <div class="event-card-details">
+                                <strong>Event Name:</strong> <span>@item.EventName</span>
+                                <strong>Description:</strong> <span>@item.EventDescription</span>
+                                <strong>Event Type:</strong> <span>@item.EventType</span>
+                                <strong>Start Date:</strong> <span>@item.EventStartDateAndTime</span>
+                                <strong>End Date:</strong> <span>@item.EventEndDateAndTime</span>
+                                @if (ViewBag.OrganizerNames.ContainsKey(item.EventOrganizerID.ToString()))
+                                {
+                                    <strong>Organizer:</strong> <span>@ViewBag.OrganizerNames[item.EventOrganizerID.ToString()]</span>
+                                }
+                                else
+                                {
+                                    <strong>Organizer:</strong> <span>unknown</span>
+                                }
+                                <strong>Club Name:</strong> <span>@ViewBag.ClubNames[(int)item.ClubID]</span>
+                                <strong>University:</strong> <span>ICFAI Foundation for Higher Education</span>
                             </div>
-                        }
-                    <div class="card-body event-card-details">
-                        <strong>Event Name:</strong> @item.EventName
-                        <strong>Description:</strong> @item.EventDescription
-                        <strong>Event Type:</strong> @item.EventType
-                        <strong>Start Date:</strong> @item.EventStartDateAndTime
-                        <strong>End Date:</strong> @item.EventEndDateAndTime
-                        @if (ViewBag.OrganizerNames.ContainsKey(item.EventOrganizerID.ToString()))
-                        {
-                            <strong>Organizer:</strong> @ViewBag.OrganizerNames[item.EventOrganizerID.ToString()]
-                        }
-                        else
-                        {
-                            <strong>Organizer: unknown</strong>
-                        }
+                        </div>
+                        <div class="event-card-buttons">
+                            <form action="@Url.Action("ApproveEventRequest", new { eventId = item.EventID })" method="post">
+                                <button type="submit" class="btn btn-success">Approve</button>
+                            </form>
 
+                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
 
-                        <strong>Club Name:</strong> @ViewBag.ClubNames[(int)item.ClubID]
-                        @*<strong>Department:</strong> @item.Department*@
-                        <strong>University:</strong> ICFAI foundation for higher education
-                    </div>
-                    </div>
-                    <div class="event-card-buttons">
-                        <form action="@Url.Action("ApproveEventRequest", new { eventId = item.EventID })" method="post">
-                            <button type="submit" class="btn btn-success">Approve</button>
-                        </form>
-
-                        <div style="display: flex; flex-direction: column;">
-                            <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
-
-                            <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
-                                @Html.AntiForgeryToken()
-                                <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..." required></textarea>
-                                <button type="button" class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
+                                <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
+                                    @Html.AntiForgeryToken()
+                                    <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..." required></textarea>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-
                 </div>
-            </div>
-        }
-    </div>
-}
-
-
-
-
-
-<!-- ✅ jQuery if still needed elsewhere -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- ✅ Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
-
-<script>
-    function toggleRejectBox(eventId) {
-        var rejectBox = $("#reject-box-" + eventId);
-
-        if (rejectBox.is(":visible")) {
-            rejectBox.hide();
-        } else {
-            $(".reject-box").hide();
-            rejectBox.show();
-        }
-    }
-    function submitRejection(eventId) {
-        const reason = $("#rejection-text-" + eventId).val().trim();
-
-        if (reason === "") {
-            alert("Please enter a rejection reason.");
-            return;
-        }
-
-        $.ajax({
-            url: '@Url.Action("RejectEventRequest", "Mentor")',
-            type: 'POST',
-            data: {
-                eventId: eventId,
-                rejectionReason: reason,
-                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-            },
-            success: function (response) {
-                if (response.success) {
-                    alert("Rejected successfully.");
-                    location.reload(); // Or update the UI accordingly
-                } else {
-                    alert(response.message || "Failed to reject.");
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error:", error);
-                alert("Error occurred: " + error);
             }
-        });
+        </div>
     }
-</script>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleRejectBox(eventId) {
+            var rejectBox = $("#reject-box-" + eventId);
+
+            if (rejectBox.is(":visible")) {
+                rejectBox.hide();
+            } else {
+                $(".reject-box").hide();
+                rejectBox.show();
+            }
+        }
+
+        function submitRejection(eventId) {
+            const reason = $("#rejection-text-" + eventId).val().trim();
+
+            if (reason === "") {
+                alert("Please enter a rejection reason.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("RejectEventRequest", "Mentor")',
+                type: 'POST',
+                data: {
+                    eventId: eventId,
+                    rejectionReason: reason,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert("Rejected successfully.");
+                        location.reload();
+                    } else {
+                        alert(response.message || "Failed to reject.");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error:", error);
+                    alert("Error occurred: " + error);
+                }
+            });
+        }
+    </script>
+}

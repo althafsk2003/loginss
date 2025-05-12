@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device=device-width, initial-scale=1.0">
     <title>@ViewBag.Title</title>
 
     <!-- Bootstrap & FontAwesome -->
@@ -39,9 +39,20 @@
             font-size: 14px;
             text-align: center;
             width: 100%;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards;
+            opacity: 1;
+            transition: opacity 0.3s ease, position 0s ease;
+            position: relative; /* Initial static positioning */
+            z-index: 1002;
         }
+
+            .top-nav.fixed {
+                position: fixed;
+                top: 0;
+            }
+
+            .top-nav.fade {
+                opacity: 0;
+            }
 
         /* Main Navigation */
         .navbar {
@@ -49,11 +60,40 @@
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards 0.2s;
-            z-index: 1001; /* Increased z-index to stay above hero section */
-            position: relative; /* Ensure proper stacking context */
+            z-index: 1001;
+            position: relative;
+            transition: all 0.3s ease;
+            margin-top: 2px; /* Initial margin to account for top-nav height */
         }
+
+            .navbar.fixed {
+                position: fixed;
+                top: 0;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                margin-top: 0; /* Remove margin when fixed */
+            }
+
+        /* Progress Line */
+        .progress-line {
+            height: 4px;
+            background: #E96C20; /* Matches your brand color */
+            width: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: width 0.1s ease;
+        }
+
+        /* Placeholder to prevent content jump */
+        .navbar-placeholder {
+            display: none;
+            height: 0;
+        }
+
+            .navbar-placeholder.active {
+                display: block;
+                height: var(--navbar-height, 60px); /* Default height of navbar */
+            }
 
         .navbar-brand {
             font-size: 26px;
@@ -77,11 +117,11 @@
             opacity: 0;
             transform: translateY(15px);
             transition: all 0.3s ease-in-out;
-            background-color: white; /* Added white background */
-            border: 1px solid #ddd; /* Optional: subtle border for definition */
-            border-radius: 5px; /* Optional: rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: shadow for depth */
-            z-index: 1002; /* Ensure dropdown is above navbar */
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1002;
         }
 
         .nav-item:hover .dropdown-menu {
@@ -96,7 +136,7 @@
             width: 100%;
             height: 100vh;
             overflow: visible;
-            z-index: 1; /* Lower z-index to allow navbar to stay above */
+            z-index: 1;
         }
 
         .hero-video {
@@ -156,7 +196,7 @@
 
             .wide-image img {
                 width: 100%;
-                height: 277px;
+                height: 220px;
                 object-fit: cover;
                 display: block;
                 border-radius: 0;
@@ -532,6 +572,8 @@
             }
         }
 
+        
+
         @@keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -609,6 +651,10 @@
                 .route-map-container iframe {
                     min-height: 200px;
                 }
+
+            .navbar {
+                margin-top: 37px; /* Ensure margin is applied on smaller screens */
+            }
         }
 
         @@media (max-width: 576px) {
@@ -634,6 +680,13 @@
             .founder-text-box h2 {
                 font-size: 1.5rem;
             }
+
+            .navbar {
+                margin-top: 37px; /* Ensure margin is applied on smaller screens */
+            }
+        }
+        .container{
+            padding-bottom:40px;
         }
     </style>
 </head>
@@ -643,9 +696,11 @@
         <span>Future Students | Current Students | Faculty & Staff | Alumni | Partners</span>
     </div>
 
+
     <!-- Main Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
+            <div class="progress-line"></div>
             <a class="navbar-brand" href="#">
                 <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="height: 50px; width: 200px; max-width: 100%;">
             </a>
@@ -669,6 +724,10 @@
             </div>
         </div>
     </nav>
+
+
+    <!-- Placeholder for Navbar -->
+    <div class="navbar-placeholder"></div>
 
     <!-- Hero Section -->
     <div class="hero">
@@ -861,6 +920,42 @@
 
             const elements = document.querySelectorAll('.top-nav, .navbar, .hero-text, .content-text, .card-grid, .founder-profile, .footer, .footer-bottom');
             elements.forEach(element => observer.observe(element));
+
+            // Handle scroll events
+            const topNav = document.querySelector('.top-nav');
+            const navbar = document.querySelector('.navbar');
+            const navbarPlaceholder = document.querySelector('.navbar-placeholder');
+            const progressLine = document.querySelector('.progress-line');
+            const topNavHeight = topNav.offsetHeight; // Get the height of top-nav
+            const navbarHeight = navbar.offsetHeight; // Get the height of navbar
+
+            // Set the navbar height as a CSS variable for the placeholder
+            document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
+
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.body.scrollHeight;
+                const scrollPercentage = (scrollPosition / (documentHeight - windowHeight)) * 100;
+
+                // Fade out top-nav as user scrolls
+                const opacity = 1 - (scrollPosition / 50); // Adjust fade speed
+                topNav.style.opacity = Math.max(0, opacity);
+
+                // Fix top-nav and navbar when scrolling past top-nav height
+                if (scrollPosition > topNavHeight) {
+                    topNav.classList.add('fixed');
+                    navbar.classList.add('fixed');
+                    navbarPlaceholder.classList.add('active');
+                } else {
+                    topNav.classList.remove('fixed');
+                    navbar.classList.remove('fixed');
+                    navbarPlaceholder.classList.remove('active');
+                }
+
+                // Update progress line
+                progressLine.style.width = `${Math.min(100, scrollPercentage)}%`;
+            });
         });
 
         function startProcess() {

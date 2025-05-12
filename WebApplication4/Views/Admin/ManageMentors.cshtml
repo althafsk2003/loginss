@@ -1,5 +1,4 @@
-﻿
-@model List<WebApplication4.Models.USER>
+﻿@model List<WebApplication4.Models.USER>
 
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -108,7 +107,7 @@
         }
 
         .table td {
-            text-align: center;
+            text-align: left;
             padding: 10px;
         }
 
@@ -134,6 +133,84 @@
 
         .btn-success:hover {
             background-color: #218838;
-
         }
+</style>
+
+
+<div class="pagination-container">
+    <div class="pagination-info mb-2">
+        Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
+    </div>
+
+    <ul class="pagination">
+        @if (ViewBag.TotalPages > 1)
+        {
+            int currentPage = ViewBag.CurrentPage;
+            int totalPages = ViewBag.TotalPages;
+            int maxPagesToShow = 5;
+
+            int startPage = Math.Max(1, currentPage - maxPagesToShow / 2);
+            int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+            if ((endPage - startPage) < maxPagesToShow - 1)
+            {
+                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+            }
+
+            for (int i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("ManageMentors", new { page = i })">@i</a>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+
+<style>
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .page-item {
+        display: flex;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 14px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .page-link:hover {
+            background-color: #d0d0d0;
+        }
+
+    .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+    }
 </style>

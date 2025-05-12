@@ -21,7 +21,6 @@ namespace WebApplication4.Controllers
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
 
-        // ✅ University Administrator Dashboard
         public async Task<ActionResult> Index()
         {
             if (!IsUniversityAdminLoggedIn())
@@ -31,14 +30,26 @@ namespace WebApplication4.Controllers
 
             int universityID = GetUniversityID();
 
-            var university = await _db.UNIVERSITies.FirstOrDefaultAsync(u => u.UniversityID == universityID);
-            var departments = await _db.DEPARTMENTs.Where(d => d.Universityid == universityID).ToListAsync();
+            var university = await _db.UNIVERSITies
+                .FirstOrDefaultAsync(u => u.UniversityID == universityID);
+
+            var departments = await _db.DEPARTMENTs
+                .Where(d => d.Universityid == universityID)
+                .ToListAsync();
+
+            var departmentIds = departments.Select(d => d.DepartmentID).ToList();
+
+            var mentors = await _db.USERs
+                .Where(u => u.Userrole == "Mentor" && u.DepartmentID != null && departmentIds.Contains(u.DepartmentID.Value))
+                .ToListAsync();
 
             ViewBag.University = university;
             ViewBag.Departments = departments;
+            ViewBag.Mentors = mentors;
 
             return View();
         }
+
 
         // ✅ Add School (Department)
         public ActionResult AddDepartment()
@@ -307,6 +318,7 @@ namespace WebApplication4.Controllers
 
 
 
+
         //manage mentors
         public ActionResult ManageMentors()
         {
@@ -469,7 +481,55 @@ namespace WebApplication4.Controllers
             return View("ViewMentors", deactivatedMentors);
         }
 
+        [HttpGet]
+        public ActionResult ChangePassword()
+        {
+            if (Session["UserEmail"] == null)
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin"); // Redirects to login if session is missing
+            }
 
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var userEmail = Session["Email"]?.ToString();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin");
+            }
+
+            var user = _db.Logins.FirstOrDefault(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(model);
+            }
+
+            // Check current password (assumes plain text for now)
+            if (user.PasswordHash != model.CurrentPassword)
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View(model);
+            }
+
+            // Update password
+            user.PasswordHash = model.NewPassword;
+            _db.SaveChanges();
+
+            TempData["Success"] = "Password changed successfully!";
+            return RedirectToAction("Index", "UniversityAdmin"); // ✅ Redirecting to Mentor Dashboard
+        }
 
 
     }

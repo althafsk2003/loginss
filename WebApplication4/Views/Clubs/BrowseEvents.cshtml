@@ -4,763 +4,843 @@
 
 @{
     ViewBag.Title = "Browse Events";
-    Layout = "~/Views/Shared/_ClubsLayout.cshtml";
+    Layout = null;
 
-    // cast into a List<EventDto>
     var concludedEvents = ViewBag.ConcludedEvents as List<EventDto> ?? new List<EventDto>();
-
-    // recent 10
-    var recentEvents = concludedEvents
-                 .OrderByDescending(e => e.EventEndDateAndTime)
-                 .Take(10)
-                 .ToList();
-
-    // year range for the picker
+    var recentEvents = concludedEvents.OrderByDescending(e => e.EventEndDateAndTime).Take(10).ToList();
     var minYear = 2000;
-    var maxYear = concludedEvents.Any()
-                  ? concludedEvents.Max(e => e.EventEndDateAndTime.Year)
-                  : DateTime.Now.Year;
-
-    // now safe to serialize
+    var maxYear = concludedEvents.Any() ? concludedEvents.Max(e => e.EventEndDateAndTime.Year) : DateTime.Now.Year;
     var eventsJson = JsonSerializer.Serialize(concludedEvents);
 }
 
-<!-- Datepicker CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
-<style>
-    body {
-        margin: 0;
-        overflow-x: hidden;
-        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8fafc;
-        color: #1e293b;
-    }
-
-    /* Carousel Styles */
-    .carousel-item img {
-        height: 570px;
-        object-fit: cover;
-        width: 100%;
-        transition: transform 0.5s ease-in-out;
-        border-radius: 10px;
-    }
-
-        .carousel-item img:hover {
-            transform: scale(1.02);
-        }
-
-    .carousel,
-    .carousel-inner,
-    .carousel-item {
-        width: 105vw;
-        margin-left: -57px;
-    }
-
-        .carousel-item img:hover {
-            transform: scale(1.03);
-            filter: brightness(100%);
-        }
-
-    .carousel-indicators {
-        margin-bottom: 1rem;
-    }
-
-        .carousel-indicators button {
-            background-color: #E96C20;
-            opacity: 0.5;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .carousel-indicators .active {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-
-    /* Headings */
-    h1, h3 {
-        font-weight: 700;
-        color: #1e293b;
-        text-align: center;
-    }
-
-    h1 {
-        font-size: 2.75rem;
-        margin: 2.5rem 0;
-        letter-spacing: -0.02em;
-    }
-
-    h3 {
-        font-size: 1.9rem;
-        margin: 3rem 0 1.5rem;
-    }
-
-    /* Toggle Buttons Container */
-    .toggle-buttons {
-        text-align: center;
-        padding: 1rem 0;
-        background: linear-gradient(to bottom, #ffffff, #f8fafc);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .btn {
-        padding: 12px 24px;
-        font-size: 1.05rem;
-        font-weight: 500;
-        border-radius: 50px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-primary {
-        background-color: #E96C20;
-        border-color: #E96C20;
-        color: #fff;
-    }
-
-        .btn-primary:hover {
-            background-color: #d45f1a;
-            border-color: #d45f1a;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(233, 108, 32, 0.4);
-        }
-
-    .btn-secondary {
-        background-color: #6b7280;
-        border-color: #6b7280;
-        color: #fff;
-    }
-
-        .btn-secondary:hover {
-            background-color: #5b606d;
-            border-color: #5b606d;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
-        }
-
-    /* Scrollable Container */
-    .event-scroll-container-wrapper {
-        position: relative;
-        padding: 43px 1.5rem 1.5rem;
-    }
-
-    .event-scroll-container {
-        scrollbar-width: thin;
-        scrollbar-color: #E96C20 transparent;
-        display: flex;
-        gap: 1.5rem;
-        overflow-x: auto;
-        padding-top: 40px; /* Space for close button */
-    }
-
-        .event-scroll-container::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .event-scroll-container::-webkit-scrollbar-thumb {
-            background-color: #E96C20;
-            border-radius: 8px;
-        }
-
-    /* Close Button for Scroll Containers */
-    .close-scroll-btn {
-        position: absolute;
-        top: 10px;
-        right: 1.5rem;
-        background-color: #E96C20;
-        color: #fff;
-        border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        cursor: pointer;
-        z-index: 1; /* Ensure it stays above content */
-        transition: background-color 0.3s ease;
-    }
-
-        .close-scroll-btn:hover {
-            background-color: #d45f1a;
-        }
-
-    /* Event Cards */
-    .event-card {
-        background: #ffffff;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
-        border: 2px solid transparent;
-        cursor: pointer;
-        min-width: 300px;
-        max-width: 300px;
-        position: relative;
-    }
-
-        .event-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border: 2px solid #E96C20;
-            box-shadow: 0 12px 32px rgba(233, 108, 32, 0.3);
-        }
-
-        .event-card:active {
-            background-color: #fff7ed;
-            box-shadow: 0 4px 12px rgba(233, 108, 32, 0.3);
-            transform: scale(0.98);
-        }
-
-    .card-body {
-        padding: 1.5rem;
-        background-color: #ffffff;
-        border-top: 1px solid #e5e7eb;
-    }
-
-    .card-title {
-        font-weight: 600;
-        font-size: 1.25rem;
-        margin-bottom: 0.75rem;
-        color: #1e293b;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .card-text {
-        font-size: 0.95rem;
-        color: #4b5563;
-        margin-bottom: 0.5rem;
-    }
-
-        .card-text i {
-            color: #E96C20;
-            margin-right: 0.5rem;
-        }
-
-    /* Accordion Styles */
-    .accordion {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-    }
-
-    .accordion-item {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .accordion-header {
-        padding: 1rem;
-        cursor: pointer;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #1e293b;
-        background: #f9fafb;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-        .accordion-header:hover {
-            background: #f1f5f9;
-        }
-
-    .accordion-content {
-        padding: 1.5rem;
-        display: none;
-        background: #ffffff;
-    }
-
-        .accordion-content.active {
-            display: block;
-        }
-
-    /* Year Picker Styles */
-    #yearPicker {
-        max-width: 300px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 8px;
-        border: 2px solid #E96C20;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-
-        #yearPicker:hover {
-            box-shadow: 0 4px 12px rgba(233, 108, 32, 0.3);
-        }
-
-        #yearPicker .input-group-text {
-            background-color: #E96C20;
-            color: #fff;
-            border: none;
-            border-radius: 6px 0 0 6px;
-            padding: 10px 15px;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
-
-            #yearPicker .input-group-text:hover {
-                background-color: #d45f1a;
-            }
-
-        #yearPicker .form-control {
-            border: none;
-            border-radius: 0 6px 6px 0;
-            padding: 10px 15px;
-            font-size: 1rem;
-            font-weight: 500;
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
             color: #1e293b;
-            background-color: #ffffff;
-            cursor: pointer;
+        }
+
+        .top-nav {
+            background: #111;
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
             text-align: center;
         }
 
-            #yearPicker .form-control:focus {
-                box-shadow: none;
-                background-color: #fff7ed;
-            }
-
-            #yearPicker .form-control::placeholder {
-                color: #6b7280;
-                font-weight: 400;
-            }
-
-    /* Datepicker Dropdown Customization */
-    .datepicker {
-        border-radius: 8px;
-        border: 2px solid #E96C20;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        font-family: 'Inter', sans-serif;
-        background: #ffffff;
-        width: 300px;
-    }
-
-        .datepicker table {
-            width: 100%;
-            margin: 0;
+        .navbar {
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-            .datepicker table tr td,
-            .datepicker table tr th {
-                border-radius: 4px;
-                font-size: 1rem;
-                color: #1e293b;
-                padding: 10px;
-                text-align: center;
-                width: 60px;
-                height: 40px;
-            }
-
-                .datepicker table tr td:hover,
-                .datepicker table tr th:hover {
-                    background: #fff7ed;
-                    color: #E96C20;
-                }
-
-                .datepicker table tr td.active,
-                .datepicker table tr td.active:hover {
-                    background-color: #E96C20 !important;
-                    color: #fff !important;
-                    border-radius: 4px;
-                }
-
-    .datepicker-years .datepicker-switch {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #1e293b;
-        background: #f9fafb;
-        padding: 10px;
-        display: none; /* Hide the decade switch as per screenshot */
-    }
-
-    .datepicker-years .prev,
-    .datepicker-years .next {
-        background: #ffffff;
-        color: #E96C20;
-        font-size: 1.1rem;
-        border-radius: 4px;
-        width: 30px;
-        height: 30px;
-        line-height: 30px;
-    }
-
-        .datepicker-years .prev:hover,
-        .datepicker-years .next:hover {
-            background: #fff7ed;
+        .navbar-brand {
+            font-size: 26px;
+            font-weight: bold;
+            color: #E96C20;
         }
 
-    /* Responsive Design */
-    @@media (max-width: 768px) {
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            color: #333;
+            transition: 0.3s;
+            padding: 10px 15px;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #E96C20;
+            }
+
+        .dropdown-menu {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-item:hover .dropdown-menu {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .carousel-item img {
-            height: 350px;
+            height: 570px;
+            object-fit: cover;
+            width: 100%;
+            transition: transform 0.5s ease-in-out;
+            border-radius: 10px;
         }
 
-        h1 {
-            font-size: 2rem;
+            .carousel-item img:hover {
+                transform: scale(1.02);
+            }
+
+        .carousel,
+        .carousel-inner,
+        .carousel-item {
+            width: 105vw;
+            margin-left: -14px;
         }
 
-        h3 {
-            font-size: 1.6rem;
+            .carousel-item img:hover {
+                transform: scale(1.03);
+                filter: brightness(100%);
+            }
+
+        .carousel-indicators {
+            margin-bottom: 1rem;
         }
 
-        .event-card {
-            min-width: 260px;
-            max-width: 260px;
+            .carousel-indicators button {
+                background-color: #E96C20;
+                opacity: 0.5;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .carousel-indicators .active {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+
+        .toggle-buttons {
+            text-align: left;
+            padding: 1rem 0;
+            margin-left: 20px;
         }
 
         .btn {
             padding: 10px 20px;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            border: none;
         }
 
-        #yearPicker {
-            max-width: 250px;
+        .btn-primary {
+            background-color: #E96C20;
+            color: #fff;
         }
 
-            #yearPicker .form-control,
-            #yearPicker .input-group-text {
-                padding: 8px 12px;
-                font-size: 0.95rem;
+            .btn-primary:hover {
+                background-color: #d45f1a;
             }
 
-        .datepicker {
-            width: 250px;
+        .btn-secondary {
+            background-color: #fff;
+            color: #E96C20;
         }
 
-            .datepicker table tr td,
-            .datepicker table tr th {
-                font-size: 0.95rem;
-                padding: 8px;
-                width: 50px;
-                height: 35px;
+            .btn-secondary:hover {
+                background-color: #f0f0f0;
             }
-    }
 
-    @@media (max-width: 576px) {
-        .carousel-item img {
-            height: 250px;
+        .event-scroll-container-wrapper {
+            position: relative;
+            padding: 1rem;
+            overflow: hidden;
         }
 
         .event-scroll-container {
-            padding: 0 1rem;
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
+
+        .event-scroll-content {
+            display: flex;
+            gap: 1.5rem;
+            animation: autoScroll 20s linear infinite;
+        }
+
+        .concluded-scroll-content {
+            display: flex;
+            gap: 1.5rem;
+            animation: autoScrollConcluded 80s linear infinite;
+        }
+
+        .event-scroll-container:hover .event-scroll-content,
+        .event-scroll-container:hover .concluded-scroll-content {
+            animation-play-state: paused;
+        }
+
+        @@keyframes autoScroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @@keyframes autoScrollConcluded {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
         }
 
         .event-card {
-            min-width: 220px;
-            max-width: 220px;
+            background: #ffffff;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            width: 400px;
+            height: 351px;
+            position: relative;
+            display: inline-block;
         }
 
-        h1 {
-            font-size: 1.8rem;
+            .event-card:hover {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+            }
+
+            .event-card:active {
+                background-color: #fff7ed;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                transform: scale(0.98);
+            }
+
+        .card-body {
+            padding: 1.5rem;
+            background-color: #ffffff;
         }
 
-        h3 {
-            font-size: 1.4rem;
+        .card-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #1e293b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .btn {
-            padding: 8px 16px;
+        .card-text {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+
+            .card-text i {
+                color: #E96C20;
+                margin-right: 0.5rem;
+            }
+
+        .event-date {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #E96C20;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
             font-size: 0.9rem;
+            font-weight: 600;
         }
 
-        #yearPicker {
-            max-width: 200px;
+        .footer {
+            background-color: #1D1744;
+            color: #ccc;
+            padding: 40px 0;
+            position: relative;
+            z-index: 1;
         }
 
-            #yearPicker .form-control,
-            #yearPicker .input-group-text {
-                padding: 6px 10px;
-                font-size: 0.9rem;
+        .footer-col {
+            margin-bottom: 20px;
+        }
+
+        .footer-content h4 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-content p, .footer-content a {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-decoration: none;
+        }
+
+            .footer-content a:hover {
+                color: #fff;
             }
 
-        .datepicker {
-            width: 200px;
+        .list-unstyled {
+            padding-left: 0;
+            list-style: none;
         }
 
-            .datepicker table tr td,
-            .datepicker table tr th {
-                font-size: 0.9rem;
-                padding: 6px;
-                width: 40px;
-                height: 30px;
+        .d-flex {
+            display: flex;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .footer-col i {
+            margin-right: 5px;
+            color: #ffc107;
+        }
+
+        .route-map-container {
+            position: absolute;
+            top: 35%;
+            right: 2%;
+            z-index: 0;
+            width: 65%;
+        }
+
+            .route-map-container h2 {
+                color: #ffc107;
+                text-align: left;
+                margin-bottom: 5px;
+                font-size: 1.5em;
             }
-    }
-</style>
 
-<!-- Carousel Section -->
-<div id="imageCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000" data-bs-pause="false">
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            .route-map-container iframe {
+                display: block;
+                width: 80%;
+                min-height: 250px;
+                border: 1px solid #ccc;
+            }
+
+        .footer-bottom {
+            background-color: #fd7e14;
+            padding: 16px 0;
+            text-align: center;
+        }
+
+            .footer-bottom p {
+                margin: 0;
+                color: white;
+                font-size: 16px;
+                font-weight: 500;
+            }
+
+            .footer-bottom strong {
+                font-weight: 600;
+            }
+
+        @@media (max-width: 768px) {
+            .carousel-item img {
+                height: 350px;
+            }
+
+            .event-card {
+                width: 260px;
+                height: auto;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .carousel-item img {
+                height: 250px;
+            }
+
+            .event-card {
+                width: 220px;
+                height: auto;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .d-inline-block {
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <span>Future Students | Current Students | Faculty & Staff | Alumni | Partners</span>
     </div>
 
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <img src="~/wwwroot/Images/im1.png" class="d-block w-100" alt="Event 1">
-        </div>
-        <div class="carousel-item">
-            <img src="~/wwwroot/Images/im2.jpg" class="d-block w-100" alt="Event 2">
-        </div>
-        <div class="carousel-item">
-            <img src="~/wwwroot/Images/Screenshot 2025-04-08 160030.png" class="d-block w-100" alt="Event 3">
-        </div>
-    </div>
-</div>
-
-<h1>Browse Events</h1>
-
-<!-- Toggle Buttons -->
-<div class="toggle-buttons mb-4">
-    <button id="btnUpcoming" class="btn btn-primary me-2">Upcoming Events</button>
-    <button id="btnConcluded" class="btn btn-secondary">Concluded Events</button>
-</div>
-
-<!-- Upcoming Events Section -->
-<div id="upcomingEventsSection">
-    <h3>Upcoming Events</h3>
-    @if (ViewBag.UpcomingEvents != null && ViewBag.UpcomingEvents.Count > 0)
-    {
-        <div class="event-scroll-container-wrapper">
-            <div class="event-scroll-container py-3">
-                @foreach (var eventItem in ViewBag.UpcomingEvents)
-                {
-                    <div class="event-card-wrapper d-inline-block me-3">
-                        <a href="@Url.Action("EventDetails", "Clubs", new { id = eventItem.EventID })" class="text-decoration-none text-dark">
-                            <div class="card event-card" onclick="handleCardClick('@eventItem.EventName')">
-                                <img src="@eventItem.EventPoster" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Event Poster" />
-                                <div class="card-body">
-                                    <h5 class="card-title" title="@eventItem.EventName">@eventItem.EventName</h5>
-                                    <p class="card-text mb-1">
-                                        <i class="bi bi-clock-fill"></i>
-                                        <strong>Date:</strong> @eventItem.EventStartDateAndTime.ToString("MMMM d, yyyy")
-                                    </p>
-                                    <p class="card-text mb-1">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        ICFAI Foundation, Hyderabad
-                                    </p>
-                                    <p class="card-text">
-                                        <i class="bi bi-people-fill"></i>
-                                        @ViewBag.ClubName ?? "Club"
-                                    </p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                }
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="height: 50px; width: 200px;">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Index", "Clubs")">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Academics</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="icfaiLifeMenu" role="button">ICFAI Life</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("ClubsandImages", "Clubs")">Clubs</a></li>
+                            <li><a class="dropdown-item" href="#">Events</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="#">Research</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@Url.Action("Login","Admin")">Login</a></li>
+                </ul>
             </div>
         </div>
-    }
-    else
-    {
-        <p class="text-center text-muted">No upcoming events found.</p>
-    }
-</div>
+    </nav>
 
-<!-- Concluded Events Section -->
-<div id="concludedEventsSection" style="display:none;">
-    <h3>Concluded Events</h3>
-
-    <!-- Search by Name -->
-    <div class="d-flex justify-content-center my-3">
-        <div class="input-group" style="max-width: 500px;">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by event name..." />
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <!-- Carousel Section -->
+    <div id="imageCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000" data-bs-pause="false">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#imageCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="~/wwwroot/Images/im1.png" class="d-block w-100" alt="Event 1">
+            </div>
+            <div class="carousel-item">
+                <img src="~/wwwroot/Images/im2.jpg" class="d-block w-100" alt="Event 2">
+            </div>
+            <div class="carousel-item">
+                <img src="~/wwwroot/Images/Screenshot 2025-04-08 160030.png" class="d-block w-100" alt="Event 3">
+            </div>
         </div>
     </div>
 
-    <!-- Filter by Year Dropdown -->
-    <div class="d-flex justify-content-center my-3">
-        <select id="yearFilter" class="form-select" style="max-width: 200px;">
-            <option value="">Filter by Year</option>
-            @for (int year = DateTime.Now.Year; year >= 2000; year--)
-            {
-                <option value="@year">@year</option>
-            }
-        </select>
+    <!-- Toggle Buttons -->
+    <div class="toggle-buttons mb-4">
+        <button id="btnUpcoming" class="btn btn-primary me-2">Upcoming Events</button>
+        <button id="btnConcluded" class="btn btn-secondary">Concluded Events</button>
     </div>
 
-    <!-- Recently Concluded Events -->
-    <div class="event-scroll-container-wrapper">
-        <div id="recent-scroll" class="event-scroll-container py-3">
-            <button id="closeRecentScroll" class="close-scroll-btn">×</button>
-            @foreach (var ev in recentEvents)
-            {
-                <div class="event-card-wrapper d-inline-block me-3">
-                    <a href="@Url.Action("EventHighlights", "Clubs", new { id = ev.EventID })" class="text-decoration-none text-dark">
-                        <div class="card event-card">
-                            @if (!string.IsNullOrEmpty(ev.EventPoster))
-                            {
-                                <img src="@Url.Content(ev.EventPoster)" class="card-img-top" style="height:200px;object-fit:cover;" alt="@ev.EventName" />
-                            }
-                            <div class="card-body">
-                                <h5 class="card-title">@ev.EventName</h5>
-                                <p class="card-text"><strong>@ev.EventEndDateAndTime.ToString("MMMM d, yyyy")</strong></p>
+    <!-- Upcoming Events Section -->
+    <div id="upcomingEventsSection">
+        @if (ViewBag.UpcomingEvents != null && ViewBag.UpcomingEvents.Count > 0)
+        {
+            <div class="event-scroll-container-wrapper">
+                <div class="event-scroll-container py-3">
+                    <div class="event-scroll-content">
+                        @foreach (var eventItem in ViewBag.UpcomingEvents)
+                        {
+                            <div class="event-card-wrapper d-inline-block me-3">
+                                <a href="@Url.Action("EventDetails", "Clubs", new { id = eventItem.EventID })" class="text-decoration-none text-dark">
+                                    <div class="event-card" onclick="handleCardClick('@eventItem.EventName')">
+                                        <div class="event-date">@(eventItem.EventStartDateAndTime != null ? eventItem.EventStartDateAndTime.ToString("MMM d, yyyy") : "Date not available")</div>
+                                        <img src="@eventItem.EventPoster" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Event Poster" />
+                                        <div class="card-body">
+                                            <h5 class="card-title" title="@eventItem.EventName.Replace("??", "").Trim()">
+                                                @eventItem.EventName.Replace("??", "").Trim()
+                                            </h5>
+                                            <p class="card-text mb-1">
+                                                <i class="bi bi-clock-fill"></i>
+                                                <strong>@(eventItem.EventStartDateAndTime != null ? eventItem.EventStartDateAndTime.ToString("MMMM d, yyyy") : "Date not available")</strong>
+                                            </p>
+                                            <p class="card-text mb-1">
+                                                <i class="bi bi-geo-alt-fill"></i>
+                                                ICFAI Foundation, Hyderabad
+                                            </p>
+                                            <p class="card-text">
+                                                <i class="bi bi-people-fill"></i>
+                                                @ViewBag.ClubName
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
-                        </div>
-                    </a>
+                        }
+                        @foreach (var eventItem in ViewBag.UpcomingEvents) // Duplicate for seamless scrolling
+                        {
+                            <div class="event-card-wrapper d-inline-block me-3">
+                                <a href="@Url.Action("EventDetails", "Clubs", new { id = eventItem.EventID })" class="text-decoration-none text-dark">
+                                    <div class="event-card" onclick="handleCardClick('@eventItem.EventName')">
+                                        <div class="event-date">@(eventItem.EventStartDateAndTime != null ? eventItem.EventStartDateAndTime.ToString("MMM d, yyyy") : "Date not available")</div>
+                                        <img src="@eventItem.EventPoster" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Event Poster" />
+                                        <div class="card-body">
+                                            <h5 class="card-title" title="@eventItem.EventName.Replace("??", "").Trim()">
+                                                @eventItem.EventName.Replace("??", "").Trim()
+                                            </h5>
+                                            <p class="card-text mb-1">
+                                                <i class="bi bi-clock-fill"></i>
+                                                <strong>@(eventItem.EventStartDateAndTime != null ? eventItem.EventStartDateAndTime.ToString("MMMM d, yyyy") : "Date not available")</strong>
+                                            </p>
+                                            <p class="card-text mb-1">
+                                                <i class="bi bi-geo-alt-fill"></i>
+                                                ICFAI Foundation, Hyderabad
+                                            </p>
+                                            <p class="card-text">
+                                                <i class="bi bi-people-fill"></i>
+                                                @ViewBag.ClubName
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
                 </div>
-            }
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">No upcoming events found.</p>
+        }
+    </div>
+
+    <!-- Concluded Events Section -->
+    <div id="concludedEventsSection" style="display:none;">
+        <!-- Search by Name -->
+        <div class="d-flex justify-content-center my-3">
+            <div class="input-group" style="max-width: 500px;">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by event name..." />
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+            </div>
+        </div>
+
+        <!-- Filter by Year Dropdown -->
+        <div class="d-flex justify-content-center my-3">
+            <select id="yearFilter" class="form-select" style="max-width: 200px;">
+                <option value="">Filter by Year</option>
+                @for (int year = DateTime.Now.Year; year >= 2000; year--)
+                {
+                    <option value="@year">@year</option>
+                }
+            </select>
+        </div>
+
+        <!-- Recently Concluded Events -->
+        <div class="event-scroll-container-wrapper">
+            <div id="recent-scroll" class="event-scroll-container py-3">
+                <div class="concluded-scroll-content">
+                    @foreach (var ev in recentEvents)
+                    {
+                        <div class="event-card-wrapper d-inline-block me-3">
+                            <a href="@Url.Action("EventHighlights", "Clubs", new { id = ev.EventID })" class="text-decoration-none text-dark">
+                                <div class="event-card">
+                                    <div class="event-date">@ev.EventEndDateAndTime.ToString("MMM d, yyyy")</div>
+                                    @if (!string.IsNullOrEmpty(ev.EventPoster))
+                                    {
+                                        <img src="@Url.Content(ev.EventPoster)" class="card-img-top" style="height:200px;object-fit:cover;" alt="@ev.EventName" />
+                                    }
+                                    <div class="card-body">
+                                        <h5 class="card-title">@ev.EventName</h5>
+                                        <p class="card-text"><strong>@ev.EventEndDateAndTime.ToString("MMMM d, yyyy")</strong></p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                    @foreach (var ev in recentEvents) // Duplicate for seamless scrolling
+                    {
+                        <div class="event-card-wrapper d-inline-block me-3">
+                            <a href="@Url.Action("EventHighlights", "Clubs", new { id = ev.EventID })" class="text-decoration-none text-dark">
+                                <div class="event-card">
+                                    <div class="event-date">@ev.EventEndDateAndTime.ToString("MMM d, yyyy")</div>
+                                    @if (!string.IsNullOrEmpty(ev.EventPoster))
+                                    {
+                                        <img src="@Url.Content(ev.EventPoster)" class="card-img-top" style="height:200px;object-fit:cover;" alt="@ev.EventName" />
+                                    }
+                                    <div class="card-body">
+                                        <h5 class="card-title">@ev.EventName</h5>
+                                        <p class="card-text"><strong>@ev.EventEndDateAndTime.ToString("MMMM d, yyyy")</strong></p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtered/Search Events Container (Shared) -->
+        <div class="event-scroll-container-wrapper">
+            <div id="year-scroll" class="event-scroll-container py-3" style="display:none;">
+                <div class="concluded-scroll-content" id="year-scroll-content"></div>
+            </div>
+            <p id="no-events-msg" class="text-center text-muted" style="display:none;">No events found.</p>
         </div>
     </div>
 
-    <!-- Filtered/Search Events Container (Shared) -->
-    <div class="event-scroll-container-wrapper">
-        <div id="year-scroll" class="event-scroll-container py-3" style="display:none;"></div>
-        <p id="no-events-msg" class="text-center text-muted" style="display:none;">No events found.</p>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content" style="color: #fff; font-size: 14px;">
+                        <div style="background-color: white; padding: 10px; margin-bottom: 20px;">
+                            <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="max-width: 100%; height: auto;">
+                        </div>
+                        <p style="color: #ffc107; font-weight: bold; margin-bottom: 8px;">
+                            <i class="fas fa-map-marker-alt"></i> CAMPUS ADDRESS
+                        </p>
+                        <p>
+                            The ICFAI Foundation for Higher Education (IFHE),<br>
+                            Hyderabad<br>
+                            Donthanapally, Shankarapalli Road<br>
+                            Hyderabad - 501203, Telangana, India.
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-phone-alt"></i> ADMISSION CONTACT
+                        </p>
+                        <p>
+                            Toll Free Number: 18005990767<br>
+                            Telangana: 8498053801<br>
+                            Andhra Pradesh: 9160191166
+                        </p>
+                        <p style="color: #ffc107; font-weight: bold; margin-top: 20px; margin-bottom: 8px;">
+                            <i class="fas fa-headset"></i> SSD (STUDENT SERVICES)
+                        </p>
+                        <p>
+                            08417-226663 / 08417-226662
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Useful Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#" style="color: #ccc;">About IFHE</a></li>
+                            <li><a href="#" style="color: #ccc;">ICFAI Business School</a></li>
+                            <li><a href="#" style="color: #ccc;">Faculty of Science & Technology</a></li>
+                            <li><a href="#" style="color: #ccc;">ICFAI Law School</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Quick Links</h4>
+                        <ul class="list-unstyled">
+                            <li><a href="#" style="color: #ccc;">Careers</a></li>
+                            <li><a href="#" style="color: #ccc;">Contact Us</a></li>
+                            <li><a href="#" style="color: #ccc;">Sitemap</a></li>
+                            <li><a href="#" style="color: #ccc;">Alumni</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 footer-col">
+                    <div class="footer-content">
+                        <h4 style="color: #fff;">Connect with Us</h4>
+                        <ul class="list-unstyled d-flex gap-2">
+                            <li>
+                                <a rel="noreferrer" title="facebook ICFAI University Hyderabad" href="https://www.facebook.com/IFHEHyderabadOfficial/" target="_blank" style="color: #ccc;">
+                                    <i class="bi bi-facebook"></i> Facebook
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://twitter.com/IFHE_Hyderabad" target="_blank" rel="noreferrer" title="Twitter ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.linkedin.com/school/icfai-foundation-for-higher-education-ifhe-hyderabad/" target="_blank" rel="noreferrer" title="LinkedIn ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-linkedin-in"></i> LinkedIn
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.instagram.com/ifhe_hyderabad/" target="_blank" rel="noreferrer" title="Instagram ICFAI University Hyderabad" style="color: #ccc;">
+                                    <i class="fab fa-instagram"></i> Instagram
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="route-map-container">
+            <h2 class="route-map-heading">ROUTE MAP TO IFHE HYDERABAD CAMPUS</h2>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3807.838918799798!2d78.2324844742829!3d17.374845483290986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb95703d119557%3A0x6a0e99997b8c5e5a!2sICFAI%20Foundation%20for%20Higher%20Education%20(IFHE)%2C%20Hyderabad!5e0!3m2!1sen!2sin!4v1712578528895!5m2!1sen!2sin"
+                    width="50"
+                    height="150"
+                    style="border:0;"
+                    loading="lazy"></iframe>
+        </div>
+    </footer>
+
+    <!-- Footer Bottom Bar -->
+    <div class="footer-bottom">
+        <p>© 2024 Copyright All Rights Reserved by <strong>The ICFAI Group.</strong></p>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-
-<script>
-    const concludedEvents = @Html.Raw(eventsJson);
-    const minYear = @minYear;
-    const maxYear = @maxYear;
-
-    $(function () {
-        // Toggle between Upcoming and Concluded sections
-        $('#btnUpcoming').click(function () {
-            $('#upcomingEventsSection').show();
-            $('#concludedEventsSection').hide();
-            $(this).addClass('btn-primary').removeClass('btn-secondary');
-            $('#btnConcluded').addClass('btn-secondary').removeClass('btn-primary');
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
         });
 
-        $('#btnConcluded').click(function () {
-            $('#concludedEventsSection').show();
-            $('#upcomingEventsSection').hide();
-            $(this).addClass('btn-primary').removeClass('btn-secondary');
-            $('#btnUpcoming').addClass('btn-secondary').removeClass('btn-primary');
-            $('#recent-scroll').show();
-            $('#year-scroll').hide();
-            $('#no-events-msg').hide();
-            $('#searchInput').val('');
-            $('#yearFilter').val('');
-        });
+        const concludedEvents = @Html.Raw(eventsJson);
+        const minYear = @minYear;
+        const maxYear = @maxYear;
 
-        // Year filter dropdown
-        $('#yearFilter').change(function () {
-            const selectedYear = parseInt($(this).val());
-            $('#searchInput').val('');
-            if (selectedYear) {
-                showEventsForYear(selectedYear);
-            } else {
+        $(function () {
+            $('#btnUpcoming').click(function () {
+                $('#upcomingEventsSection').show();
+                $('#concludedEventsSection').hide();
+                $(this).addClass('btn-primary').removeClass('btn-secondary');
+                $('#btnConcluded').addClass('btn-secondary').removeClass('btn-primary');
+            });
+
+            $('#btnConcluded').click(function () {
+                $('#concludedEventsSection').show();
+                $('#upcomingEventsSection').hide();
+                $(this).addClass('btn-primary').removeClass('btn-secondary');
+                $('#btnUpcoming').addClass('btn-secondary').removeClass('btn-primary');
+                $('#recent-scroll').show();
                 $('#year-scroll').hide();
-                $('#recent-scroll').show();
                 $('#no-events-msg').hide();
-            }
+                $('#searchInput').val('');
+                $('#yearFilter').val('');
+            });
+
+            $('#yearFilter').change(function () {
+                const selectedYear = parseInt($(this).val());
+                $('#searchInput').val('');
+                $('#recent-scroll').hide();
+                if (selectedYear) {
+                    showEventsForYear(selectedYear);
+                } else {
+                    $('#year-scroll').hide();
+                    $('#recent-scroll').show();
+                    $('#no-events-msg').hide();
+                }
+            });
+
+            $('#searchInput').on('input', function () {
+                const query = $(this).val().trim().toLowerCase();
+                $('#yearFilter').val('');
+                $('#year-scroll').hide();
+                $('#no-events-msg').hide();
+                $('#recent-scroll').hide();
+
+                if (!query) {
+                    $('#recent-scroll').show();
+                    return;
+                }
+
+                const filtered = concludedEvents.filter(e =>
+                    e.EventName.toLowerCase().includes(query)
+                );
+
+                renderSearchResults(filtered);
+            });
+
+            $('#recent-scroll').on('click', '.close-scroll-btn', function () {
+                $('#recent-scroll').hide();
+            });
+
+            $(document).on('click', '#closeYearScroll', function () {
+                $('#year-scroll').hide();
+                $('#no-events-msg').hide();
+            });
         });
 
-        // Search as you type
-        $('#searchInput').on('input', function () {
-            const query = $(this).val().trim().toLowerCase();
-            $('#yearFilter').val('');
-            $('#year-scroll').hide();
-            $('#no-events-msg').hide();
+        function showEventsForYear(year) {
+            const container = $('#year-scroll-content').empty();
+            const wrapper = $('#year-scroll');
+            const msg = $('#no-events-msg');
 
-            if (!query) {
-                $('#recent-scroll').show();
+            const filtered = concludedEvents.filter(e =>
+                new Date(e.EventEndDateAndTime).getFullYear() === year
+            );
+
+            if (!filtered.length) {
+                wrapper.hide();
+                msg.show();
                 return;
             }
 
-            $('#recent-scroll').hide();
-
-            const filtered = concludedEvents.filter(e =>
-                e.EventName.toLowerCase().includes(query)
-            );
-
-            renderSearchResults(filtered);
-        });
-
-        // Close recent scroll
-        $('#closeRecentScroll').click(function () {
-            $('#recent-scroll').hide();
-        });
-
-        // Close year-scroll (reused for filter/search)
-        $(document).on('click', '#closeYearScroll', function () {
-            $('#year-scroll').hide();
-            $('#no-events-msg').hide();
-        });
-    });
-
-    function showEventsForYear(year) {
-        const container = $('#year-scroll').empty();
-        const msg = $('#no-events-msg');
-
-        container.append('<button id="closeYearScroll" class="close-scroll-btn" title="Close">×</button>');
-
-        const filtered = concludedEvents.filter(e =>
-            new Date(e.EventEndDateAndTime).getFullYear() === year
-        );
-
-        if (!filtered.length) {
-            container.hide();
-            msg.show();
-            return;
+            msg.hide();
+            filtered.forEach(ev => container.append(createCardHtml(ev)));
+            filtered.forEach(ev => container.append(createCardHtml(ev))); // Duplicate for seamless scrolling
+            wrapper.show();
         }
 
-        msg.hide();
-        filtered.forEach(ev => container.append(createCardHtml(ev)));
-        container.show();
-    }
+        function renderSearchResults(list) {
+            const container = $('#year-scroll-content').empty();
+            const wrapper = $('#year-scroll');
+            const msg = $('#no-events-msg');
 
-    function renderSearchResults(list) {
-        const container = $('#year-scroll').empty();
-        const msg = $('#no-events-msg');
+            if (!list.length) {
+                wrapper.hide();
+                msg.text('No matching events found.').show();
+                return;
+            }
 
-        container.append('<button id="closeYearScroll" class="close-scroll-btn" title="Close">×</button>');
-
-        if (!list.length) {
-            container.hide();
-            msg.text('No matching events found.').show();
-            return;
+            msg.hide();
+            list.forEach(ev => container.append(createCardHtml(ev)));
+            list.forEach(ev => container.append(createCardHtml(ev))); // Duplicate for seamless scrolling
+            wrapper.show();
         }
 
-        msg.hide();
-        list.forEach(ev => container.append(createCardHtml(ev)));
-        container.show();
-    }
+        function createCardHtml(ev) {
+            const dateStr = new Date(ev.EventEndDateAndTime).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
 
-    function createCardHtml(ev) {
-        const dateStr = new Date(ev.EventEndDateAndTime).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        });
+            const img = ev.EventPoster && ev.EventPoster.trim()
+                ? `<img src="${ev.EventPoster}" class="card-img-top" style="height:200px;object-fit:cover;" alt="${ev.EventName}"/>`
+                : `<img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" style="height:200px;object-fit:cover;" alt="No Image"/>`;
 
-        const img = ev.EventPoster && ev.EventPoster.trim()
-            ? `<img src="${ev.EventPoster}" class="card-img-top" style="height:200px;object-fit:cover;" alt="${ev.EventName}"/>`
-            : `<img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" style="height:200px;object-fit:cover;" alt="No Image"/>`;
-
-        return `
-            <div class="event-card-wrapper d-inline-block me-3">
-                <a href="/Clubs/EventHighlights/${ev.EventID}" class="text-decoration-none text-dark">
-                    <div class="card event-card" style="min-width:300px;max-width:300px;">
-                        ${img}
-                        <div class="card-body">
-                            <h5 class="card-title">${ev.EventName}</h5>
-                            <p class="card-text"><strong>${dateStr}</strong></p>
+            return `
+                <div class="event-card-wrapper d-inline-block me-3">
+                    <a href="/Clubs/EventHighlights/${ev.EventID}" class="text-decoration-none text-dark">
+                        <div class="event-card">
+                            <div class="event-date">${dateStr}</div>
+                            ${img}
+                            <div class="card-body">
+                                <h5 class="card-title">${ev.EventName}</h5>
+                                <p class="card-text"><strong>${dateStr}</strong></p>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>`;
-    }
-</script>
+                    </a>
+                </div>`;
+        }
+
+        function handleCardClick(eventName) {
+            console.log(`Clicked on event: ${eventName}`);
+        }
+    </script>
+</body>
+</html>

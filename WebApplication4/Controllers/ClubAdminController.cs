@@ -43,12 +43,10 @@ namespace WebApplication1.Controllers
             int loginId = Convert.ToInt32(Session["UserID"]);
             System.Diagnostics.Debug.WriteLine($"[DEBUG] clubadmin LoginID: {loginId}");
 
-
             // Fetch notifications
             var notifications = _db.Notifications
-                                   .Where(n => n.LoginID == loginId && n.IsRead == false && n.EndDate > DateTime.Now)
-                                   .ToList();
-
+                                    .Where(n => n.LoginID == loginId && n.IsRead == false && n.EndDate > DateTime.Now)
+                                    .ToList();
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Total Unread Notifications: {notifications.Count}");
 
             ViewBag.Notifications = notifications;
@@ -60,6 +58,17 @@ namespace WebApplication1.Controllers
             ViewBag.University = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME;
             ViewBag.ClubAdminPhoto = clubAdmin.ProfileImagePath; // Assuming the photo is stored as a file path or URL
 
+            // -----------------------------  New Code for Events and Clubs Count -----------------------------
+
+            // Count Number of Events for this Club Admin's Club
+            int clubId = clubAdmin.ClubID ?? 0; // handling if null
+            int numberOfEvents = _db.EVENTS.Count(e => e.ClubID == clubId);
+            ViewBag.NumberOfEvents = numberOfEvents;
+
+            // Count Number of Clubs (assuming one club per admin, otherwise adjust logic)
+            ViewBag.NumberOfClubs = 1;
+
+            // ----------------------------------------------------------------------------------------------
 
             return View();
         }
@@ -179,7 +188,7 @@ namespace WebApplication1.Controllers
                 {
                     Console.WriteLine("Event saved successfully with EventPoster: " + filePath);
                     TempData["SuccessMessage"] = "Event request submitted successfully!";
-                    return RedirectToAction("ViewEventStatus");
+                    return RedirectToAction("RequestEvent");
                 }
                 else
                 {
@@ -197,6 +206,7 @@ namespace WebApplication1.Controllers
                 return View(model);
             }
         }
+
 
 
         public ActionResult MarkNotificationAsRead(int notificationId)
@@ -345,7 +355,7 @@ namespace WebApplication1.Controllers
 
 
                     ViewBag.Message = "Event posted successfully!";
-                    return View("PostEventSuccess", model);
+                    return View("PostEvent", model);
                 }
                 catch (System.Data.Entity.Validation.DbEntityValidationException ex)
                 {
@@ -508,9 +518,9 @@ namespace WebApplication1.Controllers
                         _db.SaveChanges();
                     }
 
-
-                    ViewBag.Message = "Event posted successfully!";
-                    return View("PostEventSuccess", model);
+                    
+                    ViewBag.Message = "Event updated successfully!";
+                    return View(new PostEventViewModel());
                 }
                 catch (System.Data.Entity.Validation.DbEntityValidationException ex)
                 {
@@ -691,51 +701,31 @@ namespace WebApplication1.Controllers
             var evnt = _db.EVENTS.Find(EventId);
             if (evnt == null)
             {
-                TempData["ErrorMessage"] = "Event not found.";
-                return RedirectToAction("EventList");
+                ViewBag.ErrorMessage = "Event not found.";
+                return View("EventDetails");
             }
 
-            /*// Handle Brochure Upload
+            // Handle Brochure Upload
             if (Brochure != null && Brochure.ContentLength > 0)
             {
                 string brochureDirectory = Server.MapPath("~/wwwroot/UploadedBrochures/");
                 if (!Directory.Exists(brochureDirectory))
                     Directory.CreateDirectory(brochureDirectory);
 
-                string brochureFileName = Path.GetFileName(Brochure.FileName);
-                string brochurePath = Path.Combine(brochureDirectory, brochureFileName);
-                Brochure.SaveAs(brochurePath);
-
-                evnt.EventBrochure = "/wwwroot/UploadedBrochures/" + brochureFileName;
-            }*/
-
-
-            // Handle Brochure Upload (only update if a new file is selected)
-            if (Brochure != null && Brochure.ContentLength > 0)
-            {
-                string brochureDirectory = Server.MapPath("~/wwwroot/UploadedBrochures/");
-                if (!Directory.Exists(brochureDirectory))
-                    Directory.CreateDirectory(brochureDirectory);
-
-                // Delete old brochure file if it exists and the user uploads a new one
                 if (!string.IsNullOrEmpty(evnt.EventBrochure))
                 {
                     var oldBrochurePath = Server.MapPath(evnt.EventBrochure);
                     if (System.IO.File.Exists(oldBrochurePath))
                     {
-                        System.IO.File.Delete(oldBrochurePath);  // Delete the old file
+                        System.IO.File.Delete(oldBrochurePath);
                     }
                 }
 
-                // Save the new brochure file
                 string brochureFileName = Path.GetFileName(Brochure.FileName);
                 string brochurePath = Path.Combine(brochureDirectory, brochureFileName);
                 Brochure.SaveAs(brochurePath);
-
-                // Update the EventBrochure field to the new path
                 evnt.EventBrochure = "/wwwroot/UploadedBrochures/" + brochureFileName;
             }
-
 
             // Handle New Photos
             if (EventPhotos != null)
@@ -793,8 +783,72 @@ namespace WebApplication1.Controllers
             }
 
             _db.SaveChanges();
-            TempData["SuccessMessage"] = "Event details updated successfully!";
-            return RedirectToAction("EventDetails", new { id = EventId });
+
+            // Set success message in ViewBag
+            ViewBag.SuccessMessage = "Event details updated successfully!";
+
+            // Rebuild view model for the same view
+            var model = new EventDetailsViewModel
+            {
+                Event = evnt,
+                EventPhotos = _db.EventPhotos.Where(p => p.EventId == EventId).ToList(),
+                EventWinners = _db.EventWinners.Where(w => w.EventId == EventId).ToList()
+            };
+
+            return View("getconEventDetails", model); // Stay on same view
+        }
+
+
+
+        //change password
+        [HttpGet]
+        public ActionResult ChangePassword()
+        {
+            if (Session["UserID"] == null)
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin"); // ✅ Redirects to AdminController
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var userEmail = Session["UserID"]?.ToString();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "Your session has expired. Please login again.";
+                return RedirectToAction("Login", "Admin"); // ✅ Redirects to AdminController
+            }
+
+            var user = _db.Logins.FirstOrDefault(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(model);
+            }
+
+            // WARNING: This assumes plain text password comparison — not secure in production!
+            if (user.PasswordHash != model.CurrentPassword)
+            {
+                ModelState.AddModelError("", "Current password is incorrect.");
+                return View(model);
+            }
+
+            // Update password
+            user.PasswordHash = model.NewPassword;
+            _db.SaveChanges();
+
+            TempData["SuccessMessage"] = "Password changed successfully!";
+            return RedirectToAction("Dashboard", "ClubAdmin");
         }
 
 
