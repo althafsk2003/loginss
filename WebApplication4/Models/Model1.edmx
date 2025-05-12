@@ -147,6 +147,8 @@
           <Property Name="IsActive" Type="bit" />
           <Property Name="UniversityID" Type="int" />
           <Property Name="DepartmentID" Type="int" />
+          <Property Name="OTP" Type="nvarchar" MaxLength="6" />
+          <Property Name="OTPExpiry" Type="datetime" />
         </EntityType>
         <EntityType Name="Notifications">
           <Key>
@@ -200,7 +202,7 @@
           <Property Name="District" Type="varchar" MaxLength="255" />
           <Property Name="DepartmentID" Type="int" />
         </EntityType>
-        <Association Name="FK__ClubRegis__Appro__7FEAFD3E">
+        <Association Name="FK__ClubRegis__Appro__7E37BEF6">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -212,7 +214,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__ClubI__7EF6D905">
+        <Association Name="FK__ClubRegis__ClubI__7F2BE32F">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -224,7 +226,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__UserI__7E02B4CC">
+        <Association Name="FK__ClubRegis__UserI__00200768">
           <End Role="USER" Type="Self.USER" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -236,7 +238,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__ApprovalS__30C33EC3">
+        <Association Name="FK__CLUBS__ApprovalS__02FC7413">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -248,7 +250,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__Departmen__2EDAF651">
+        <Association Name="FK__CLUBS__Departmen__03F0984C">
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -260,7 +262,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__MentorID__2FCF1A8A">
+        <Association Name="FK__CLUBS__MentorID__04E4BC85">
           <End Role="Logins" Type="Self.Logins" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -272,7 +274,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__DEPARTMEN__Unive__656C112C">
+        <Association Name="FK__DEPARTMEN__Unive__07C12930">
           <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -284,7 +286,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventPhot__Event__67DE6983">
+        <Association Name="FK__EventPhot__Event__08B54D69">
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
           <End Role="EventPhotos" Type="Self.EventPhotos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -296,7 +298,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__Approval__214BF109">
+        <Association Name="FK__EVENTS__Approval__0A9D95DB">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -308,7 +310,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__ClubID__2057CCD0">
+        <Association Name="FK__EVENTS__ClubID__0B91BA14">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -320,7 +322,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__EventOrg__22401542">
+        <Association Name="FK__EVENTS__EventOrg__0C85DE4D">
           <End Role="Logins" Type="Self.Logins" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -332,7 +334,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventWinn__Event__6ABAD62E">
+        <Association Name="FK__EventWinn__Event__0D7A0286">
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
           <End Role="EventWinners" Type="Self.EventWinners" Multiplicity="*" />
           <ReferentialConstraint>
@@ -344,7 +346,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Notificat__Login__3F115E1A">
+        <Association Name="FK__Notificat__Login__10566F31">
           <End Role="Logins" Type="Self.Logins" Multiplicity="0..1" />
           <End Role="Notifications" Type="Self.Notifications" Multiplicity="*" />
           <ReferentialConstraint>
@@ -468,55 +470,55 @@
           <EntitySet Name="Notifications" EntityType="Self.Notifications" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UNIVERSITY" EntityType="Self.UNIVERSITY" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="USER" EntityType="Self.USER" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__ClubRegis__Appro__7FEAFD3E" Association="Self.FK__ClubRegis__Appro__7FEAFD3E">
+          <AssociationSet Name="FK__ClubRegis__Appro__7E37BEF6" Association="Self.FK__ClubRegis__Appro__7E37BEF6">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__ClubI__7EF6D905" Association="Self.FK__ClubRegis__ClubI__7EF6D905">
+          <AssociationSet Name="FK__ClubRegis__ClubI__7F2BE32F" Association="Self.FK__ClubRegis__ClubI__7F2BE32F">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__UserI__7E02B4CC" Association="Self.FK__ClubRegis__UserI__7E02B4CC">
+          <AssociationSet Name="FK__ClubRegis__UserI__00200768" Association="Self.FK__ClubRegis__UserI__00200768">
             <End Role="USER" EntitySet="USER" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__ApprovalS__30C33EC3" Association="Self.FK__CLUBS__ApprovalS__30C33EC3">
+          <AssociationSet Name="FK__CLUBS__ApprovalS__02FC7413" Association="Self.FK__CLUBS__ApprovalS__02FC7413">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__Departmen__2EDAF651" Association="Self.FK__CLUBS__Departmen__2EDAF651">
+          <AssociationSet Name="FK__CLUBS__Departmen__03F0984C" Association="Self.FK__CLUBS__Departmen__03F0984C">
             <End Role="DEPARTMENT" EntitySet="DEPARTMENT" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__MentorID__2FCF1A8A" Association="Self.FK__CLUBS__MentorID__2FCF1A8A">
+          <AssociationSet Name="FK__CLUBS__MentorID__04E4BC85" Association="Self.FK__CLUBS__MentorID__04E4BC85">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__DEPARTMEN__Unive__656C112C" Association="Self.FK__DEPARTMEN__Unive__656C112C">
+          <AssociationSet Name="FK__DEPARTMEN__Unive__07C12930" Association="Self.FK__DEPARTMEN__Unive__07C12930">
             <End Role="UNIVERSITY" EntitySet="UNIVERSITY" />
             <End Role="DEPARTMENT" EntitySet="DEPARTMENT" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__67DE6983" Association="Self.FK__EventPhot__Event__67DE6983">
+          <AssociationSet Name="FK__EventPhot__Event__08B54D69" Association="Self.FK__EventPhot__Event__08B54D69">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventPhotos" EntitySet="EventPhotos" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__Approval__214BF109" Association="Self.FK__EVENTS__Approval__214BF109">
+          <AssociationSet Name="FK__EVENTS__Approval__0A9D95DB" Association="Self.FK__EVENTS__Approval__0A9D95DB">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__ClubID__2057CCD0" Association="Self.FK__EVENTS__ClubID__2057CCD0">
+          <AssociationSet Name="FK__EVENTS__ClubID__0B91BA14" Association="Self.FK__EVENTS__ClubID__0B91BA14">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__EventOrg__22401542" Association="Self.FK__EVENTS__EventOrg__22401542">
+          <AssociationSet Name="FK__EVENTS__EventOrg__0C85DE4D" Association="Self.FK__EVENTS__EventOrg__0C85DE4D">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventWinn__Event__6ABAD62E" Association="Self.FK__EventWinn__Event__6ABAD62E">
+          <AssociationSet Name="FK__EventWinn__Event__0D7A0286" Association="Self.FK__EventWinn__Event__0D7A0286">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventWinners" EntitySet="EventWinners" />
           </AssociationSet>
-          <AssociationSet Name="FK__Notificat__Login__3F115E1A" Association="Self.FK__Notificat__Login__3F115E1A">
+          <AssociationSet Name="FK__Notificat__Login__10566F31" Association="Self.FK__Notificat__Login__10566F31">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="Notifications" EntitySet="Notifications" />
           </AssociationSet>
@@ -557,6 +559,218 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="dummyclubsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="ApprovalStatusTable">
+          <Key>
+            <PropertyRef Name="ApprovalStatusID" />
+          </Key>
+          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__Appro__7E37BEF6" FromRole="ApprovalStatusTable" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__ApprovalS__02FC7413" FromRole="ApprovalStatusTable" ToRole="CLUBS" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__Approval__0A9D95DB" FromRole="ApprovalStatusTable" ToRole="EVENTS" />
+        </EntityType>
+        <EntityType Name="ClubRegistration">
+          <Key>
+            <PropertyRef Name="RegistrationID" />
+          </Key>
+          <Property Name="RegistrationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" />
+          <Property Name="ClubID" Type="Int32" />
+          <Property Name="FullName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="PreferredRole" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RoleJustification" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ProfileImagePath" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="ApprovalStatusID" Type="Int32" />
+          <Property Name="AssignedRole" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RegisteredAt" Type="DateTime" Precision="3" />
+          <Property Name="DepartmentID" Type="Int32" />
+          <Property Name="UniversityID" Type="Int32" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__ClubRegis__Appro__7E37BEF6" FromRole="ClubRegistrations" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="CLUB" Relationship="Self.FK__ClubRegis__ClubI__7F2BE32F" FromRole="ClubRegistrations" ToRole="CLUBS" />
+          <NavigationProperty Name="USER" Relationship="Self.FK__ClubRegis__UserI__00200768" FromRole="ClubRegistrations" ToRole="USER" />
+          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_ClubRegistrations_Department" FromRole="ClubRegistrations" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK_ClubRegistrations_University" FromRole="ClubRegistrations" ToRole="UNIVERSITY" />
+        </EntityType>
+        <EntityType Name="CLUB">
+          <Key>
+            <PropertyRef Name="ClubID" />
+          </Key>
+          <Property Name="ClubID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ClubName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Abbreviation" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="TotalClubCommitteeSeats" Type="Int32" Nullable="false" />
+          <Property Name="AvailableClubCommitteeSeats" Type="Int32" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="DepartmentID" Type="Int32" Nullable="false" />
+          <Property Name="MentorID" Type="Int32" Nullable="false" />
+          <Property Name="LogoImagePath" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__CLUBS__ApprovalS__02FC7413" FromRole="CLUBS" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__ClubI__7F2BE32F" FromRole="CLUBS" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK__CLUBS__Departmen__03F0984C" FromRole="CLUBS" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__CLUBS__MentorID__04E4BC85" FromRole="CLUBS" ToRole="Logins" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__ClubID__0B91BA14" FromRole="CLUBS" ToRole="EVENTS" />
+        </EntityType>
+        <EntityType Name="Comment">
+          <Key>
+            <PropertyRef Name="CommentID" />
+          </Key>
+          <Property Name="CommentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventID" Type="Int32" Nullable="false" />
+          <Property Name="ParentCommentID" Type="Int32" />
+          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="CommentText" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PostedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Avatar" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK_Comments_Events" FromRole="Comments" ToRole="EVENTS" />
+          <NavigationProperty Name="Comments1" Relationship="Self.FK_Comments_Parent" FromRole="Comments" ToRole="Comments1" />
+          <NavigationProperty Name="Comment1" Relationship="Self.FK_Comments_Parent" FromRole="Comments1" ToRole="Comments" />
+        </EntityType>
+        <EntityType Name="DEPARTMENT">
+          <Key>
+            <PropertyRef Name="DepartmentID" />
+          </Key>
+          <Property Name="DepartmentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DepartmentName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="HOD" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="createdDate" Type="DateTime" Precision="3" />
+          <Property Name="Universityid" Type="Int32" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK_ClubRegistrations_Department" FromRole="DEPARTMENT" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__Departmen__03F0984C" FromRole="DEPARTMENT" ToRole="CLUBS" />
+          <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK__DEPARTMEN__Unive__07C12930" FromRole="DEPARTMENT" ToRole="UNIVERSITY" />
+          <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_Department" FromRole="DEPARTMENT" ToRole="Logins" />
+          <NavigationProperty Name="USERs" Relationship="Self.FK_Users_Department" FromRole="DEPARTMENT" ToRole="USER" />
+        </EntityType>
+        <EntityType Name="EventPhoto">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventId" Type="Int32" Nullable="false" />
+          <Property Name="PhotoPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventPhot__Event__08B54D69" FromRole="EventPhotos" ToRole="EVENTS" />
+        </EntityType>
+        <EntityType Name="EventRegistration">
+          <Key>
+            <PropertyRef Name="RegistrationID" />
+          </Key>
+          <Property Name="RegistrationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventID" Type="Int32" Nullable="false" />
+          <Property Name="TypeOfParticipation" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GroupName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="NumberOfMembers" Type="Int32" />
+          <Property Name="MemberNames" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FullName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="EnrollmentId" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="UniversityName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Branch" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="YearOfStudy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="RegisteredAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK_Registrations_Events" FromRole="EventRegistrations" ToRole="EVENTS" />
+        </EntityType>
+        <EntityType Name="EVENT">
+          <Key>
+            <PropertyRef Name="EventID" />
+          </Key>
+          <Property Name="ClubID" Type="Int32" />
+          <Property Name="EventID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="EventDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="EventType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="EventStartDateAndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EventEndDateAndTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EventCreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="EventPoster" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="EventBrochure" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="NoOfLikes" Type="Int32" />
+          <Property Name="NoOfDislikes" Type="Int32" />
+          <Property Name="QRContentText" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="QRImage" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="EventOrganizerID" Type="Int32" Nullable="false" />
+          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" />
+          <Property Name="RegistrationURL" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="EventBannerPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="EventStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__EVENTS__Approval__0A9D95DB" FromRole="EVENTS" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="CLUB" Relationship="Self.FK__EVENTS__ClubID__0B91BA14" FromRole="EVENTS" ToRole="CLUBS" />
+          <NavigationProperty Name="Comments" Relationship="Self.FK_Comments_Events" FromRole="EVENTS" ToRole="Comments" />
+          <NavigationProperty Name="EventPhotos" Relationship="Self.FK__EventPhot__Event__08B54D69" FromRole="EVENTS" ToRole="EventPhotos" />
+          <NavigationProperty Name="EventRegistrations" Relationship="Self.FK_Registrations_Events" FromRole="EVENTS" ToRole="EventRegistrations" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__EVENTS__EventOrg__0C85DE4D" FromRole="EVENTS" ToRole="Logins" />
+          <NavigationProperty Name="EventWinners" Relationship="Self.FK__EventWinn__Event__0D7A0286" FromRole="EVENTS" ToRole="EventWinners" />
+        </EntityType>
+        <EntityType Name="EventWinner">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventId" Type="Int32" Nullable="false" />
+          <Property Name="WinnerName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Prize" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventWinn__Event__0D7A0286" FromRole="EventWinners" ToRole="EVENTS" />
+        </EntityType>
+        <EntityType Name="Login">
+          <Key>
+            <PropertyRef Name="LoginID" />
+          </Key>
+          <Property Name="LoginID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PasswordHash" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Role" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="UniversityID" Type="Int32" />
+          <Property Name="DepartmentID" Type="Int32" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__MentorID__04E4BC85" FromRole="Logins" ToRole="CLUBS" />
+          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_Logins_Department" FromRole="Logins" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__EventOrg__0C85DE4D" FromRole="Logins" ToRole="EVENTS" />
+          <NavigationProperty Name="Notifications" Relationship="Self.FK__Notificat__Login__10566F31" FromRole="Logins" ToRole="Notifications" />
+          <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK_Logins_University" FromRole="Logins" ToRole="UNIVERSITY" />
+          <Property Name="OTP" Type="String" MaxLength="6" FixedLength="false" Unicode="true" />
+          <Property Name="OTPExpiry" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="Notification">
+          <Key>
+            <PropertyRef Name="NotificationID" />
+          </Key>
+          <Property Name="NotificationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LoginID" Type="Int32" />
+          <Property Name="Message" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="IsRead" Type="Boolean" />
+          <Property Name="StartDate" Type="DateTime" Precision="3" />
+          <Property Name="EndDate" Type="DateTime" Precision="3" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__Notificat__Login__10566F31" FromRole="Notifications" ToRole="Logins" />
+        </EntityType>
+        <EntityType Name="UNIVERSITY">
+          <Key>
+            <PropertyRef Name="UniversityID" />
+          </Key>
+          <Property Name="UniversityID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UniversityNAME" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Abbreviation" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Location" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AdministratorName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Contact" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK_ClubRegistrations_University" FromRole="UNIVERSITY" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="DEPARTMENTs" Relationship="Self.FK__DEPARTMEN__Unive__07C12930" FromRole="UNIVERSITY" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_University" FromRole="UNIVERSITY" ToRole="Logins" />
+        </EntityType>
         <EntityType Name="USER">
           <Key>
             <PropertyRef Name="UserID" />
@@ -581,146 +795,156 @@
           <Property Name="PhotoPath" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="District" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="DepartmentID" Type="Int32" />
-          <NavigationProperty Name="DEPARTMENT" Relationship="dummyclubsModel.FK_Users_Department" FromRole="USER" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="dummyclubsModel.FK__ClubRegis__UserI__7E02B4CC" FromRole="USER" ToRole="ClubRegistration" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__UserI__00200768" FromRole="USER" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_Users_Department" FromRole="USER" ToRole="DEPARTMENT" />
         </EntityType>
-        <EntityContainer Name="dummyclubsEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="USERs" EntityType="Self.USER" />
-          <EntitySet Name="DEPARTMENTs" EntityType="dummyclubsModel.DEPARTMENT" />
-          <EntitySet Name="UNIVERSITies" EntityType="dummyclubsModel.UNIVERSITY" />
-          <AssociationSet Name="FK__DEPARTMEN__Unive__656C112C" Association="dummyclubsModel.FK__DEPARTMEN__Unive__656C112C">
-            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
-            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
-          </AssociationSet>
-          <EntitySet Name="Logins" EntityType="dummyclubsModel.Login" />
-          <AssociationSet Name="FK_Logins_University" Association="dummyclubsModel.FK_Logins_University">
-            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
-            <End Role="Login" EntitySet="Logins" />
-          </AssociationSet>
-          <EntitySet Name="ApprovalStatusTables" EntityType="dummyclubsModel.ApprovalStatusTable" />
-          <EntitySet Name="CLUBS" EntityType="dummyclubsModel.CLUB" />
-          <AssociationSet Name="FK__CLUBS__ApprovalS__30C33EC3" Association="dummyclubsModel.FK__CLUBS__ApprovalS__30C33EC3">
-            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
-            <End Role="CLUB" EntitySet="CLUBS" />
-          </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__Departmen__2EDAF651" Association="dummyclubsModel.FK__CLUBS__Departmen__2EDAF651">
-            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
-            <End Role="CLUB" EntitySet="CLUBS" />
-          </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__MentorID__2FCF1A8A" Association="dummyclubsModel.FK__CLUBS__MentorID__2FCF1A8A">
-            <End Role="Login" EntitySet="Logins" />
-            <End Role="CLUB" EntitySet="CLUBS" />
-          </AssociationSet>
-          <EntitySet Name="Notifications" EntityType="dummyclubsModel.Notification" />
-          <AssociationSet Name="FK__Notificat__Login__3F115E1A" Association="dummyclubsModel.FK__Notificat__Login__3F115E1A">
-            <End Role="Login" EntitySet="Logins" />
-            <End Role="Notification" EntitySet="Notifications" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Logins_Department" Association="dummyclubsModel.FK_Logins_Department">
-            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
-            <End Role="Login" EntitySet="Logins" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Users_Department" Association="dummyclubsModel.FK_Users_Department">
-            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
-            <End Role="USER" EntitySet="USERs" />
-          </AssociationSet>
-          <EntitySet Name="ClubRegistrations" EntityType="dummyclubsModel.ClubRegistration" />
-          <AssociationSet Name="FK__ClubRegis__Appro__7FEAFD3E" Association="dummyclubsModel.FK__ClubRegis__Appro__7FEAFD3E">
-            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
-            <End Role="ClubRegistration" EntitySet="ClubRegistrations" />
-          </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__ClubI__7EF6D905" Association="dummyclubsModel.FK__ClubRegis__ClubI__7EF6D905">
-            <End Role="CLUB" EntitySet="CLUBS" />
-            <End Role="ClubRegistration" EntitySet="ClubRegistrations" />
-          </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__UserI__7E02B4CC" Association="dummyclubsModel.FK__ClubRegis__UserI__7E02B4CC">
-            <End Role="USER" EntitySet="USERs" />
-            <End Role="ClubRegistration" EntitySet="ClubRegistrations" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ClubRegistrations_Department" Association="dummyclubsModel.FK_ClubRegistrations_Department">
-            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
-            <End Role="ClubRegistration" EntitySet="ClubRegistrations" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ClubRegistrations_University" Association="dummyclubsModel.FK_ClubRegistrations_University">
-            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
-            <End Role="ClubRegistration" EntitySet="ClubRegistrations" />
-          </AssociationSet>
-          <EntitySet Name="EVENTS" EntityType="dummyclubsModel.EVENT" />
-          <AssociationSet Name="FK__EVENTS__Approval__214BF109" Association="dummyclubsModel.FK__EVENTS__Approval__214BF109">
-            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
-            <End Role="EVENT" EntitySet="EVENTS" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__ClubID__2057CCD0" Association="dummyclubsModel.FK__EVENTS__ClubID__2057CCD0">
-            <End Role="CLUB" EntitySet="CLUBS" />
-            <End Role="EVENT" EntitySet="EVENTS" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__EventOrg__22401542" Association="dummyclubsModel.FK__EVENTS__EventOrg__22401542">
-            <End Role="Login" EntitySet="Logins" />
-            <End Role="EVENT" EntitySet="EVENTS" />
-          </AssociationSet>
-          <EntitySet Name="Comments" EntityType="dummyclubsModel.Comment" />
-          <AssociationSet Name="FK_Comments_Events" Association="dummyclubsModel.FK_Comments_Events">
-            <End Role="EVENT" EntitySet="EVENTS" />
-            <End Role="Comment" EntitySet="Comments" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Comments_Parent" Association="dummyclubsModel.FK_Comments_Parent">
-            <End Role="Comment" EntitySet="Comments" />
-            <End Role="Comment1" EntitySet="Comments" />
-          </AssociationSet>
-          <EntitySet Name="EventRegistrations" EntityType="dummyclubsModel.EventRegistration" />
-          <AssociationSet Name="FK_Registrations_Events" Association="dummyclubsModel.FK_Registrations_Events">
-            <End Role="EVENT" EntitySet="EVENTS" />
-            <End Role="EventRegistration" EntitySet="EventRegistrations" />
-          </AssociationSet>
-          <EntitySet Name="EventPhotos" EntityType="dummyclubsModel.EventPhoto" />
-          <EntitySet Name="EventWinners" EntityType="dummyclubsModel.EventWinner" />
-          <AssociationSet Name="FK__EventPhot__Event__67DE6983" Association="dummyclubsModel.FK__EventPhot__Event__67DE6983">
-            <End Role="EVENT" EntitySet="EVENTS" />
-            <End Role="EventPhoto" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventWinn__Event__6ABAD62E" Association="dummyclubsModel.FK__EventWinn__Event__6ABAD62E">
-            <End Role="EVENT" EntitySet="EVENTS" />
-            <End Role="EventWinner" EntitySet="EventWinners" />
-          </AssociationSet>
-        </EntityContainer>
-        <EntityType Name="DEPARTMENT">
-          <Key>
-            <PropertyRef Name="DepartmentID" />
-          </Key>
-          <Property Name="DepartmentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="DepartmentName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="HOD" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="createdDate" Type="DateTime" Precision="3" />
-          <Property Name="Universityid" Type="Int32" />
-          <Property Name="IsActive" Type="Boolean" />
-          <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="UNIVERSITY" Relationship="dummyclubsModel.FK__DEPARTMEN__Unive__656C112C" FromRole="DEPARTMENT" ToRole="UNIVERSITY" />
-          <NavigationProperty Name="CLUBS" Relationship="dummyclubsModel.FK__CLUBS__Departmen__2EDAF651" FromRole="DEPARTMENT" ToRole="CLUB" />
-          <NavigationProperty Name="Logins" Relationship="dummyclubsModel.FK_Logins_Department" FromRole="DEPARTMENT" ToRole="Login" />
-          <NavigationProperty Name="USERs" Relationship="dummyclubsModel.FK_Users_Department" FromRole="DEPARTMENT" ToRole="USER" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="dummyclubsModel.FK_ClubRegistrations_Department" FromRole="DEPARTMENT" ToRole="ClubRegistration" />
-        </EntityType>
-        <EntityType Name="UNIVERSITY">
-          <Key>
-            <PropertyRef Name="UniversityID" />
-          </Key>
-          <Property Name="UniversityID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UniversityNAME" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Abbreviation" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Location" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="AdministratorName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Contact" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" />
-          <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="DEPARTMENTs" Relationship="dummyclubsModel.FK__DEPARTMEN__Unive__656C112C" FromRole="UNIVERSITY" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="Logins" Relationship="dummyclubsModel.FK_Logins_University" FromRole="UNIVERSITY" ToRole="Login" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="dummyclubsModel.FK_ClubRegistrations_University" FromRole="UNIVERSITY" ToRole="ClubRegistration" />
-        </EntityType>
-        <Association Name="FK__DEPARTMEN__Unive__656C112C">
-          <End Type="dummyclubsModel.UNIVERSITY" Role="UNIVERSITY" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.DEPARTMENT" Role="DEPARTMENT" Multiplicity="*" />
+        <Association Name="FK__ClubRegis__Appro__7E37BEF6">
+          <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="0..1" />
+          <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ApprovalStatusTable">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Principal>
+            <Dependent Role="ClubRegistrations">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CLUBS__ApprovalS__02FC7413">
+          <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
+          <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ApprovalStatusTable">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Principal>
+            <Dependent Role="CLUBS">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EVENTS__Approval__0A9D95DB">
+          <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ApprovalStatusTable">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Principal>
+            <Dependent Role="EVENTS">
+              <PropertyRef Name="ApprovalStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ClubRegis__ClubI__7F2BE32F">
+          <End Role="CLUBS" Type="Self.CLUB" Multiplicity="0..1" />
+          <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CLUBS">
+              <PropertyRef Name="ClubID" />
+            </Principal>
+            <Dependent Role="ClubRegistrations">
+              <PropertyRef Name="ClubID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ClubRegis__UserI__00200768">
+          <End Role="USER" Type="Self.USER" Multiplicity="0..1" />
+          <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="USER">
+              <PropertyRef Name="UserID" />
+            </Principal>
+            <Dependent Role="ClubRegistrations">
+              <PropertyRef Name="UserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ClubRegistrations_Department">
+          <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="0..1" />
+          <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DEPARTMENT">
+              <PropertyRef Name="DepartmentID" />
+            </Principal>
+            <Dependent Role="ClubRegistrations">
+              <PropertyRef Name="DepartmentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ClubRegistrations_University">
+          <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
+          <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UNIVERSITY">
+              <PropertyRef Name="UniversityID" />
+            </Principal>
+            <Dependent Role="ClubRegistrations">
+              <PropertyRef Name="UniversityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CLUBS__Departmen__03F0984C">
+          <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="1" />
+          <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DEPARTMENT">
+              <PropertyRef Name="DepartmentID" />
+            </Principal>
+            <Dependent Role="CLUBS">
+              <PropertyRef Name="DepartmentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CLUBS__MentorID__04E4BC85">
+          <End Role="Logins" Type="Self.Login" Multiplicity="1" />
+          <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Logins">
+              <PropertyRef Name="LoginID" />
+            </Principal>
+            <Dependent Role="CLUBS">
+              <PropertyRef Name="MentorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EVENTS__ClubID__0B91BA14">
+          <End Role="CLUBS" Type="Self.CLUB" Multiplicity="0..1" />
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CLUBS">
+              <PropertyRef Name="ClubID" />
+            </Principal>
+            <Dependent Role="EVENTS">
+              <PropertyRef Name="ClubID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Comments_Events">
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
+          <End Role="Comments" Type="Self.Comment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENTS">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="Comments">
+              <PropertyRef Name="EventID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Comments_Parent">
+          <End Role="Comments" Type="Self.Comment" Multiplicity="0..1" />
+          <End Role="Comments1" Type="Self.Comment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Comments">
+              <PropertyRef Name="CommentID" />
+            </Principal>
+            <Dependent Role="Comments1">
+              <PropertyRef Name="ParentCommentID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__DEPARTMEN__Unive__07C12930">
+          <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
+          <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="UNIVERSITY">
               <PropertyRef Name="UniversityID" />
@@ -730,144 +954,21 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="Login">
-          <Key>
-            <PropertyRef Name="LoginID" />
-          </Key>
-          <Property Name="LoginID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Email" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="PasswordHash" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Role" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" />
-          <Property Name="UniversityID" Type="Int32" />
-          <NavigationProperty Name="UNIVERSITY" Relationship="dummyclubsModel.FK_Logins_University" FromRole="Login" ToRole="UNIVERSITY" />
-          <NavigationProperty Name="CLUBS" Relationship="dummyclubsModel.FK__CLUBS__MentorID__2FCF1A8A" FromRole="Login" ToRole="CLUB" />
-          <NavigationProperty Name="Notifications" Relationship="dummyclubsModel.FK__Notificat__Login__3F115E1A" FromRole="Login" ToRole="Notification" />
-          <Property Name="DepartmentID" Type="Int32" />
-          <NavigationProperty Name="DEPARTMENT" Relationship="dummyclubsModel.FK_Logins_Department" FromRole="Login" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="EVENTS" Relationship="dummyclubsModel.FK__EVENTS__EventOrg__22401542" FromRole="Login" ToRole="EVENT" />
-        </EntityType>
-        <Association Name="FK_Logins_University">
-          <End Type="dummyclubsModel.UNIVERSITY" Role="UNIVERSITY" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.Login" Role="Login" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="UNIVERSITY">
-              <PropertyRef Name="UniversityID" />
-            </Principal>
-            <Dependent Role="Login">
-              <PropertyRef Name="UniversityID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="ApprovalStatusTable">
-          <Key>
-            <PropertyRef Name="ApprovalStatusID" />
-          </Key>
-          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Status" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="CLUBS" Relationship="dummyclubsModel.FK__CLUBS__ApprovalS__30C33EC3" FromRole="ApprovalStatusTable" ToRole="CLUB" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="dummyclubsModel.FK__ClubRegis__Appro__7FEAFD3E" FromRole="ApprovalStatusTable" ToRole="ClubRegistration" />
-          <NavigationProperty Name="EVENTS" Relationship="dummyclubsModel.FK__EVENTS__Approval__214BF109" FromRole="ApprovalStatusTable" ToRole="EVENT" />
-        </EntityType>
-        <EntityType Name="CLUB">
-          <Key>
-            <PropertyRef Name="ClubID" />
-          </Key>
-          <Property Name="ClubID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ClubName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="Abbreviation" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="TotalClubCommitteeSeats" Type="Int32" Nullable="false" />
-          <Property Name="AvailableClubCommitteeSeats" Type="Int32" Nullable="false" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="DepartmentID" Type="Int32" Nullable="false" />
-          <Property Name="MentorID" Type="Int32" Nullable="false" />
-          <Property Name="LogoImagePath" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" />
-          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="dummyclubsModel.FK__CLUBS__ApprovalS__30C33EC3" FromRole="CLUB" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="DEPARTMENT" Relationship="dummyclubsModel.FK__CLUBS__Departmen__2EDAF651" FromRole="CLUB" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="Login" Relationship="dummyclubsModel.FK__CLUBS__MentorID__2FCF1A8A" FromRole="CLUB" ToRole="Login" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="dummyclubsModel.FK__ClubRegis__ClubI__7EF6D905" FromRole="CLUB" ToRole="ClubRegistration" />
-          <NavigationProperty Name="EVENTS" Relationship="dummyclubsModel.FK__EVENTS__ClubID__2057CCD0" FromRole="CLUB" ToRole="EVENT" />
-        </EntityType>
-        <Association Name="FK__CLUBS__ApprovalS__30C33EC3">
-          <End Type="dummyclubsModel.ApprovalStatusTable" Role="ApprovalStatusTable" Multiplicity="1" />
-          <End Type="dummyclubsModel.CLUB" Role="CLUB" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ApprovalStatusTable">
-              <PropertyRef Name="ApprovalStatusID" />
-            </Principal>
-            <Dependent Role="CLUB">
-              <PropertyRef Name="ApprovalStatusID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__CLUBS__Departmen__2EDAF651">
-          <End Type="dummyclubsModel.DEPARTMENT" Role="DEPARTMENT" Multiplicity="1" />
-          <End Type="dummyclubsModel.CLUB" Role="CLUB" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="DEPARTMENT">
-              <PropertyRef Name="DepartmentID" />
-            </Principal>
-            <Dependent Role="CLUB">
-              <PropertyRef Name="DepartmentID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__CLUBS__MentorID__2FCF1A8A">
-          <End Type="dummyclubsModel.Login" Role="Login" Multiplicity="1" />
-          <End Type="dummyclubsModel.CLUB" Role="CLUB" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
-              <PropertyRef Name="LoginID" />
-            </Principal>
-            <Dependent Role="CLUB">
-              <PropertyRef Name="MentorID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="Notification">
-          <Key>
-            <PropertyRef Name="NotificationID" />
-          </Key>
-          <Property Name="NotificationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="LoginID" Type="Int32" />
-          <Property Name="Message" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="IsRead" Type="Boolean" />
-          <Property Name="StartDate" Type="DateTime" Precision="3" />
-          <Property Name="EndDate" Type="DateTime" Precision="3" />
-          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Login" Relationship="dummyclubsModel.FK__Notificat__Login__3F115E1A" FromRole="Notification" ToRole="Login" />
-        </EntityType>
-        <Association Name="FK__Notificat__Login__3F115E1A">
-          <End Type="dummyclubsModel.Login" Role="Login" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.Notification" Role="Notification" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
-              <PropertyRef Name="LoginID" />
-            </Principal>
-            <Dependent Role="Notification">
-              <PropertyRef Name="LoginID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Logins_Department">
-          <End Type="dummyclubsModel.DEPARTMENT" Role="DEPARTMENT" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.Login" Role="Login" Multiplicity="*" />
+          <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="0..1" />
+          <End Role="Logins" Type="Self.Login" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DEPARTMENT">
               <PropertyRef Name="DepartmentID" />
             </Principal>
-            <Dependent Role="Login">
+            <Dependent Role="Logins">
               <PropertyRef Name="DepartmentID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Users_Department">
-          <End Type="dummyclubsModel.DEPARTMENT" Role="DEPARTMENT" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.USER" Role="USER" Multiplicity="*" />
+          <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="0..1" />
+          <End Role="USER" Type="Self.USER" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DEPARTMENT">
               <PropertyRef Name="DepartmentID" />
@@ -877,287 +978,372 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="ClubRegistration">
-          <Key>
-            <PropertyRef Name="RegistrationID" />
-          </Key>
-          <Property Name="RegistrationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserID" Type="Int32" />
-          <Property Name="ClubID" Type="Int32" />
-          <Property Name="FullName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="Email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="ContactNumber" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="PreferredRole" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="RoleJustification" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ProfileImagePath" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="ApprovalStatusID" Type="Int32" />
-          <Property Name="AssignedRole" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="RegisteredAt" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="dummyclubsModel.FK__ClubRegis__Appro__7FEAFD3E" FromRole="ClubRegistration" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="CLUB" Relationship="dummyclubsModel.FK__ClubRegis__ClubI__7EF6D905" FromRole="ClubRegistration" ToRole="CLUB" />
-          <NavigationProperty Name="USER" Relationship="dummyclubsModel.FK__ClubRegis__UserI__7E02B4CC" FromRole="ClubRegistration" ToRole="USER" />
-          <Property Name="DepartmentID" Type="Int32" />
-          <Property Name="UniversityID" Type="Int32" />
-          <NavigationProperty Name="DEPARTMENT" Relationship="dummyclubsModel.FK_ClubRegistrations_Department" FromRole="ClubRegistration" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="UNIVERSITY" Relationship="dummyclubsModel.FK_ClubRegistrations_University" FromRole="ClubRegistration" ToRole="UNIVERSITY" />
-        </EntityType>
-        <Association Name="FK__ClubRegis__Appro__7FEAFD3E">
-          <End Type="dummyclubsModel.ApprovalStatusTable" Role="ApprovalStatusTable" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.ClubRegistration" Role="ClubRegistration" Multiplicity="*" />
+        <Association Name="FK__EventPhot__Event__08B54D69">
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
+          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="ApprovalStatusTable">
-              <PropertyRef Name="ApprovalStatusID" />
+            <Principal Role="EVENTS">
+              <PropertyRef Name="EventID" />
             </Principal>
-            <Dependent Role="ClubRegistration">
-              <PropertyRef Name="ApprovalStatusID" />
+            <Dependent Role="EventPhotos">
+              <PropertyRef Name="EventId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__ClubI__7EF6D905">
-          <End Type="dummyclubsModel.CLUB" Role="CLUB" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.ClubRegistration" Role="ClubRegistration" Multiplicity="*" />
+        <Association Name="FK_Registrations_Events">
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="EventRegistrations" Type="Self.EventRegistration" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="CLUB">
-              <PropertyRef Name="ClubID" />
+            <Principal Role="EVENTS">
+              <PropertyRef Name="EventID" />
             </Principal>
-            <Dependent Role="ClubRegistration">
-              <PropertyRef Name="ClubID" />
+            <Dependent Role="EventRegistrations">
+              <PropertyRef Name="EventID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__UserI__7E02B4CC">
-          <End Type="dummyclubsModel.USER" Role="USER" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.ClubRegistration" Role="ClubRegistration" Multiplicity="*" />
+        <Association Name="FK__EVENTS__EventOrg__0C85DE4D">
+          <End Role="Logins" Type="Self.Login" Multiplicity="1" />
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="USER">
-              <PropertyRef Name="UserID" />
-            </Principal>
-            <Dependent Role="ClubRegistration">
-              <PropertyRef Name="UserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ClubRegistrations_Department">
-          <End Type="dummyclubsModel.DEPARTMENT" Role="DEPARTMENT" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.ClubRegistration" Role="ClubRegistration" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="DEPARTMENT">
-              <PropertyRef Name="DepartmentID" />
-            </Principal>
-            <Dependent Role="ClubRegistration">
-              <PropertyRef Name="DepartmentID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ClubRegistrations_University">
-          <End Type="dummyclubsModel.UNIVERSITY" Role="UNIVERSITY" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.ClubRegistration" Role="ClubRegistration" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="UNIVERSITY">
-              <PropertyRef Name="UniversityID" />
-            </Principal>
-            <Dependent Role="ClubRegistration">
-              <PropertyRef Name="UniversityID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="EVENT">
-          <Key>
-            <PropertyRef Name="EventID" />
-          </Key>
-          <Property Name="ClubID" Type="Int32" />
-          <Property Name="EventID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="EventDescription" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="EventType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EventStartDateAndTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="EventEndDateAndTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="EventCreatedDate" Type="DateTime" Precision="3" />
-          <Property Name="EventPoster" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EventBrochure" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="NoOfLikes" Type="Int32" />
-          <Property Name="NoOfDislikes" Type="Int32" />
-          <Property Name="QRContentText" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="QRImage" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
-          <Property Name="EventOrganizerID" Type="Int32" Nullable="false" />
-          <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" />
-          <Property Name="RegistrationURL" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
-          <Property Name="IsActive" Type="Boolean" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="dummyclubsModel.FK__EVENTS__Approval__214BF109" FromRole="EVENT" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="CLUB" Relationship="dummyclubsModel.FK__EVENTS__ClubID__2057CCD0" FromRole="EVENT" ToRole="CLUB" />
-          <NavigationProperty Name="Login" Relationship="dummyclubsModel.FK__EVENTS__EventOrg__22401542" FromRole="EVENT" ToRole="Login" />
-          <Property Name="EventBannerPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="EventStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Comments" Relationship="dummyclubsModel.FK_Comments_Events" FromRole="EVENT" ToRole="Comment" />
-          <NavigationProperty Name="EventRegistrations" Relationship="dummyclubsModel.FK_Registrations_Events" FromRole="EVENT" ToRole="EventRegistration" />
-          <NavigationProperty Name="EventPhotos" Relationship="dummyclubsModel.FK__EventPhot__Event__67DE6983" FromRole="EVENT" ToRole="EventPhoto" />
-          <NavigationProperty Name="EventWinners" Relationship="dummyclubsModel.FK__EventWinn__Event__6ABAD62E" FromRole="EVENT" ToRole="EventWinner" />
-        </EntityType>
-        <Association Name="FK__EVENTS__Approval__214BF109">
-          <End Type="dummyclubsModel.ApprovalStatusTable" Role="ApprovalStatusTable" Multiplicity="1" />
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ApprovalStatusTable">
-              <PropertyRef Name="ApprovalStatusID" />
-            </Principal>
-            <Dependent Role="EVENT">
-              <PropertyRef Name="ApprovalStatusID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EVENTS__ClubID__2057CCD0">
-          <End Type="dummyclubsModel.CLUB" Role="CLUB" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="CLUB">
-              <PropertyRef Name="ClubID" />
-            </Principal>
-            <Dependent Role="EVENT">
-              <PropertyRef Name="ClubID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EVENTS__EventOrg__22401542">
-          <End Type="dummyclubsModel.Login" Role="Login" Multiplicity="1" />
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Login">
+            <Principal Role="Logins">
               <PropertyRef Name="LoginID" />
             </Principal>
-            <Dependent Role="EVENT">
+            <Dependent Role="EVENTS">
               <PropertyRef Name="EventOrganizerID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="Comment">
-          <Key>
-            <PropertyRef Name="CommentID" />
-          </Key>
-          <Property Name="CommentID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventID" Type="Int32" Nullable="false" />
-          <Property Name="ParentCommentID" Type="Int32" />
-          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="CommentText" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
-          <Property Name="PostedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="Avatar" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK_Comments_Events" FromRole="Comment" ToRole="EVENT" />
-          <NavigationProperty Name="Comments1" Relationship="dummyclubsModel.FK_Comments_Parent" FromRole="Comment" ToRole="Comment1" />
-          <NavigationProperty Name="Comment1" Relationship="dummyclubsModel.FK_Comments_Parent" FromRole="Comment1" ToRole="Comment" />
-        </EntityType>
-        <Association Name="FK_Comments_Events">
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
-          <End Type="dummyclubsModel.Comment" Role="Comment" Multiplicity="*" />
+        <Association Name="FK__EventWinn__Event__0D7A0286">
+          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
+          <End Role="EventWinners" Type="Self.EventWinner" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="EVENT">
+            <Principal Role="EVENTS">
               <PropertyRef Name="EventID" />
             </Principal>
-            <Dependent Role="Comment">
-              <PropertyRef Name="EventID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Comments_Parent">
-          <End Type="dummyclubsModel.Comment" Role="Comment" Multiplicity="0..1" />
-          <End Type="dummyclubsModel.Comment" Role="Comment1" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Comment">
-              <PropertyRef Name="CommentID" />
-            </Principal>
-            <Dependent Role="Comment1">
-              <PropertyRef Name="ParentCommentID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="EventRegistration">
-          <Key>
-            <PropertyRef Name="RegistrationID" />
-          </Key>
-          <Property Name="RegistrationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventID" Type="Int32" Nullable="false" />
-          <Property Name="TypeOfParticipation" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="GroupName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="NumberOfMembers" Type="Int32" />
-          <Property Name="MemberNames" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <Property Name="FullName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="Email" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="EnrollmentId" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="UniversityName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="Branch" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="YearOfStudy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="RegisteredAt" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK_Registrations_Events" FromRole="EventRegistration" ToRole="EVENT" />
-        </EntityType>
-        <Association Name="FK_Registrations_Events">
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Type="dummyclubsModel.EventRegistration" Role="EventRegistration" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENT">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventRegistration">
-              <PropertyRef Name="EventID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="EventPhoto">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventId" Type="Int32" Nullable="false" />
-          <Property Name="PhotoPath" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK__EventPhot__Event__67DE6983" FromRole="EventPhoto" ToRole="EVENT" />
-        </EntityType>
-        <EntityType Name="EventWinner">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventId" Type="Int32" Nullable="false" />
-          <Property Name="WinnerName" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="Prize" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
-          <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK__EventWinn__Event__6ABAD62E" FromRole="EventWinner" ToRole="EVENT" />
-        </EntityType>
-        <Association Name="FK__EventPhot__Event__67DE6983">
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
-          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENT">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhoto">
+            <Dependent Role="EventWinners">
               <PropertyRef Name="EventId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventWinn__Event__6ABAD62E">
-          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
-          <End Type="dummyclubsModel.EventWinner" Role="EventWinner" Multiplicity="*" />
+        <Association Name="FK__Notificat__Login__10566F31">
+          <End Role="Logins" Type="Self.Login" Multiplicity="0..1" />
+          <End Role="Notifications" Type="Self.Notification" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="EVENT">
-              <PropertyRef Name="EventID" />
+            <Principal Role="Logins">
+              <PropertyRef Name="LoginID" />
             </Principal>
-            <Dependent Role="EventWinner">
-              <PropertyRef Name="EventId" />
+            <Dependent Role="Notifications">
+              <PropertyRef Name="LoginID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Logins_University">
+          <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
+          <End Role="Logins" Type="Self.Login" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="UNIVERSITY">
+              <PropertyRef Name="UniversityID" />
+            </Principal>
+            <Dependent Role="Logins">
+              <PropertyRef Name="UniversityID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="dummyclubsEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ApprovalStatusTables" EntityType="Self.ApprovalStatusTable" />
+          <EntitySet Name="ClubRegistrations" EntityType="Self.ClubRegistration" />
+          <EntitySet Name="CLUBS" EntityType="Self.CLUB" />
+          <EntitySet Name="Comments" EntityType="Self.Comment" />
+          <EntitySet Name="DEPARTMENTs" EntityType="Self.DEPARTMENT" />
+          <EntitySet Name="EventPhotos" EntityType="Self.EventPhoto" />
+          <EntitySet Name="EventRegistrations" EntityType="Self.EventRegistration" />
+          <EntitySet Name="EVENTS" EntityType="Self.EVENT" />
+          <EntitySet Name="EventWinners" EntityType="Self.EventWinner" />
+          <EntitySet Name="Logins" EntityType="Self.Login" />
+          <EntitySet Name="Notifications" EntityType="Self.Notification" />
+          <EntitySet Name="UNIVERSITies" EntityType="Self.UNIVERSITY" />
+          <EntitySet Name="USERs" EntityType="Self.USER" />
+          <AssociationSet Name="FK__ClubRegis__Appro__7E37BEF6" Association="Self.FK__ClubRegis__Appro__7E37BEF6">
+            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
+            <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CLUBS__ApprovalS__02FC7413" Association="Self.FK__CLUBS__ApprovalS__02FC7413">
+            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
+            <End Role="CLUBS" EntitySet="CLUBS" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EVENTS__Approval__0A9D95DB" Association="Self.FK__EVENTS__Approval__0A9D95DB">
+            <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
+            <End Role="EVENTS" EntitySet="EVENTS" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ClubRegis__ClubI__7F2BE32F" Association="Self.FK__ClubRegis__ClubI__7F2BE32F">
+            <End Role="CLUBS" EntitySet="CLUBS" />
+            <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ClubRegis__UserI__00200768" Association="Self.FK__ClubRegis__UserI__00200768">
+            <End Role="USER" EntitySet="USERs" />
+            <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClubRegistrations_Department" Association="Self.FK_ClubRegistrations_Department">
+            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
+            <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClubRegistrations_University" Association="Self.FK_ClubRegistrations_University">
+            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
+            <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CLUBS__Departmen__03F0984C" Association="Self.FK__CLUBS__Departmen__03F0984C">
+            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
+            <End Role="CLUBS" EntitySet="CLUBS" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CLUBS__MentorID__04E4BC85" Association="Self.FK__CLUBS__MentorID__04E4BC85">
+            <End Role="Logins" EntitySet="Logins" />
+            <End Role="CLUBS" EntitySet="CLUBS" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EVENTS__ClubID__0B91BA14" Association="Self.FK__EVENTS__ClubID__0B91BA14">
+            <End Role="CLUBS" EntitySet="CLUBS" />
+            <End Role="EVENTS" EntitySet="EVENTS" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Comments_Events" Association="Self.FK_Comments_Events">
+            <End Role="EVENTS" EntitySet="EVENTS" />
+            <End Role="Comments" EntitySet="Comments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Comments_Parent" Association="Self.FK_Comments_Parent">
+            <End Role="Comments" EntitySet="Comments" />
+            <End Role="Comments1" EntitySet="Comments" />
+          </AssociationSet>
+          <AssociationSet Name="FK__DEPARTMEN__Unive__07C12930" Association="Self.FK__DEPARTMEN__Unive__07C12930">
+            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
+            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Logins_Department" Association="Self.FK_Logins_Department">
+            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
+            <End Role="Logins" EntitySet="Logins" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Users_Department" Association="Self.FK_Users_Department">
+            <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
+            <End Role="USER" EntitySet="USERs" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__08B54D69" Association="Self.FK__EventPhot__Event__08B54D69">
+            <End Role="EVENTS" EntitySet="EVENTS" />
+            <End Role="EventPhotos" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Registrations_Events" Association="Self.FK_Registrations_Events">
+            <End Role="EVENTS" EntitySet="EVENTS" />
+            <End Role="EventRegistrations" EntitySet="EventRegistrations" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EVENTS__EventOrg__0C85DE4D" Association="Self.FK__EVENTS__EventOrg__0C85DE4D">
+            <End Role="Logins" EntitySet="Logins" />
+            <End Role="EVENTS" EntitySet="EVENTS" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventWinn__Event__0D7A0286" Association="Self.FK__EventWinn__Event__0D7A0286">
+            <End Role="EVENTS" EntitySet="EVENTS" />
+            <End Role="EventWinners" EntitySet="EventWinners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Notificat__Login__10566F31" Association="Self.FK__Notificat__Login__10566F31">
+            <End Role="Logins" EntitySet="Logins" />
+            <End Role="Notifications" EntitySet="Notifications" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Logins_University" Association="Self.FK_Logins_University">
+            <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
+            <End Role="Logins" EntitySet="Logins" />
+          </AssociationSet>
+        </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="dummyclubsModelStoreContainer" CdmEntityContainer="dummyclubsEntities">
+          <EntitySetMapping Name="ApprovalStatusTables">
+            <EntityTypeMapping TypeName="dummyclubsModel.ApprovalStatusTable">
+              <MappingFragment StoreEntitySet="ApprovalStatusTable">
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ClubRegistrations">
+            <EntityTypeMapping TypeName="dummyclubsModel.ClubRegistration">
+              <MappingFragment StoreEntitySet="ClubRegistrations">
+                <ScalarProperty Name="RegistrationID" ColumnName="RegistrationID" />
+                <ScalarProperty Name="UserID" ColumnName="UserID" />
+                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="ContactNumber" ColumnName="ContactNumber" />
+                <ScalarProperty Name="PreferredRole" ColumnName="PreferredRole" />
+                <ScalarProperty Name="RoleJustification" ColumnName="RoleJustification" />
+                <ScalarProperty Name="ProfileImagePath" ColumnName="ProfileImagePath" />
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
+                <ScalarProperty Name="AssignedRole" ColumnName="AssignedRole" />
+                <ScalarProperty Name="RegisteredAt" ColumnName="RegisteredAt" />
+                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
+                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CLUBS">
+            <EntityTypeMapping TypeName="dummyclubsModel.CLUB">
+              <MappingFragment StoreEntitySet="CLUBS">
+                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
+                <ScalarProperty Name="ClubName" ColumnName="ClubName" />
+                <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="TotalClubCommitteeSeats" ColumnName="TotalClubCommitteeSeats" />
+                <ScalarProperty Name="AvailableClubCommitteeSeats" ColumnName="AvailableClubCommitteeSeats" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
+                <ScalarProperty Name="MentorID" ColumnName="MentorID" />
+                <ScalarProperty Name="LogoImagePath" ColumnName="LogoImagePath" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Comments">
+            <EntityTypeMapping TypeName="dummyclubsModel.Comment">
+              <MappingFragment StoreEntitySet="Comments">
+                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
+                <ScalarProperty Name="EventID" ColumnName="EventID" />
+                <ScalarProperty Name="ParentCommentID" ColumnName="ParentCommentID" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="CommentText" ColumnName="CommentText" />
+                <ScalarProperty Name="PostedDate" ColumnName="PostedDate" />
+                <ScalarProperty Name="Avatar" ColumnName="Avatar" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DEPARTMENTs">
+            <EntityTypeMapping TypeName="dummyclubsModel.DEPARTMENT">
+              <MappingFragment StoreEntitySet="DEPARTMENT">
+                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
+                <ScalarProperty Name="DepartmentName" ColumnName="DepartmentName" />
+                <ScalarProperty Name="HOD" ColumnName="HOD" />
+                <ScalarProperty Name="createdDate" ColumnName="createdDate" />
+                <ScalarProperty Name="Universityid" ColumnName="Universityid" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventPhotos">
+            <EntityTypeMapping TypeName="dummyclubsModel.EventPhoto">
+              <MappingFragment StoreEntitySet="EventPhotos">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="EventId" ColumnName="EventId" />
+                <ScalarProperty Name="PhotoPath" ColumnName="PhotoPath" />
+                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventRegistrations">
+            <EntityTypeMapping TypeName="dummyclubsModel.EventRegistration">
+              <MappingFragment StoreEntitySet="EventRegistrations">
+                <ScalarProperty Name="RegistrationID" ColumnName="RegistrationID" />
+                <ScalarProperty Name="EventID" ColumnName="EventID" />
+                <ScalarProperty Name="TypeOfParticipation" ColumnName="TypeOfParticipation" />
+                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
+                <ScalarProperty Name="NumberOfMembers" ColumnName="NumberOfMembers" />
+                <ScalarProperty Name="MemberNames" ColumnName="MemberNames" />
+                <ScalarProperty Name="FullName" ColumnName="FullName" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="EnrollmentId" ColumnName="EnrollmentId" />
+                <ScalarProperty Name="UniversityName" ColumnName="UniversityName" />
+                <ScalarProperty Name="Branch" ColumnName="Branch" />
+                <ScalarProperty Name="YearOfStudy" ColumnName="YearOfStudy" />
+                <ScalarProperty Name="RegisteredAt" ColumnName="RegisteredAt" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EVENTS">
+            <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
+              <MappingFragment StoreEntitySet="EVENTS">
+                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
+                <ScalarProperty Name="EventID" ColumnName="EventID" />
+                <ScalarProperty Name="EventName" ColumnName="EventName" />
+                <ScalarProperty Name="EventDescription" ColumnName="EventDescription" />
+                <ScalarProperty Name="EventType" ColumnName="EventType" />
+                <ScalarProperty Name="EventStartDateAndTime" ColumnName="EventStartDateAndTime" />
+                <ScalarProperty Name="EventEndDateAndTime" ColumnName="EventEndDateAndTime" />
+                <ScalarProperty Name="EventCreatedDate" ColumnName="EventCreatedDate" />
+                <ScalarProperty Name="EventPoster" ColumnName="EventPoster" />
+                <ScalarProperty Name="EventBrochure" ColumnName="EventBrochure" />
+                <ScalarProperty Name="NoOfLikes" ColumnName="NoOfLikes" />
+                <ScalarProperty Name="NoOfDislikes" ColumnName="NoOfDislikes" />
+                <ScalarProperty Name="QRContentText" ColumnName="QRContentText" />
+                <ScalarProperty Name="QRImage" ColumnName="QRImage" />
+                <ScalarProperty Name="EventOrganizerID" ColumnName="EventOrganizerID" />
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
+                <ScalarProperty Name="RegistrationURL" ColumnName="RegistrationURL" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="EventBannerPath" ColumnName="EventBannerPath" />
+                <ScalarProperty Name="EventStatus" ColumnName="EventStatus" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventWinners">
+            <EntityTypeMapping TypeName="dummyclubsModel.EventWinner">
+              <MappingFragment StoreEntitySet="EventWinners">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="EventId" ColumnName="EventId" />
+                <ScalarProperty Name="WinnerName" ColumnName="WinnerName" />
+                <ScalarProperty Name="Prize" ColumnName="Prize" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Logins">
+            <EntityTypeMapping TypeName="dummyclubsModel.Login">
+              <MappingFragment StoreEntitySet="Logins">
+                <ScalarProperty Name="OTPExpiry" ColumnName="OTPExpiry" />
+                <ScalarProperty Name="OTP" ColumnName="OTP" />
+                <ScalarProperty Name="LoginID" ColumnName="LoginID" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
+                <ScalarProperty Name="Role" ColumnName="Role" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
+                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Notifications">
+            <EntityTypeMapping TypeName="dummyclubsModel.Notification">
+              <MappingFragment StoreEntitySet="Notifications">
+                <ScalarProperty Name="NotificationID" ColumnName="NotificationID" />
+                <ScalarProperty Name="LoginID" ColumnName="LoginID" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="IsRead" ColumnName="IsRead" />
+                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
+                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UNIVERSITies">
+            <EntityTypeMapping TypeName="dummyclubsModel.UNIVERSITY">
+              <MappingFragment StoreEntitySet="UNIVERSITY">
+                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
+                <ScalarProperty Name="UniversityNAME" ColumnName="UniversityNAME" />
+                <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
+                <ScalarProperty Name="Location" ColumnName="Location" />
+                <ScalarProperty Name="AdministratorName" ColumnName="AdministratorName" />
+                <ScalarProperty Name="Contact" ColumnName="Contact" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="USERs">
             <EntityTypeMapping TypeName="dummyclubsModel.USER">
               <MappingFragment StoreEntitySet="USER">
-                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
-                <ScalarProperty Name="District" ColumnName="District" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
                 <ScalarProperty Name="FirstName" ColumnName="FirstName" />
                 <ScalarProperty Name="LastName" ColumnName="LastName" />
@@ -1176,188 +1362,8 @@
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
                 <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
                 <ScalarProperty Name="PhotoPath" ColumnName="PhotoPath" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DEPARTMENTs">
-            <EntityTypeMapping TypeName="dummyclubsModel.DEPARTMENT">
-              <MappingFragment StoreEntitySet="DEPARTMENT">
-                <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="Universityid" ColumnName="Universityid" />
-                <ScalarProperty Name="createdDate" ColumnName="createdDate" />
-                <ScalarProperty Name="HOD" ColumnName="HOD" />
-                <ScalarProperty Name="DepartmentName" ColumnName="DepartmentName" />
+                <ScalarProperty Name="District" ColumnName="District" />
                 <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="UNIVERSITies">
-            <EntityTypeMapping TypeName="dummyclubsModel.UNIVERSITY">
-              <MappingFragment StoreEntitySet="UNIVERSITY">
-                <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="Contact" ColumnName="Contact" />
-                <ScalarProperty Name="AdministratorName" ColumnName="AdministratorName" />
-                <ScalarProperty Name="Location" ColumnName="Location" />
-                <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
-                <ScalarProperty Name="UniversityNAME" ColumnName="UniversityNAME" />
-                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Logins">
-            <EntityTypeMapping TypeName="dummyclubsModel.Login">
-              <MappingFragment StoreEntitySet="Logins">
-                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
-                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="Role" ColumnName="Role" />
-                <ScalarProperty Name="PasswordHash" ColumnName="PasswordHash" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="LoginID" ColumnName="LoginID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ApprovalStatusTables">
-            <EntityTypeMapping TypeName="dummyclubsModel.ApprovalStatusTable">
-              <MappingFragment StoreEntitySet="ApprovalStatusTable">
-                <ScalarProperty Name="Status" ColumnName="Status" />
-                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="CLUBS">
-            <EntityTypeMapping TypeName="dummyclubsModel.CLUB">
-              <MappingFragment StoreEntitySet="CLUBS">
-                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="LogoImagePath" ColumnName="LogoImagePath" />
-                <ScalarProperty Name="MentorID" ColumnName="MentorID" />
-                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="AvailableClubCommitteeSeats" ColumnName="AvailableClubCommitteeSeats" />
-                <ScalarProperty Name="TotalClubCommitteeSeats" ColumnName="TotalClubCommitteeSeats" />
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
-                <ScalarProperty Name="ClubName" ColumnName="ClubName" />
-                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Notifications">
-            <EntityTypeMapping TypeName="dummyclubsModel.Notification">
-              <MappingFragment StoreEntitySet="Notifications">
-                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
-                <ScalarProperty Name="EndDate" ColumnName="EndDate" />
-                <ScalarProperty Name="StartDate" ColumnName="StartDate" />
-                <ScalarProperty Name="IsRead" ColumnName="IsRead" />
-                <ScalarProperty Name="Message" ColumnName="Message" />
-                <ScalarProperty Name="LoginID" ColumnName="LoginID" />
-                <ScalarProperty Name="NotificationID" ColumnName="NotificationID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ClubRegistrations">
-            <EntityTypeMapping TypeName="dummyclubsModel.ClubRegistration">
-              <MappingFragment StoreEntitySet="ClubRegistrations">
-                <ScalarProperty Name="UniversityID" ColumnName="UniversityID" />
-                <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
-                <ScalarProperty Name="RegisteredAt" ColumnName="RegisteredAt" />
-                <ScalarProperty Name="AssignedRole" ColumnName="AssignedRole" />
-                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
-                <ScalarProperty Name="ProfileImagePath" ColumnName="ProfileImagePath" />
-                <ScalarProperty Name="RoleJustification" ColumnName="RoleJustification" />
-                <ScalarProperty Name="PreferredRole" ColumnName="PreferredRole" />
-                <ScalarProperty Name="ContactNumber" ColumnName="ContactNumber" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="FullName" ColumnName="FullName" />
-                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
-                <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="RegistrationID" ColumnName="RegistrationID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="EVENTS">
-            <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
-              <MappingFragment StoreEntitySet="EVENTS">
-                <ScalarProperty Name="EventStatus" ColumnName="EventStatus" />
-                <ScalarProperty Name="EventBannerPath" ColumnName="EventBannerPath" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="RegistrationURL" ColumnName="RegistrationURL" />
-                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
-                <ScalarProperty Name="EventOrganizerID" ColumnName="EventOrganizerID" />
-                <ScalarProperty Name="QRImage" ColumnName="QRImage" />
-                <ScalarProperty Name="QRContentText" ColumnName="QRContentText" />
-                <ScalarProperty Name="NoOfDislikes" ColumnName="NoOfDislikes" />
-                <ScalarProperty Name="NoOfLikes" ColumnName="NoOfLikes" />
-                <ScalarProperty Name="EventBrochure" ColumnName="EventBrochure" />
-                <ScalarProperty Name="EventPoster" ColumnName="EventPoster" />
-                <ScalarProperty Name="EventCreatedDate" ColumnName="EventCreatedDate" />
-                <ScalarProperty Name="EventEndDateAndTime" ColumnName="EventEndDateAndTime" />
-                <ScalarProperty Name="EventStartDateAndTime" ColumnName="EventStartDateAndTime" />
-                <ScalarProperty Name="EventType" ColumnName="EventType" />
-                <ScalarProperty Name="EventDescription" ColumnName="EventDescription" />
-                <ScalarProperty Name="EventName" ColumnName="EventName" />
-                <ScalarProperty Name="EventID" ColumnName="EventID" />
-                <ScalarProperty Name="ClubID" ColumnName="ClubID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Comments">
-            <EntityTypeMapping TypeName="dummyclubsModel.Comment">
-              <MappingFragment StoreEntitySet="Comments">
-                <ScalarProperty Name="Avatar" ColumnName="Avatar" />
-                <ScalarProperty Name="PostedDate" ColumnName="PostedDate" />
-                <ScalarProperty Name="CommentText" ColumnName="CommentText" />
-                <ScalarProperty Name="UserName" ColumnName="UserName" />
-                <ScalarProperty Name="ParentCommentID" ColumnName="ParentCommentID" />
-                <ScalarProperty Name="EventID" ColumnName="EventID" />
-                <ScalarProperty Name="CommentID" ColumnName="CommentID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="EventRegistrations">
-            <EntityTypeMapping TypeName="dummyclubsModel.EventRegistration">
-              <MappingFragment StoreEntitySet="EventRegistrations">
-                <ScalarProperty Name="RegisteredAt" ColumnName="RegisteredAt" />
-                <ScalarProperty Name="YearOfStudy" ColumnName="YearOfStudy" />
-                <ScalarProperty Name="Branch" ColumnName="Branch" />
-                <ScalarProperty Name="UniversityName" ColumnName="UniversityName" />
-                <ScalarProperty Name="EnrollmentId" ColumnName="EnrollmentId" />
-                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="FullName" ColumnName="FullName" />
-                <ScalarProperty Name="MemberNames" ColumnName="MemberNames" />
-                <ScalarProperty Name="NumberOfMembers" ColumnName="NumberOfMembers" />
-                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
-                <ScalarProperty Name="TypeOfParticipation" ColumnName="TypeOfParticipation" />
-                <ScalarProperty Name="EventID" ColumnName="EventID" />
-                <ScalarProperty Name="RegistrationID" ColumnName="RegistrationID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="EventPhotos">
-            <EntityTypeMapping TypeName="dummyclubsModel.EventPhoto">
-              <MappingFragment StoreEntitySet="EventPhotos">
-                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
-                <ScalarProperty Name="PhotoPath" ColumnName="PhotoPath" />
-                <ScalarProperty Name="EventId" ColumnName="EventId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="EventWinners">
-            <EntityTypeMapping TypeName="dummyclubsModel.EventWinner">
-              <MappingFragment StoreEntitySet="EventWinners">
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="Prize" ColumnName="Prize" />
-                <ScalarProperty Name="WinnerName" ColumnName="WinnerName" />
-                <ScalarProperty Name="EventId" ColumnName="EventId" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

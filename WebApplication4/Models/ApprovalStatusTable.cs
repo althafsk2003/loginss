@@ -17,8 +17,8 @@ namespace WebApplication4.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public ApprovalStatusTable()
         {
-            this.CLUBS = new HashSet<CLUB>();
             this.ClubRegistrations = new HashSet<ClubRegistration>();
+            this.CLUBS = new HashSet<CLUB>();
             this.EVENTS = new HashSet<EVENT>();
         }
     
@@ -26,9 +26,9 @@ namespace WebApplication4.Models
         public string Status { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CLUB> CLUBS { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CLUB> CLUBS { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EVENT> EVENTS { get; set; }
     }

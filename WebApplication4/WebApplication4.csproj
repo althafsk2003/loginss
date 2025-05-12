@@ -301,6 +301,7 @@
     <Compile Include="Models\USER.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\VerifyOTPViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -326,8 +327,8 @@
     <Content Include="Content\Site.css" />
     <Content Include="Models\Model1.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Model1.Context.cs</LastGenOutput>
       <DependentUpon>Model1.edmx</DependentUpon>
+      <LastGenOutput>Model1.Context.cs</LastGenOutput>
     </Content>
     <Content Include="Models\Model1.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -363,6 +364,7 @@
     <Content Include="wwwroot\Images\im2.jpg" />
     <Content Include="wwwroot\Images\im3.jpg" />
     <Content Include="wwwroot\Images\ima1.png" />
+    <Content Include="wwwroot\Images\Logo.svg" />
     <Content Include="wwwroot\Images\Nj.jpg" />
     <Content Include="wwwroot\Images\Screenshot 2025-02-27 145635.png" />
     <Content Include="wwwroot\Images\Screenshot 2025-02-27 145945.png" />
@@ -462,6 +464,8 @@
     <Content Include="Views\ClubAdmin\ChangePassword.cshtml" />
     <Content Include="Views\stulogin\Login.cshtml" />
     <Content Include="Views\stulogin\Dashboard.cshtml" />
+    <Content Include="Views\Admin\VerifyOTP.cshtml" />
+    <Content Include="Views\Admin\ForgotPassword.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

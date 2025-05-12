@@ -530,7 +530,63 @@ namespace WebApplication4.Controllers
             TempData["Success"] = "Password changed successfully!";
             return RedirectToAction("Index", "UniversityAdmin"); // ✅ Redirecting to Mentor Dashboard
         }
+        //forgetpassword
+        [HttpGet]
+        public ActionResult ForgotPassword()
+        {
+            return View();
+        }
 
+        [HttpPost]
+        public async Task<ActionResult> ForgotPassword(LoginViewModel model)
+        {
+            var user = _db.Logins.FirstOrDefault(l => l.Email == model.Username);
+            if (user == null)
+            {
+                ViewBag.Message = "Email not found.";
+                return View();
+            }
+
+            var otp = new Random().Next(100000, 999999).ToString();
+
+            user.OTP = otp;
+            user.OTPExpiry = DateTime.Now.AddMinutes(5);
+            _db.SaveChanges();
+
+            var emailService = new EmailService();
+            await emailService.SendEmailAsync(user.Email, "Your OTP Code", $"Your OTP is: {otp}");
+
+            return RedirectToAction("VerifyOTP", new { email = user.Email });
+        }
+
+
+        //otpverify
+        [HttpGet]
+        public ActionResult VerifyOTP(string email)
+        {
+            return View(new VerifyOTPViewModel { Email = email });
+        }
+
+        [HttpPost]
+        public ActionResult VerifyOTP(VerifyOTPViewModel model)
+        {
+            var user = _db.Logins.FirstOrDefault(l => l.Email == model.Email);
+
+            if (user == null || user.OTP != model.OTP || user.OTPExpiry < DateTime.Now)
+            {
+                ViewBag.Message = "Invalid or expired OTP.";
+                return View(model);
+            }
+
+            user.PasswordHash = model.NewPassword;
+            user.OTP = null;
+            user.OTPExpiry = null;
+
+            _db.SaveChanges();
+
+            ViewBag.Message = "Password reset successful!";
+            return RedirectToAction("Login");
+        }
 
     }
 }

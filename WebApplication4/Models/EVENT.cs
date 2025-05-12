@@ -19,8 +19,8 @@ namespace WebApplication4.Models
         public EVENT()
         {
             this.Comments = new HashSet<Comment>();
-            this.EventRegistrations = new HashSet<EventRegistration>();
             this.EventPhotos = new HashSet<EventPhoto>();
+            this.EventRegistrations = new HashSet<EventRegistration>();
             this.EventWinners = new HashSet<EventWinner>();
         }
     
@@ -44,26 +44,26 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public string EventBannerPath { get; set; }
         public string EventStatus { get; set; }
+        [NotMapped]
+        public string ClubName;
 
-        // This property will NOT be mapped to the database
         [NotMapped]
-        public string ClubName { get; set; }
-        // This property will NOT be mapped to the database
-        [NotMapped]
-        public string Department { get; set; }
-        // This property will NOT be mapped to the database
-        [NotMapped]
-        public string University { get; set; }
+        public string Department;
 
+        [NotMapped]
+        public string University;
+
+        [NotMapped]
+        public string OrganizerName;
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual CLUB CLUB { get; set; }
-        public virtual Login Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<EventRegistration> EventRegistrations { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventPhoto> EventPhotos { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventRegistration> EventRegistrations { get; set; }
+        public virtual Login Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventWinner> EventWinners { get; set; }
     }

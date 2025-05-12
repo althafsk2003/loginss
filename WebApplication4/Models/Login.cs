@@ -18,8 +18,8 @@ namespace WebApplication4.Models
         public Login()
         {
             this.CLUBS = new HashSet<CLUB>();
-            this.Notifications = new HashSet<Notification>();
             this.EVENTS = new HashSet<EVENT>();
+            this.Notifications = new HashSet<Notification>();
         }
     
         public int LoginID { get; set; }
@@ -30,14 +30,16 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public Nullable<int> UniversityID { get; set; }
         public Nullable<int> DepartmentID { get; set; }
+        public string OTP { get; set; }
+        public Nullable<System.DateTime> OTPExpiry { get; set; }
     
-        public virtual UNIVERSITY UNIVERSITY { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CLUB> CLUBS { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Notification> Notifications { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EVENT> EVENTS { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual UNIVERSITY UNIVERSITY { get; set; }
     }
 }

@@ -17,10 +17,10 @@ namespace WebApplication4.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public DEPARTMENT()
         {
+            this.ClubRegistrations = new HashSet<ClubRegistration>();
             this.CLUBS = new HashSet<CLUB>();
             this.Logins = new HashSet<Login>();
             this.USERs = new HashSet<USER>();
-            this.ClubRegistrations = new HashSet<ClubRegistration>();
         }
     
         public int DepartmentID { get; set; }
@@ -31,14 +31,14 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public Nullable<System.DateTime> IsActiveDate { get; set; }
     
-        public virtual UNIVERSITY UNIVERSITY { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CLUB> CLUBS { get; set; }
+        public virtual UNIVERSITY UNIVERSITY { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Login> Logins { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<USER> USERs { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
     }
 }

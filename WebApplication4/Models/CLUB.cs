@@ -12,6 +12,7 @@ namespace WebApplication4.Models
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
+
     public partial class CLUB
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -33,16 +34,13 @@ namespace WebApplication4.Models
         public string LogoImagePath { get; set; }
         public Nullable<bool> IsActive { get; set; }
         public int ApprovalStatusID { get; set; }
-
-        // This property will NOT be mapped to the database
         [NotMapped]
-        public string MentorName { get; set; }
-
+        public string MentorName;
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
-        public virtual DEPARTMENT DEPARTMENT { get; set; }
-        public virtual Login Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
+        public virtual DEPARTMENT DEPARTMENT { get; set; }
+        public virtual Login Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EVENT> EVENTS { get; set; }
     }
