@@ -1460,5 +1460,43 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
         }
 
 
+        [HttpGet]
+        public ActionResult ViewDetails(int clubId)
+        {
+            // Fetch the club
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubId);
+            if (club == null)
+            {
+                return HttpNotFound();
+            }
+
+            // Fetch all events under this club
+            var events = _db.EVENTS
+                .Where(e => e.ClubID == clubId)
+                .Select(e => new EventDetailsViewsModel
+                {
+                    EventID = e.EventID,
+                    EventName = e.EventName,
+                    EventDescription = e.EventDescription,
+                    EventDate = e.EventCreatedDate,
+                    
+                    Venue = "ICFAI Foundation,Hydreabad"
+                    
+                })
+                .ToList();
+
+            // Prepare the view model
+            var model = new ClubDetailsViewModel
+            {
+                ClubID = club.ClubID,
+                ClubName = club.ClubName,
+                Description = club.Description,
+                Events = events
+            };
+
+            return View(model);
+        }
+
+
     }
 }

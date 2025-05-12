@@ -1,21 +1,188 @@
-﻿@{
+﻿@model WebApplication4.Models.StudentDashboardViewModel
+
+@{
     ViewBag.Title = "Student Dashboard";
+    Layout = null;
 }
 
-<h2>Welcome, @ViewBag.EnrollmentId</h2>
-<p>Email: @ViewBag.Email</p>
-
-@if (ViewBag.Events != null && ((List<object>)ViewBag.Events).Count > 0)
-{
-    <h3>Your Registered Events:</h3>
-    <ul>
-        @foreach (var eventItem in (List<dynamic>)ViewBag.Events)
-        {
-            <li>@eventItem.EventName - Registered on: @eventItem.RegisteredAt?.ToString("MMMM d, yyyy")</li>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f9fafb, #e5e7eb);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #1f2937;
         }
-    </ul>
-}
-else
-{
-    <p>You have not registered for any events.</p>
-}
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+        .welcome-header {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-in;
+        }
+        .sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .sidebar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .event-item {
+            background: #eff6ff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            border-left: 4px solid #3b82f6;
+        }
+        .event-item:hover {
+            background: #dbeafe;
+            transform: scale(1.03);
+        }
+        .event-details {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .event-details:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .group-info, .individual-info {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e5e7eb;
+            animation: slideIn 0.5s ease;
+        }
+        .group-members li {
+            background: #e0f2fe;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .leader {
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @@media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar, .event-details {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-header">
+        <h1 class="text-4xl font-bold">Welcome, @Model.EnrollmentId</h1>
+        <p class="text-xl mt-2 text-gray-600">Email: @Model.Email</p>
+    </div>
+    <div class="container flex flex-col md:flex-row">
+        <!-- Sidebar with Registered Events -->
+        <div class="sidebar w-full md:w-1/4 mr-0 md:mr-6">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-6">Registered Events</h3>
+            <ul role="listbox" aria-label="Registered events list">
+                @if (Model.RegisteredEvents != null && Model.RegisteredEvents.Count > 0)
+                {
+                    foreach (var eventItem in Model.RegisteredEvents)
+                    {
+                        <li class="event-item" role="option" onclick="showEventDetails('@eventItem.EventName')" aria-label="Select @eventItem.EventName">
+                            @eventItem.EventName
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="text-gray-600 p-1">No registered events.</li>
+                }
+            </ul>
+        </div>
+
+        <!-- Event Details Section -->
+        <div class="event-details w-full md:w-3/4">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-6">Event Details</h3>
+            <div id="eventDetails" class="text-gray-700">
+                <p>Select an event from the left to view details.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showEventDetails(eventName) {
+            try {
+                const events = @Html.Raw(Model.SerializedEvents);
+                const eventDetails = events.find(e => e.EventName === eventName);
+                if (!eventDetails) {
+                    document.getElementById('eventDetails').innerHTML = '<p>Event not found.</p>';
+                    return;
+                }
+
+                let eventDetailsHtml = `
+                    <h4 class="text-xl font-semibold text-gray-800">${eventDetails.EventName}</h4>
+                    <p class="mt-2"><strong>Description:</strong> ${eventDetails.EventDescription || 'N/A'}</p>
+                    <p class="mt-1"><strong>Date:</strong> ${eventDetails.EventDate ? new Date(eventDetails.EventDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                    
+                `;
+
+                if (eventDetails.GroupName) {
+                    eventDetailsHtml += `
+                        <div class="group-info">
+                            <p class="mt-2"><strong>Group Name:</strong> ${eventDetails.GroupName}</p>
+                            <p class="leader mt-1"><strong>Group Leader:</strong> ${eventDetails.GroupLeader || 'N/A'}</p>
+                            <p class="mt-2">You are registered as a group for this event. Working as a team can be a rewarding experience, allowing you to collaborate, share ideas, and achieve common goals. Make sure to coordinate well with your members and give your best!</p>
+                            <ul class="group-members mt-2">
+                                ${eventDetails.GroupMembers?.length ? eventDetails.GroupMembers.map(member => `
+                                    <li>${member.FullName} (Email: ${member.Email})</li>
+                                `).join('') : '<li>No members available.</li>'}
+                            </ul>
+                            <p class="mt-2">Remember, as the group leader, your role is crucial in guiding your team to success. Best of luck!</p>
+                        </div>
+                    `;
+                } else {
+                    eventDetailsHtml += `
+                        <div class="individual-info">
+                            <p class="mt-2">You are registered as an individual for this event. This is a great opportunity to showcase your personal skills and creativity. Give it your best and shine bright!</p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('eventDetails').innerHTML = eventDetailsHtml;
+            } catch (error) {
+                console.error('Error displaying event details:', error);
+                document.getElementById('eventDetails').innerHTML = '<p>Error loading event details.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
