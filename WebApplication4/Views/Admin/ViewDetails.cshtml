@@ -1,0 +1,86 @@
+﻿@model WebApplication4.Models.ClubDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.ClubName - Event Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+        <!-- Club Header -->
+        <div class="bg-white shadow-xl rounded-xl p-8 mb-10 border border-gray-100">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-3">@Model.ClubName</h1>
+            <p class="text-gray-600 text-lg leading-relaxed mb-6">@Model.Description</p>
+            <a href="@Url.Action("Index", "Admin")"
+               class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Back to Clubs
+            </a>
+        </div>
+
+        <!-- Events Section -->
+        <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Events</h2>
+
+            @if (Model.Events != null && Model.Events.Count > 0)
+            {
+                <ul class="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+                    @foreach (var eventItem in Model.Events)
+                    {
+                        <li class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 opacity-0">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">@eventItem.EventName</h3>
+                            <p class="text-gray-600 leading-relaxed mb-4">@eventItem.EventDescription</p>
+                            <div class="text-sm text-gray-500 space-y-1">
+                                <p><strong>Date:</strong> @eventItem.EventDate?.ToString("MMMM dd, yyyy")</p>
+                                <p><strong>Venue:</strong> @eventItem.Venue</p>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="bg-white shadow-md rounded-lg p-6 text-center border border-gray-100">
+                    <p class="text-gray-500 text-lg">No events available for this club.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const eventCards = document.querySelectorAll('ul li');
+            eventCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('animate-fadeIn');
+                    card.classList.remove('opacity-0');
+                }, index * 200); // 200ms delay between each card
+            });
+        });
+    </script>
+</body>
+</html>

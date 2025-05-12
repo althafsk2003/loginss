@@ -242,6 +242,7 @@
     <Compile Include="Models\CLUB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\ClubDetailsViewModel.cs" />
     <Compile Include="Models\ClubRegistration.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -259,6 +260,7 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\EventDetailsViewModel.cs" />
+    <Compile Include="Models\EventDetailsViewsModel.cs" />
     <Compile Include="Models\EventDto.cs" />
     <Compile Include="Models\EventPhoto.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -266,9 +268,11 @@
     <Compile Include="Models\EventRegistration.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\EventRegistrationViewModel.cs" />
     <Compile Include="Models\EventWinner.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\GroupMember.cs" />
     <Compile Include="Models\Login.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -294,6 +298,7 @@
     <Compile Include="Models\PostEventViewModel.cs" />
     <Compile Include="Models\RegistrationModel.cs" />
     <Compile Include="Models\save_event_detailsview.cs" />
+    <Compile Include="Models\StudentDashboardViewModel.cs" />
     <Compile Include="Models\UNIVERSITY.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -462,6 +467,7 @@
     <Content Include="Views\ClubAdmin\ChangePassword.cshtml" />
     <Content Include="Views\stulogin\Login.cshtml" />
     <Content Include="Views\stulogin\Dashboard.cshtml" />
+    <Content Include="Views\Admin\ViewDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

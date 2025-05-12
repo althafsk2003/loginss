@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using WebApplication4.Models;
+using Newtonsoft.Json;
 
 namespace WebApplication4.Controllers
 {
@@ -31,30 +32,77 @@ namespace WebApplication4.Controllers
             }
 
             // Redirect to dashboard
-            return RedirectToAction("Dashboard", "stulogin", new { enrollmentNumber = enrollmentNumber, email = email });
+            // Redirect to dashboard
+            return RedirectToAction("Dashboard", "stulogin", new { enrollmentId = enrollmentNumber, email = email });
+
         }
 
+
+
+        [HttpGet]
         public ActionResult Dashboard(string enrollmentId)
         {
-            // Fetch the events registered by the student using their Enrollment ID
-            var events = _db.EventRegistrations
-                                 .Where(r => r.EnrollmentId == enrollmentId)
-                                 .Select(r => new
-                                 {
-                                     EventName = r.EVENT.EventName,
-                                     RegisteredAt = r.RegisteredAt
-                                 })
-                                 .ToList();
+            // Fetch email and event registrations
+            var email = _db.EventRegistrations
+                           .Where(r => r.EnrollmentId == enrollmentId)
+                           .Select(r => r.Email)
+                           .FirstOrDefault();
 
-            // Pass the student's details and event list to the view
-            ViewBag.EnrollmentId = enrollmentId;
-            ViewBag.Email = _db.EventRegistrations
-                                    .Where(r => r.EnrollmentId == enrollmentId)
-                                    .Select(r => r.Email)
-                                    .FirstOrDefault();
-            ViewBag.Events = events;
+            var eventRegistrations = _db.EventRegistrations
+                .Where(r => r.EnrollmentId == enrollmentId)
+                .Select(r => new
+                {
+                    r.EVENT.EventName,
+                    r.EVENT.EventDescription,  // Added EventDescription
+                    r.EVENT.EventCreatedDate,  // Added EventDate
+                    r.GroupName,
+                    r.FullName,
+                    r.Email,
+                    r.RegisteredAt,
+                    r.MemberNames
+                })
+                .ToList();
 
-            return View();
+            // Prepare event data
+            var events = eventRegistrations.Select(e => new EventRegistrationViewModel
+            {
+                EventName = e.EventName,
+                EventDescription = e.EventDescription,  // Added EventDescription to model
+                EventDate = e.EventCreatedDate,  // Added EventDate to model
+                GroupName = e.GroupName,
+                GroupLeader = !string.IsNullOrEmpty(e.GroupName)
+                    ? _db.EventRegistrations
+                          .Where(g => g.GroupName == e.GroupName)
+                          .OrderBy(g => g.RegisteredAt)
+                          .Select(g => g.FullName)
+                          .FirstOrDefault()
+                    : null,
+                GroupMembers = !string.IsNullOrEmpty(e.GroupName)
+                    ? _db.EventRegistrations
+                          .Where(g => g.GroupName == e.GroupName)
+                          .Select(g => new GroupMember
+                          {
+                              FullName = g.FullName,
+                              Email = g.Email
+                          })
+                          .ToList()
+                    : new List<GroupMember>()
+            }).ToList();
+
+            // Serialize the event registrations list for use in JavaScript
+            var serializedEvents = JsonConvert.SerializeObject(events);
+
+            // Prepare the student dashboard model
+            var model = new StudentDashboardViewModel
+            {
+                EnrollmentId = enrollmentId,
+               
+                Email = email,
+                RegisteredEvents = events,
+                SerializedEvents = serializedEvents  // Add the serialized events to the model
+            };
+
+            return View(model);
         }
 
 
