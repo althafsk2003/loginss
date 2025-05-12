@@ -188,5 +188,119 @@
             <div class="alert">@ViewBag.Message</div>
         }
     </div>
-</body>
+</body> // GET: Login Page
+ // GET: Login Page
+ public ActionResult Login()
+ {
+     // Prevent logged-in users from accessing login page
+     if (Session["UserID"] != null)
+     {
+         var role = Session["UserRole"]?.ToString();
+         if (role == "Admin") return RedirectToAction("Index", "Admin");
+         if (role == "UniversityAdministrator") return RedirectToAction("Index", "UniversityAdmin");
+         if (role == "Mentor") return RedirectToAction("Index", "Mentor");
+         if (role == "Club Admin") return RedirectToAction("Index", "ClubAdmin");
+     }
+
+     // Prevent browser from caching login page
+     Response.Cache.SetCacheability(HttpCacheability.ServerAndNoCache);
+     Response.Cache.SetNoStore();
+     Response.Cache.SetExpires(DateTime.UtcNow.AddSeconds(-1));
+     Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+     Response.AppendHeader("Pragma", "no-cache");
+     Response.AppendHeader("Expires", "0");
+
+
+     return View();
+ }
+
+
+
+ [HttpPost]
+
+ // POST: Handle Login
+
+
+ public ActionResult Login(LoginViewModel model)
+ {
+     if (ModelState.IsValid)
+     {
+         // Check credentials in Logins table
+         var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username && u.PasswordHash == model.Password);
+
+         if (user != null)
+         {
+             // Store user session data
+             Session["UserID"] = user.LoginID;
+             Session["UserRole"] = user.Role;
+             Session["UserEmail"] = user.Email;
+
+             if (user.Role == "Admin")
+             {
+                 Session["User1Email"] = user.Email;
+                 return RedirectToAction("Index", "Admin");
+             }
+             else if (user.Role == "UniversityAdministrator")
+             {
+                 // Fetch assigned university
+                 var university = _db.UNIVERSITies.FirstOrDefault(u => u.Email == user.Email);
+
+                 if (university != null)
+                 {
+                     // Store university details in session
+                     Session["UniversityID"] = university.UniversityID;
+                     Session["UniversityName"] = university.UniversityNAME;
+                     Session["UniversityLocation"] = university.Location;
+
+                     // Redirect to University Admin Dashboard
+                     return RedirectToAction("Index", "UniversityAdmin");
+                 }
+                 else
+                 {
+                     ViewBag.Message = "No university assigned to this administrator.";
+                 }
+             }
+             else if (user.Role == "Mentor")
+             {
+                 // Store the mentor's university ID in the session
+                 Session["UniversityID"] = user.UniversityID;
+
+                 // Optionally, you can store other details like the mentor's ID or role
+                 Session["UserID"] = user.LoginID;
+                 // This should be in your login controller
+                 //Session["MentorID"] = loggedInMentor.MentorID;
+
+                 Session["UserRole"] = user.Role;
+
+                 Session["UserEmail"] = user.Email;
+
+
+                 return RedirectToAction("Index", "Mentor");
+
+             }
+             else if(user.Role== "Club Admin")
+             {
+                 Session["UserID"] = user.LoginID;
+                 return RedirectToAction("Index", "ClubAdmin");
+             }
+             else
+             {
+                 ViewBag.Message = "Access Denied! Invalid Role.";
+             }
+         }
+         else
+         {
+             ViewBag.Message = "Invalid email or password.";
+         }
+     }
+     return View(model);
+ }
+
+
+ // Logout Action
+ public ActionResult Logout()
+ {
+     Session.Clear();
+     return RedirectToAction("Login");
+ }
 </html>
