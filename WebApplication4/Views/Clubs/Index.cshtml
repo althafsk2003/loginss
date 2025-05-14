@@ -196,7 +196,7 @@
 
             .wide-image img {
                 width: 100%;
-                height: 220px;
+                height: 253px;
                 object-fit: cover;
                 display: block;
                 border-radius: 0;
@@ -572,8 +572,6 @@
             }
         }
 
-        
-
         @@keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -685,9 +683,6 @@
                 margin-top: 37px; /* Ensure margin is applied on smaller screens */
             }
         }
-        .container{
-            padding-bottom:40px;
-        }
     </style>
 </head>
 <body>
@@ -696,11 +691,10 @@
         <span>Future Students | Current Students | Faculty & Staff | Alumni | Partners</span>
     </div>
 
-
     <!-- Main Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <div class="progress-line"></div>
+            <div class="progress-line"></div> <!-- Progress line added here -->
             <a class="navbar-brand" href="#">
                 <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="height: 50px; width: 200px; max-width: 100%;">
             </a>
@@ -725,7 +719,6 @@
         </div>
     </nav>
 
-
     <!-- Placeholder for Navbar -->
     <div class="navbar-placeholder"></div>
 
@@ -733,7 +726,7 @@
     <div class="hero">
         <video autoplay muted loop class="hero-video">
             <source src="~/wwwroot/videos/clubs11.mp4" type="video/mp4">
-            Your browser does not support the video tag.
+            Your browser does not support the video tag.
         </video>
         <div class="hero-overlay"></div>
         <div class="hero-text">Always on to something amazing</div>
@@ -781,7 +774,7 @@
     <!-- Founder's Note -->
     <section class="founder-profile" id="founderProfile">
         <div class="founder-image-box">
-            <img src="~/wwwroot/Images/Nj.jpg" alt="N. J. Yasaswy">
+            <img src="~/wwwroot/Images/NJ.jpg" alt="N. J. Yasaswy">
             <div class="founder-details">
                 <p class="founder-name">N. J. Yasaswy</p>
                 <p><small>(1950 - 2011)</small></p>
@@ -931,7 +924,6 @@
 
             // Set the navbar height as a CSS variable for the placeholder
             document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
-
             window.addEventListener('scroll', () => {
                 const scrollPosition = window.scrollY;
                 const windowHeight = window.innerHeight;
@@ -954,7 +946,7 @@
                 }
 
                 // Update progress line
-                progressLine.style.width = `${Math.min(100, scrollPercentage)}%`;
+                progressLine.style.width = `${ Math.min(100, scrollPercentage) }%`;
             });
         });
 
