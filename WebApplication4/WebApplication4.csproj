@@ -470,6 +470,9 @@
     <Content Include="Views\stulogin\Login.cshtml" />
     <Content Include="Views\stulogin\Dashboard.cshtml" />
     <Content Include="Views\Admin\ViewDetails.cshtml" />
+    <Content Include="Views\UniversityAdmin\ViewAllDepartments.cshtml" />
+    <Content Include="Views\UniversityAdmin\ViewClubs.cshtml" />
+    <Content Include="Views\UniversityAdmin\ViewEvents.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

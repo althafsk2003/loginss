@@ -9,8 +9,6 @@ using System.Web;
 using System.Web.Mvc;
 using WebApplication4.Models;
 using System.Dynamic;
-using System.Data.Entity;
-using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Generators;
 using System.Drawing;
 
@@ -587,6 +585,70 @@ namespace WebApplication4.Controllers
             ViewBag.Message = "Password reset successful!";
             return RedirectToAction("Login");
         }
+
+        public ActionResult ViewAllDepartments()
+        {
+            int universityID = GetUniversityID();
+
+            var departments = _db.DEPARTMENTs
+                .Where(d => d.Universityid == universityID)
+                .ToList();
+
+            return View(departments); // Views/UniversityAdmin/ViewAllDepartments.cshtml
+        }
+        public ActionResult ViewClubs(int departmentId)
+        {
+            var clubs = _db.CLUBS
+                .Where(c => c.DepartmentID == departmentId)
+                .ToList();
+
+            ViewBag.Department = _db.DEPARTMENTs.Find(departmentId);
+            return View(clubs); // Views/UniversityAdmin/ViewClubs.cshtml
+        }
+        [HttpGet]
+        public ActionResult ViewEvents(int clubId)
+        {
+            int universityID = GetUniversityID();
+
+            // Join CLUB with DEPARTMENT to validate ownership
+            var clubWithDept = (from c in _db.CLUBS
+                                join d in _db.DEPARTMENTs on c.DepartmentID equals d.DepartmentID
+                                where c.ClubID == clubId && d.Universityid == universityID
+                                select new
+                                {
+                                    Club = c,
+                                    Department = d
+                                }).FirstOrDefault();
+
+            if (clubWithDept == null)
+            {
+                return HttpNotFound();
+            }
+
+            var events = _db.EVENTS
+                .Where(e => e.ClubID == clubId)
+                .Select(e => new EventDetailsViewsModel
+                {
+                    EventID = e.EventID,
+                    EventName = e.EventName,
+                    EventDescription = e.EventDescription,
+                    EventDate = (DateTime)e.EventCreatedDate,
+                    Venue = "ICFAI Foundation, Hyderabad"
+                }).ToList();
+
+            var model = new ClubDetailsViewModel
+            {
+                ClubID = clubWithDept.Club.ClubID,
+                ClubName = clubWithDept.Club.ClubName,
+                Description = clubWithDept.Club.Description,
+                Events = events
+            };
+
+            return View(model);
+        }
+
+
+
 
     }
 }

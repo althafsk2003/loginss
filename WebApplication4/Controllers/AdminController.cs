@@ -1478,7 +1478,7 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
                     EventID = e.EventID,
                     EventName = e.EventName,
                     EventDescription = e.EventDescription,
-                    EventDate = e.EventCreatedDate,
+                    EventDate = (DateTime)e.EventCreatedDate,
                     
                     Venue = "ICFAI Foundation,Hydreabad"
                     
