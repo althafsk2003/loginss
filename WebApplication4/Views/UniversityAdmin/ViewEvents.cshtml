@@ -6,45 +6,160 @@
 }
 
 @section Styles {
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Scoped styles for club-details */
+        .club-details {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb; /* Light gray, like bg-gray-50 */
+            color: #1f2937; /* Dark gray text */
         }
-        .header {
-          
+        /* Container */
+        .club-details .container {
             width: 100%;
-            height:79px;
-           
+            max-width: 1024px; /* Reduced from 1280px (max-w-5xl) for compactness */
+            margin: 0 auto;
+            padding: 0.75rem; /* Reduced from 1rem */
         }
-        .h2{
-            font-size:xx-large;
+        /* Club header card */
+        .club-details .club-header {
+            background-color: #ffffff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Like shadow-xl */
+            border: 1px solid #e5e7eb; /* Light border */
+            border-radius: 0.75rem; /* Like rounded-xl */
+            padding: 1.5rem; /* Reduced from 2rem */
+            margin-bottom: 2rem; /* Reduced from 2.5rem */
         }
-
+        .club-details .club-header h1 {
+            font-size: 2.25rem; /* Reduced from 2.5rem (text-4xl) */
+            font-weight: 800;
+            color: #111827; /* Dark text */
+            margin-bottom: 0.5rem; /* Reduced from 0.75rem */
+        }
+        .club-details .club-header p {
+            font-size: 1.125rem; /* Reduced from 1.25rem (text-lg) */
+            color: #4b5563; /* Gray text */
+            line-height: 1.625;
+            margin-bottom: 1rem; /* Reduced from 1.5rem */
+        }
+        .club-details .club-header a {
+            display: inline-flex;
+            align-items: center;
+            color: #2563eb; /* Blue link */
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .club-details .club-header a:hover {
+            color: #1e40af; /* Darker blue */
+        }
+        .club-details .club-header svg {
+            width: 1.25rem; /* Like w-5 */
+            height: 1.25rem;
+            margin-right: 0.5rem; /* Like mr-2 */
+        }
+        /* Events section */
+        .club-details .events h2 {
+            font-size: 1.875rem; /* Reduced from 2.25rem (text-3xl) */
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem; /* Reduced from 1.5rem */
+        }
+        .club-details .events ul {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* Reduced from 1.5rem */
+        }
+        @@media (min-width: 768px) {
+            .club-details .events ul {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* Like md:grid-cols-2 */
+                gap: 1rem;
+            }
+        }
+        @@media (min-width: 1024px) {
+            .club-details .events ul {
+                grid-template-columns: 1fr; /* Like lg:grid-cols-1 */
+            }
+        }
+        .club-details .event-card {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Like shadow-lg */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem; /* Like rounded-lg */
+            padding: 1rem; /* Reduced from 1.5rem */
+            transition: box-shadow 0.3s ease;
+        }
+        .club-details .event-card:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Like hover:shadow-xl */
+        }
+        .club-details .event-card h3 {
+            font-size: 1.25rem; /* Reduced from 1.5rem (text-xl) */
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem; /* Reduced from 0.5rem */
+        }
+        .club-details .event-card p {
+            font-size: 1rem; /* Like base */
+            color: #4b5563;
+            line-height: 1.5;
+            margin-bottom: 0.75rem; /* Reduced from 1rem */
+        }
+        .club-details .event-card .details {
+            font-size: 0.875rem; /* Like text-sm */
+            color: #6b7280; /* Lighter gray */
+            line-height: 1.25;
+        }
+        .club-details .event-card .details p {
+            margin-bottom: 0.25rem;
+        }
+        /* No events card */
+        .club-details .no-events {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Like shadow-md */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem; /* Reduced from 1.5rem */
+            text-align: center;
+        }
+        .club-details .no-events p {
+            font-size: 1.125rem; /* Reduced from 1.25rem (text-lg) */
+            color: #6b7280;
+        }
+        /* Animation */
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .animate-fadeIn {
-            animation: fadeIn 0.6s ease-out forwards;
+            animation: fadeIn 0.5s ease-out forwards; /* Faster than 0.6s */
+        }
+        /* Protect header */
+        .header, nav, .navbar, header {
+            width: 100% !important;
+            height: 79px !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            z-index: 1000 !important;
+            box-sizing: border-box;
+        }
+        /* Prevent body interference */
+        body {
+            margin: 0;
+            padding-top: 79px; /* Match header height */
+            overflow-x: hidden;
         }
     </style>
 }
 
-<div class="bg-gray-50 font-sans antialiased">
-    <div class="container mx-auto px-4 py-12 max-w-5xl">
+<div class="club-details">
+    <div class="container">
         <!-- Club Header -->
-        <div class="bg-white shadow-xl rounded-xl p-8 mb-10 border border-gray-100">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-3">@Model.ClubName</h1>
-            <p class="text-gray-600 text-lg leading-relaxed mb-6">@Model.Description</p>
-            <a href="@Url.Action("Index", "UniversityAdmin")"
-               class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                     xmlns="http://www.w3.org/2000/svg">
+        <div class="club-header">
+            <h1>@Model.ClubName</h1>
+            <p>@Model.Description</p>
+            <a href="@Url.Action("Index", "UniversityAdmin")">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
                 Back to Home
@@ -52,20 +167,20 @@
         </div>
 
         <!-- Events Section -->
-        <div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-6">Events</h2> 
+        <div class="events">
+            <h2>Events</h2>
 
-            @if (Model.Events != null && Model.Events.Count > 0)
+            @if (Model.Events != null && Model.Events.Any())
             {
-                <ul class="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+                <ul>
                     @foreach (var eventItem in Model.Events)
                     {
-                        <li class="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 opacity-0">
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">@eventItem.EventName</h3>
-                            <p class="text-gray-600 leading-relaxed mb-4">@eventItem.EventDescription</p>
-                            <div class="text-sm text-gray-500 space-y-1">
-                                <p><strong>Date:</strong> @eventItem.EventDate?.ToString("MMMM dd, yyyy")</p>
-                                <p><strong>Venue:</strong> @eventItem.Venue</p>
+                        <li class="event-card opacity-0 animate-fadeIn">
+                            <h3>@eventItem.EventName</h3>
+                            <p>@eventItem.EventDescription</p>
+                            <div class="details">
+                                <p><strong>Date:</strong> @(eventItem.EventDate.ToString("MMMM dd, yyyy") ?? "Not specified")</p>
+                                <p><strong>Venue:</strong> @(string.IsNullOrEmpty(eventItem.Venue) ? "Not specified" : eventItem.Venue)</p>
                             </div>
                         </li>
                     }
@@ -73,8 +188,8 @@
             }
             else
             {
-                <div class="bg-white shadow-md rounded-lg p-6 text-center border border-gray-100">
-                    <p class="text-gray-500 text-lg">No events available for this club.</p>
+                <div class="no-events">
+                    <p>No events available for this club.</p>
                 </div>
             }
         </div>
@@ -84,13 +199,21 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const eventCards = document.querySelectorAll('ul li');
+            const eventCards = document.querySelectorAll('.club-details .event-card');
             eventCards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.classList.add('animate-fadeIn');
-                    card.classList.remove('opacity-0');
-                }, index * 200);
+                card.style.animationDelay = `${index * 150}ms`; // Reduced from 200ms
+                card.classList.remove('opacity-0');
+                console.log(`Card ${index + 1} rendered with delay ${index * 150}ms`);
             });
+            const header = document.querySelector('.header, nav, .navbar, header');
+            if (header) {
+                console.log('Header dimensions:', {
+                    width: header.offsetWidth,
+                    height: header.offsetHeight
+                });
+            }
+            const container = document.querySelector('.club-details .container');
+            console.log('Container width:', container?.offsetWidth);
         });
     </script>
 }
