@@ -30,7 +30,7 @@
     .container {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 2rem 1rem;
+        padding: 1rem 0.5rem; /* Reduced from 2rem 1rem */
     }
 
     /* Event Banner */
@@ -39,7 +39,7 @@
         width: 100%;
         border-radius: 20px;
         overflow: hidden;
-        margin-bottom: 3rem;
+        margin-bottom: 1.5rem; /* Reduced from 3rem */
         box-shadow: var(--shadow-xl);
         position: relative;
         animation: fadeInZoom 1.2s ease;
@@ -59,8 +59,8 @@
     /* Event Header */
     .event-header {
         display: flex;
-        gap: 2.5rem;
-        margin-bottom: 4rem;
+        gap: 1rem; /* Reduced from 2.5rem */
+        margin-bottom: 2rem; /* Reduced from 4rem */
         align-items: flex-start;
     }
 
@@ -88,7 +88,7 @@
     .event-title {
         font-size: 3.5rem;
         font-weight: 800;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem; /* Reduced from 1.5rem */
         background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -104,7 +104,7 @@
         padding: 0.7rem 2rem;
         border-radius: 50px;
         font-weight: 600;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem; /* Reduced from 2rem */
         box-shadow: var(--shadow-xl);
         animation: slideInLeft 1s ease;
     }
@@ -116,10 +116,10 @@
         .event-description p {
             font-size: 1.3rem;
             line-height: 2.2;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem; /* Reduced from 1.5rem */
             color: #4b5563;
             background: linear-gradient(90deg, rgba(233, 108, 32, 0.1), rgba(249, 168, 37, 0.1));
-            padding: 1rem;
+            padding: 0.5rem; /* Reduced from 1rem */
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             opacity: 0;
@@ -134,17 +134,17 @@
 
     /* Centered Winners Section */
     .winners-section {
-        margin: 5rem auto;
+        margin: 2rem auto; /* Reduced from 5rem auto */
         max-width: 1200px;
         text-align: center;
-        padding: 3rem 0;
+        padding: 1.5rem 0; /* Reduced from 3rem 0 */
         position: relative;
     }
 
     .section-title {
         font-size: 2.5rem;
         font-weight: 700;
-        margin-bottom: 3rem;
+        margin-bottom: 1.5rem; /* Reduced from 3rem */
         position: relative;
         display: inline-block;
         animation: fadeInDown 1.2s ease;
@@ -166,7 +166,7 @@
     .winners-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
+        gap: 1rem; /* Reduced from 2rem */
         perspective: 1000px;
         margin: 0 auto;
     }
@@ -174,7 +174,7 @@
     .winner-card {
         background: white;
         border-radius: 12px;
-        padding: 2rem;
+        padding: 1rem; /* Reduced from 2rem */
         box-shadow: var(--shadow-xl);
         transition: var(--transition);
         position: relative;
@@ -239,16 +239,16 @@
 
     /* Enhanced Auto-Scrolling Gallery */
     .gallery-section {
-        margin: 5rem 0;
+        margin: 2rem 0; /* Reduced from 5rem 0 */
         position: relative;
         overflow: hidden;
-        padding: 3rem 0;
+        padding: 1.5rem 0; /* Reduced from 3rem 0 */
     }
 
     .gallery-container {
         display: flex;
-        gap: 2rem;
-        padding: 1rem 0;
+        gap: 1rem; /* Reduced from 2rem */
+        padding: 0.5rem 0; /* Reduced from 1rem 0 */
     }
 
     .gallery-item {
@@ -441,7 +441,7 @@
         }
 
         .winner-card {
-            padding: 1.5rem;
+            padding: 1rem; /* Already reduced */
         }
     }
 </style>
@@ -516,7 +516,6 @@
                     Read More
                 </button>
             </div>
-
         </div>
     </div>
 
