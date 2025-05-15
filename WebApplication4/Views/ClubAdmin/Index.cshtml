@@ -40,6 +40,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         margin-bottom: 15px;
         transition: transform 0.2s;
+        position: relative; /* Added for positioning notification icon */
     }
 
         .card:hover {
@@ -155,6 +156,80 @@
         animation: gradientShift 3s linear infinite;
     }
 
+    /* Notification Icon Styling */
+    .notification-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .notification-icon {
+        font-size: 20px;
+        color: #7b61ff;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .notification-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff4d4f;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-dropdown {
+        display: none;
+        position: absolute;
+        top: 30px;
+        right: 0;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        min-width: 250px;
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        padding: 10px;
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notification-item a {
+            color: #7b61ff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+            .notification-item a:hover {
+                text-decoration: underline;
+            }
+
     @@keyframes gradientShift {
         0% {
             transform: translateX(-100%);
@@ -229,6 +304,11 @@
         .profile-img {
             margin: 0 0 15px 0;
         }
+
+        .notification-dropdown {
+            min-width: 200px;
+            right: -10px;
+        }
     }
 </style>
 
@@ -240,6 +320,30 @@
             <!-- Profile Card -->
             <div class="card profile-card">
                 <h4 class="mb-3">Club Admin Profile</h4>
+                <!-- Notification Icon -->
+                <div class="notification-container">
+                    <i class="fas fa-bell notification-icon" onclick="toggleNotifications()"></i>
+                    @if (ViewBag.Notifications != null && ViewBag.Notifications.Count > 0)
+                    {
+                        <span class="notification-count">@ViewBag.Notifications.Count</span>
+                    }
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        @if (ViewBag.Notifications != null && ViewBag.Notifications.Count > 0)
+                        {
+                            foreach (var notification in ViewBag.Notifications)
+                            {
+                                <div class="notification-item">
+                                    <span>@notification.Message</span>
+                                    <a href="@Url.Action("MarkNotificationAsRead", "ClubAdmin", new { notificationId = notification.NotificationID })">Mark as Read</a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="notification-item">No new notifications</div>
+                        }
+                    </div>
+                </div>
                 @if (!string.IsNullOrEmpty(ViewBag.ClubAdminPhoto))
                 {
                     <img src="@Url.Content(ViewBag.ClubAdminPhoto)" alt="Club Admin Profile Picture" class="profile-img">
@@ -349,6 +453,21 @@
                     }
                 }
             }
+        }
+    });
+
+    // Toggle notification dropdown
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('notificationDropdown');
+        const icon = document.querySelector('.notification-icon');
+        if (!dropdown.contains(event.target) && !icon.contains(event.target)) {
+            dropdown.style.display = 'none';
         }
     });
 </script>
