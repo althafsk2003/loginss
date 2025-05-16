@@ -378,6 +378,7 @@
     <Content Include="wwwroot\Images\ICFAISchoolOfSocialSciences.jpg" />
     <Content Include="wwwroot\Images\Screenshot 2025-04-08 160030.png" />
     <Content Include="wwwroot\videos\clubs11.mp4" />
+    <Content Include="wwwroot\videos\GUIDE Video .mp4" />
     <EntityDeploy Include="Models\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
