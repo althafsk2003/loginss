@@ -582,6 +582,9 @@ namespace WebApplication4.Controllers
                 .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
                 .ToList();
 
+            // Set the FilterApplied flag to true
+            ViewBag.FilterApplied = true;
+
             // Fetch Organizer Names and Club Names separately and store them in ViewBag
             var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
 

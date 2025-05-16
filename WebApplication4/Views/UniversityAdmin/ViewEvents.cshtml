@@ -179,7 +179,7 @@
                             <h3>@eventItem.EventName</h3>
                             <p>@eventItem.EventDescription</p>
                             <div class="details">
-                                <p><strong>Date:</strong> @(eventItem.EventDate.ToString("MMMM dd, yyyy") ?? "Not specified")</p>
+                               @* <p><strong>Date:</strong> @(eventItem.EventDate.ToString("MMMM dd, yyyy") ?? "Not specified")</p>*@
                                 <p><strong>Venue:</strong> @(string.IsNullOrEmpty(eventItem.Venue) ? "Not specified" : eventItem.Venue)</p>
                             </div>
                         </li>
