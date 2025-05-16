@@ -1,13 +1,12 @@
 ﻿@{
     Layout = null;
-    ViewBag.Title = "ICFAI Foundation for Higher Education";
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title</title>
 
     <!-- Bootstrap & FontAwesome -->
@@ -39,11 +38,18 @@
             font-size: 14px;
             text-align: center;
             width: 100%;
-            opacity: 1;
-            transition: opacity 0.3s ease, position 0s ease;
-            position: relative; /* Initial static positioning */
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            position: relative;
             z-index: 1002;
         }
+
+            .top-nav.visible {
+                opacity: 1;
+                transform: translateY(0);
+                animation: pulse 2s infinite;
+            }
 
             .top-nav.fixed {
                 position: fixed;
@@ -63,25 +69,34 @@
             z-index: 1001;
             position: relative;
             transition: all 0.3s ease;
-            margin-top: 2px; /* Initial margin to account for top-nav height */
+            margin-top: 2px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
+            .navbar.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
 
             .navbar.fixed {
                 position: fixed;
                 top: 0;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                margin-top: 0; /* Remove margin when fixed */
+                margin-top: 0;
             }
 
         /* Progress Line */
         .progress-line {
             height: 4px;
-            background: #E96C20; /* Matches your brand color */
+            background: #E96C20;
             width: 0;
             position: absolute;
             top: 0;
             left: 0;
             transition: width 0.1s ease;
+            animation: glow 1.5s infinite alternate;
         }
 
         /* Placeholder to prevent content jump */
@@ -92,24 +107,31 @@
 
             .navbar-placeholder.active {
                 display: block;
-                height: var(--navbar-height, 60px); /* Default height of navbar */
+                height: var(--navbar-height, 60px);
             }
 
         .navbar-brand {
             font-size: 26px;
             font-weight: bold;
             color: #E96C20;
+            transition: transform 0.3s ease;
         }
+
+            .navbar-brand:hover {
+                transform: scale(1.05);
+            }
 
         .navbar-nav .nav-link {
             font-weight: 600;
             color: #333;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             padding: 10px 15px;
+            position: relative;
         }
 
             .navbar-nav .nav-link:hover {
                 color: #E96C20;
+                transform: translateY(-2px);
             }
 
         .dropdown-menu {
@@ -128,6 +150,7 @@
             display: block;
             opacity: 1;
             transform: translateY(0);
+            animation: slideIn 0.3s ease;
         }
 
         /* Hero Section */
@@ -143,7 +166,19 @@
             width: 100%;
             height: 72%;
             object-fit: cover;
+            transition: transform 0.5s ease;
+            opacity: 0;
+            transform: scale(0.95);
         }
+
+            .hero-video.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            .hero-video:hover {
+                transform: scale(1.02);
+            }
 
         .hero-overlay {
             position: absolute;
@@ -152,11 +187,12 @@
             width: 100%;
             height: 70%;
             background: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
         }
 
         .hero-text {
             position: absolute;
-            bottom: 160px;
+            bottom: 180px;
             left: 32%;
             transform: translateX(-50%);
             background: orange;
@@ -170,8 +206,15 @@
             z-index: 1000;
             pointer-events: none;
             opacity: 0;
-            animation: fadeInUp 1s ease forwards 0.5s;
+            transform: translate(-50%, 20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
+            .hero-text.visible {
+                opacity: 1;
+                transform: translate(-50%, 0);
+                animation: pulse 2s infinite;
+            }
 
         /* Card Grid Section */
         .card-grid {
@@ -192,7 +235,15 @@
 
         .wide-image {
             grid-column: span 2;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
+            .wide-image.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
 
             .wide-image img {
                 width: 100%;
@@ -209,7 +260,16 @@
             border-radius: 0;
             cursor: pointer;
             transition: transform 0.2s ease;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
+            .card.visible {
+                opacity: 1;
+                transform: scale(1);
+                animation: cardPop 0.5s ease;
+            }
 
             .card img {
                 width: 100%;
@@ -252,6 +312,11 @@
             z-index: 2;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
             background: none;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .card-text {
+            transform: translateY(-5px);
         }
 
         /* Founder's Note Section */
@@ -276,6 +341,7 @@
             .founder-profile.visible {
                 opacity: 1;
                 transform: translateY(0);
+                animation: slideInLeft 0.5s ease;
             }
 
         .founder-image-box {
@@ -289,17 +355,30 @@
                 width: 100%;
                 border-radius: 10px;
                 border: 4px solid #e44d26;
-                transition: transform 0.3s ease;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                opacity: 0;
+                transform: scale(0.9);
             }
+
+                .founder-image-box img.visible {
+                    opacity: 1;
+                    transform: scale(1);
+                }
 
                 .founder-image-box img:hover {
                     transform: scale(1.05);
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
                 }
 
         .founder-details {
             margin-top: 15px;
             color: #333;
+            transition: transform 0.3s ease;
         }
+
+            .founder-details:hover {
+                transform: translateY(-5px);
+            }
 
         .founder-name {
             font-size: 1.5rem;
@@ -327,7 +406,12 @@
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 position: relative;
+                transition: color 0.3s ease;
             }
+
+                .founder-text-box h2:hover {
+                    color: #e44d26;
+                }
 
                 .founder-text-box h2::after {
                     content: '';
@@ -351,6 +435,11 @@
             float: left;
             margin-right: 15px;
             margin-top: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .founder-text-box:hover .quote-mark {
+            transform: scale(1.1);
         }
 
         .founder-quote {
@@ -360,7 +449,103 @@
             margin-top: 5px;
             font-style: italic;
             clear: both;
+            transition: opacity 0.3s ease;
         }
+
+        .founder-text-box:hover .founder-quote {
+            opacity: 0.8;
+        }
+
+        /* Guide Video Section */
+        .guide-video-section {
+            width: 100%;
+            padding: 40px 50px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin: 0 0 60px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+            .guide-video-section.visible {
+                opacity: 1;
+                transform: translateY(0);
+                animation: slideInRight 0.5s ease;
+            }
+
+            .guide-video-section h2 {
+                font-size: 2.5rem;
+                color: #2c3e50;
+                margin-bottom: 20px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                position: relative;
+                text-align: center;
+                transition: color 0.3s ease;
+            }
+
+                .guide-video-section h2:hover {
+                    color: #e44d26;
+                }
+
+                .guide-video-section h2::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 60px;
+                    height: 3px;
+                    background: #e44d26;
+                    transition: width 0.3s ease;
+                }
+
+                .guide-video-section h2:hover::after {
+                    width: 120px;
+                }
+
+            .guide-video-section p {
+                font-size: 1.1rem;
+                color: #34495e;
+                margin-bottom: 30px;
+                text-align: center;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+                transition: opacity 0.3s ease;
+            }
+
+            .guide-video-section:hover p {
+                opacity: 0.8;
+            }
+
+        .guide-video-container {
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+            .guide-video-container.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            .guide-video-container:hover {
+                transform: scale(1.02);
+            }
+
+            .guide-video-container video {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
 
         /* Buttons */
         .btn-custom {
@@ -373,7 +558,24 @@
             border-radius: 25px;
             transition: all 0.3s ease;
             margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
+
+            .btn-custom::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.3s ease;
+            }
+
+            .btn-custom:hover::before {
+                left: 100%;
+            }
 
             .btn-custom:hover {
                 background: linear-gradient(90deg, #ff7f50, #e44d26);
@@ -389,7 +591,24 @@
             border-radius: 25px;
             border: none;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+            .btn-gradient::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.3s ease;
+            }
+
+            .btn-gradient:hover::before {
+                left: 100%;
+            }
 
             .btn-gradient:hover {
                 background: linear-gradient(90deg, #ff7f50, #e44d26);
@@ -405,6 +624,7 @@
             background: #fff;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
             font-family: 'Segoe UI', sans-serif;
+            animation: modalPop 0.4s ease;
         }
 
         .modal-title {
@@ -413,7 +633,12 @@
             color: #e44d26;
             margin-bottom: 10px;
             text-transform: uppercase;
+            transition: color 0.3s ease;
         }
+
+            .modal-title:hover {
+                color: #ff7f50;
+            }
 
         .underline {
             width: 60px;
@@ -422,6 +647,11 @@
             border-radius: 2px;
             margin-top: -5px;
             margin-bottom: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .stylish-modal:hover .underline {
+            width: 100px;
         }
 
         .modal-body p {
@@ -429,14 +659,26 @@
             font-size: 1rem;
             line-height: 1.7;
             margin-bottom: 1rem;
+            transition: opacity 0.3s ease;
         }
+
+            .modal-body p:hover {
+                opacity: 0.8;
+            }
 
         .image-gallery img {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 3px solid #f1f1f1;
             border-radius: 10px;
             max-width: 100%;
+            opacity: 0;
+            transform: scale(0.9);
         }
+
+            .image-gallery img.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
 
             .image-gallery img:hover {
                 transform: scale(1.03);
@@ -481,22 +723,34 @@
             .footer.visible {
                 opacity: 1;
                 transform: translateY(0);
+                animation: slideInUp 0.5s ease;
             }
 
         .footer-col {
             margin-bottom: 20px;
+            transition: transform 0.3s ease;
         }
+
+            .footer-col:hover {
+                transform: translateY(-5px);
+            }
 
         .footer-content h4 {
             color: #fff;
             margin-bottom: 15px;
             font-size: 1.2rem;
+            transition: color 0.3s ease;
         }
+
+            .footer-content h4:hover {
+                color: #ffc107;
+            }
 
         .footer-content p, .footer-content a {
             font-size: 0.9rem;
             color: #ccc;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
 
             .footer-content a:hover {
@@ -519,7 +773,12 @@
         .footer-col i {
             margin-right: 5px;
             color: #ffc107;
+            transition: transform 0.3s ease;
         }
+
+            .footer-col i:hover {
+                transform: scale(1.2);
+            }
 
         .route-map-container {
             position: absolute;
@@ -528,20 +787,38 @@
             z-index: 0;
             width: 65%;
             max-width: calc(100% - 40px);
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
+
+            .route-map-container.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
 
             .route-map-container h2 {
                 color: #ffc107;
                 text-align: left;
                 margin-bottom: 5px;
                 font-size: 1.5em;
+                transition: color 0.3s ease;
             }
+
+                .route-map-container h2:hover {
+                    color: #fff;
+                }
 
             .route-map-container iframe {
                 display: block;
                 width: 100%;
                 min-height: 250px;
                 border: 1px solid #ccc;
+                transition: transform 0.3s ease;
+            }
+
+            .route-map-container:hover iframe {
+                transform: scale(1.02);
             }
 
         /* Footer Bottom */
@@ -550,8 +827,6 @@
             padding: 16px 0;
             text-align: center;
             width: 100%;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards 0.5s;
         }
 
             .footer-bottom p {
@@ -559,7 +834,12 @@
                 color: white;
                 font-size: 16px;
                 font-weight: 500;
+                transition: transform 0.3s ease;
             }
+
+                .footer-bottom p:hover {
+                    transform: scale(1.05);
+                }
 
         /* Animation Keyframes */
         @@keyframes fadeIn {
@@ -581,6 +861,112 @@
             to {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes cardPop {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @@keyframes glow {
+            from {
+                box-shadow: 0 0 5px #E96C20;
+            }
+
+            to {
+                box-shadow: 0 0 15px #E96C20;
+            }
+        }
+
+        @@keyframes modalPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
             }
         }
 
@@ -651,7 +1037,7 @@
                 }
 
             .navbar {
-                margin-top: 37px; /* Ensure margin is applied on smaller screens */
+                margin-top: 37px;
             }
         }
 
@@ -680,7 +1066,7 @@
             }
 
             .navbar {
-                margin-top: 37px; /* Ensure margin is applied on smaller screens */
+                margin-top: 37px;
             }
         }
     </style>
@@ -694,7 +1080,7 @@
     <!-- Main Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <div class="progress-line"></div> <!-- Progress line added here -->
+            <div class="progress-line"></div>
             <a class="navbar-brand" href="#">
                 <img src="https://www.ifheindia.org/assets/img/Logo.svg" alt="ICFAI Logo" style="height: 50px; width: 200px; max-width: 100%;">
             </a>
@@ -704,7 +1090,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Academics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#guide-video">Guide</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="icfaiLifeMenu" role="button">ICFAI Life</a>
                         <ul class="dropdown-menu">
@@ -787,6 +1173,22 @@
                 Mr. N.J. Yasaswy (1950–2011), Founder of the ICFAI Group of educational institutions and a pioneer in promoting higher education in the private sector had a brilliant academic career: B.Com (Andhra University 1969, First Rank), CA Inter (May 1971, First Rank), CA Final (May 1973, First Rank), ICWA Inter (July 1970, First Rank) and ICWA Final (July 1972, First Rank). He was the recipient of the Basu Foundation Award for the Best Student of the Year from both, The Institute of Cost and Works Accountants of India (in 1972) and The Institute of Chartered Accountants of India (in 1973).
             </p>
             <a href="#" class="btn-custom" data-bs-toggle="modal" data-bs-target="#founderModal">Read More ›</a>
+        </div>
+    </section>
+
+    <!-- Guide Video Section -->
+    <section class="guide-video-section" id="guide-video">
+        <h2>Website Navigation Guide</h2>
+        <p>
+            Learn
+
+            how to navigate the website with this step-by-step video guide, covering key sections, menus, and features.
+        </p>
+        <div class="guide-video-container">
+            <video controls class="guide-video">
+                <source src="~/wwwroot/videos/GUIDE Video .mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </section>
 
@@ -906,23 +1308,92 @@
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
+                        // Animate cards individually with delay
+                        if (entry.target.classList.contains('card-grid')) {
+                            const cards = entry.target.querySelectorAll('.card, .wide-image');
+                            cards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    card.classList.add('visible');
+                                }, index * 100);
+                            });
+                        }
+                        // Animate footer route map
+                        if (entry.target.classList.contains('footer')) {
+                            const routeMap = document.querySelector('.route-map-container');
+                            if (routeMap) {
+                                routeMap.classList.add('visible');
+                            }
+                        }
+                        // Animate founder image
+                        if (entry.target.classList.contains('founder-profile')) {
+                            const founderImage = entry.target.querySelector('.founder-image-box img');
+                            if (founderImage) {
+                                founderImage.classList.add('visible');
+                            }
+                        }
+                        // Animate guide video container
+                        if (entry.target.classList.contains('guide-video-section')) {
+                            const videoContainer = entry.target.querySelector('.guide-video-container');
+                            if (videoContainer) {
+                                videoContainer.classList.add('visible');
+                            }
+                        }
+                        // Animate modal image
+                        if (entry.target.classList.contains('stylish-modal')) {
+                            const modalImage = entry.target.querySelector('.image-gallery img');
+                            if (modalImage) {
+                                modalImage.classList.add('visible');
+                            }
+                        }
+                    } else {
+                        // Reset visibility to allow re-animation
+                        entry.target.classList.remove('visible');
+                        if (entry.target.classList.contains('card-grid')) {
+                            const cards = entry.target.querySelectorAll('.card, .wide-image');
+                            cards.forEach((card) => {
+                                card.classList.remove('visible');
+                            });
+                        }
+                        if (entry.target.classList.contains('footer')) {
+                            const routeMap = document.querySelector('.route-map-container');
+                            if (routeMap) {
+                                routeMap.classList.remove('visible');
+                            }
+                        }
+                        if (entry.target.classList.contains('founder-profile')) {
+                            const founderImage = entry.target.querySelector('.founder-image-box img');
+                            if (founderImage) {
+                                founderImage.classList.remove('visible');
+                            }
+                        }
+                        if (entry.target.classList.contains('guide-video-section')) {
+                            const videoContainer = entry.target.querySelector('.guide-video-container');
+                            if (videoContainer) {
+                                videoContainer.classList.remove('visible');
+                            }
+                        }
+                        if (entry.target.classList.contains('stylish-modal')) {
+                            const modalImage = entry.target.querySelector('.image-gallery img');
+                            if (modalImage) {
+                                modalImage.classList.remove('visible');
+                            }
+                        }
                     }
                 });
-            }, { threshold: 0.1 });
+            }, { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
 
-            const elements = document.querySelectorAll('.top-nav, .navbar, .hero-text, .content-text, .card-grid, .founder-profile, .footer, .footer-bottom');
+            // Observe elements
+            const elements = document.querySelectorAll('.top-nav, .navbar, .hero-text, .hero-video, .card-grid, .founder-profile, .guide-video-section, .footer, .stylish-modal');
             elements.forEach(element => observer.observe(element));
 
-            // Handle scroll events
+            // Handle scroll events for fixed nav
             const topNav = document.querySelector('.top-nav');
             const navbar = document.querySelector('.navbar');
             const navbarPlaceholder = document.querySelector('.navbar-placeholder');
             const progressLine = document.querySelector('.progress-line');
-            const topNavHeight = topNav.offsetHeight; // Get the height of top-nav
-            const navbarHeight = navbar.offsetHeight; // Get the height of navbar
+            const topNavHeight = topNav.offsetHeight;
+            const navbarHeight = navbar.offsetHeight;
 
-            // Set the navbar height as a CSS variable for the placeholder
             document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`);
             window.addEventListener('scroll', () => {
                 const scrollPosition = window.scrollY;
@@ -930,11 +1401,9 @@
                 const documentHeight = document.body.scrollHeight;
                 const scrollPercentage = (scrollPosition / (documentHeight - windowHeight)) * 100;
 
-                // Fade out top-nav as user scrolls
-                const opacity = 1 - (scrollPosition / 50); // Adjust fade speed
+                const opacity = 1 - (scrollPosition / 50);
                 topNav.style.opacity = Math.max(0, opacity);
 
-                // Fix top-nav and navbar when scrolling past top-nav height
                 if (scrollPosition > topNavHeight) {
                     topNav.classList.add('fixed');
                     navbar.classList.add('fixed');
@@ -945,8 +1414,26 @@
                     navbarPlaceholder.classList.remove('active');
                 }
 
-                // Update progress line
-                progressLine.style.width = `${ Math.min(100, scrollPercentage) }%`;
+                progressLine.style.width = `${Math.min(100, scrollPercentage)}%`;
+            });
+
+            // Smooth scroll for Guide link
+            document.querySelector('a[href="#guide-video"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector('#guide-video');
+                const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                const targetPosition = target.getBoundingClientRect().top + window.scrollY - navbarHeight;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Ensure modal animations on show
+            const founderModal = document.querySelector('#founderModal');
+            founderModal.addEventListener('show.bs.modal', () => {
+                const modalContent = founderModal.querySelector('.stylish-modal');
+                observer.observe(modalContent);
             });
         });
 
