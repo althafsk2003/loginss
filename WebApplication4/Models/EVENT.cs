@@ -11,8 +11,7 @@ namespace WebApplication4.Models
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
-
+    
     public partial class EVENT
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -44,17 +43,7 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public string EventBannerPath { get; set; }
         public string EventStatus { get; set; }
-        [NotMapped]
-        public string ClubName;
-
-        [NotMapped]
-        public string Department;
-
-        [NotMapped]
-        public string University;
-
-        [NotMapped]
-        public string OrganizerName;
+    
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual CLUB CLUB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

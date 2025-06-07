@@ -72,6 +72,31 @@
         </div>
     </div>
 </div>
+<div class="col-12 mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-calendar-alt"></i> Get Events Report</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Start Date:</label>
+                    <input type="date" id="startDate" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">End Date:</label>
+                    <input type="date" id="endDate" class="form-control" />
+                </div>
+                <div class="col-md-4 mt-4">
+                    <button id="getReportBtn" class="btn btn-primary w-100">
+                        <i class="fas fa-file-alt"></i> Get Report
+                    </button>
+                </div>
+            </div>
+            <div id="reportResults" class="mt-4"></div>
+        </div>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -171,4 +196,49 @@
             });
         });
     })();
+</script>
+<script>
+    $("#getReportBtn").click(function () {
+        const startDate = $("#startDate").val();
+        const endDate = $("#endDate").val();
+
+        if (!startDate || !endDate) {
+            alert("Please select both start and end dates.");
+            return;
+        }
+
+        $("#reportResults").html('<div class="text-center text-info"><i class="fas fa-spinner fa-spin"></i> Loading report...</div>');
+
+        $.get("@Url.Action("GetClubEventReport", "Admin")", { startDate, endDate }, function (response) {
+            if (response.error) {
+                $("#reportResults").html('<div class="alert alert-danger">Error fetching report: ' + response.message + '</div>');
+                return;
+            }
+
+            const data = response.data;
+            if (!data.length) {
+                $("#reportResults").html('<div class="alert alert-warning">No events found for this date range.</div>');
+                return;
+            }
+
+            let html = "";
+            data.forEach(event => {
+                html += `
+                    <div class="card mb-4">
+                        <div class="card-header"><strong>${event.EventTitle}</strong></div>
+                        <div class="card-body">
+                            <p>${event.Description || 'No description available.'}</p>
+                            ${event.PosterUrl ? `<img src="${event.PosterUrl}" class="img-fluid mb-3" style="max-height: 200px;" />` : ""}
+                            ${event.Photos?.length ? event.Photos.map(url => `<img src="${url}" class="img-thumbnail m-1" style="height: 100px;" />`).join('') : ""}
+                            <p><strong>Winners:</strong> ${event.Winners?.length ? event.Winners.join(", ") : "N/A"}</p>
+                            ${event.BrochureUrl ? `<a href="${event.BrochureUrl}" target="_blank" class="btn btn-outline-secondary btn-sm">View Brochure</a>` : ""}
+                        </div>
+                    </div>`;
+            });
+
+            $("#reportResults").html(html);
+        }).fail(function () {
+            $("#reportResults").html('<div class="alert alert-danger">Something went wrong while fetching the report.</div>');
+        });
+    });
 </script>

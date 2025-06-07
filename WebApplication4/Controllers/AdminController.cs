@@ -1498,5 +1498,39 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
         }
 
 
+
+        [HttpGet]
+        public JsonResult GetClubEventReport(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var events = _db.EVENTS
+                    .Where(e =>
+                        e.EventStartDateAndTime >= startDate &&
+                        e.EventEndDateAndTime <= endDate &&
+                        e.EventStatus == "Concluded")
+                    .Select(e => new
+                    {
+                        EventTitle = e.EventName,
+                        Description = e.EventDescription,
+                        PosterUrl = e.EventPoster,
+                        BrochureUrl = e.EventBrochure,
+                        Photos = e.EventPhotos.Select(p => p.PhotoPath).ToList(),
+                        Winners = e.EventWinners.Select(w => w.WinnerName).ToList()
+                    })
+                    .ToList();
+
+                return Json(new { data = events }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+
+
+
     }
 }
