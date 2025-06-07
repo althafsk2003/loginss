@@ -404,7 +404,7 @@ namespace WebApplication4.Controllers
 
             // Replace localhost with your ngrok URL
             string registrationLink = Url.Action("VerifyEnrollment", "Clubs", new { id = eventItem.EventID }, protocol: "https");
-            registrationLink = registrationLink.Replace("localhost:44368", "56dd-110-235-224-180.ngrok-free.app");
+            registrationLink = registrationLink.Replace("localhost:44368", "0ca7-2409-40f0-156-f963-913c-b01d-9fa4-c961.ngrok-free.app");
 
 
             // Generate the QR code for this URL

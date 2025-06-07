@@ -268,7 +268,7 @@ namespace WebApplication4.Controllers
                 ModelState.Clear();
 
                 // Provide success message in the same view
-                ViewBag.SuccessMessage = "Club registration request sent to admin!";
+                ViewBag.SuccessMessage = "Club registration request sent to HOD!";
                 ViewBag.DepartmentName = department.DepartmentName;
                 ViewBag.DepartmentID = department.DepartmentID;
                 return View(new CLUB() { DepartmentID = department.DepartmentID });

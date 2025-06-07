@@ -46,6 +46,14 @@
                     <span class="text-danger" id="HODError0"></span>
                 </div>
 
+
+                <div class="form-group">
+                    <label class="form-label">HOD Email</label>
+                    <input type="email" name="Departments[0].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" pattern="[a-zA-Z0-9._%+-]+[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Enter a valid email address (e.g., name@example.com)" />
+                    <span class="text-danger" id="HODEmailError0"></span>
+                </div>
+
+
                 <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
             </div>
         </div>
@@ -79,6 +87,12 @@
                         <input type="text" name="Departments[${departmentCount}].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
                         <span class="text-danger" id="HODError${departmentCount}"></span>
                     </div>
+
+                    <div class="form-group">
+    <label class="form-label">HOD Email</label>
+    <input type="email" name="Departments[${departmentCount}].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" />
+    <span class="text-danger" id="HODEmailError${departmentCount}"></span>
+</div>
 
                     <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
                 </div>`;

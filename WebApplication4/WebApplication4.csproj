@@ -228,6 +228,7 @@
     <Compile Include="Controllers\AdminDashboardController.cs" />
     <Compile Include="Controllers\ClubAdminController.cs" />
     <Compile Include="Controllers\ClubsController.cs" />
+    <Compile Include="Controllers\HODController.cs" />
     <Compile Include="Controllers\MentorController.cs" />
     <Compile Include="Controllers\stuloginController.cs" />
     <Compile Include="Controllers\UniversityAdminController.cs" />
@@ -475,6 +476,14 @@
     <Content Include="Views\UniversityAdmin\ViewAllDepartments.cshtml" />
     <Content Include="Views\UniversityAdmin\ViewClubs.cshtml" />
     <Content Include="Views\UniversityAdmin\ViewEvents.cshtml" />
+    <Content Include="Views\HOD\Index.cshtml" />
+    <Content Include="Views\Shared\_HodLayout.cshtml" />
+    <Content Include="Views\HOD\AddMentor.cshtml" />
+    <Content Include="Views\HOD\ManageMentors.cshtml" />
+    <Content Include="Views\HOD\ViewMentors.cshtml" />
+    <Content Include="Views\HOD\ClubRequests.cshtml" />
+    <Content Include="Views\HOD\ManageClubs.cshtml" />
+    <Content Include="Views\HOD\ClubStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

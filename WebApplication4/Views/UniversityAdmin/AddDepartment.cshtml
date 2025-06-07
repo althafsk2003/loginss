@@ -1,4 +1,4 @@
-﻿@model WebApplication4.Models.DEPARTMENT
+﻿@model List<WebApplication4.Models.DEPARTMENT>
 
 @{
     Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
@@ -20,112 +20,151 @@
 
         <input type="hidden" name="Universityid" value="@ViewBag.UniversityID" />
 
-        <!-- Card Start -->
-        <div class="card mx-auto" style="max-width: 600px;">
-            <div class="card-body">
+        <!-- Dynamic Department Fields -->
+        <div id="dynamic-departments">
+            <div class="department-entry">
                 <div class="form-group">
-                    @Html.LabelFor(model => model.DepartmentName, new { @class = "form-label" })
-                    @Html.TextBoxFor(model => model.DepartmentName, new { @class = "form-control", required = "required", placeholder = "Enter School Name", pattern = "[A-Za-z ]{2,50}", title = "Department name must be 2-50 characters long and contain only letters and spaces" })
-                    <div class="invalid-feedback">Please enter a valid department name (2-50 characters, letters and spaces only).</div>
+                    <label class="form-label">Department Name</label>
+                    <input type="text" name="Departments[0].DepartmentName" class="form-control department-name" required placeholder="Enter Department Name" />
+                    <span class="text-danger" id="DepartmentNameError0"></span>
                 </div>
 
                 <div class="form-group">
-                    @Html.LabelFor(model => model.HOD, new { @class = "form-label" })
-                    @Html.TextBoxFor(model => model.HOD, new { @class = "form-control", required = "required", placeholder = "Enter Head of Department", pattern = "[A-Za-z ]{2,50}", title = "HOD name must be 2-50 characters long and contain only letters and spaces" })
-                    <div class="invalid-feedback">Please enter a valid HOD name (2-50 characters, letters and spaces only).</div>
+                    <label class="form-label">HOD Name</label>
+                    <input type="text" name="Departments[0].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
+                    <span class="text-danger" id="HODError0"></span>
                 </div>
 
-                <div class="form-group text-center mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Add School
-                    </button>
+
+                <div class="form-group">
+                    <label class="form-label">HOD Email</label>
+                    <input type="email" name="Departments[0].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" pattern="[a-zA-Z0-9._%+-]+[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Enter a valid email address (e.g., name@example.com)" />
+                    <span class="text-danger" id="HODEmailError0"></span>
                 </div>
+
+                <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
             </div>
         </div>
-        <!-- Card End -->
 
+        <button type="button" id="add-department" class="btn btn-secondary mt-2">+ Add Another Department</button>
+
+        <div class="form-group text-center mt-4">
+            <button type="submit" class="btn btn-primary submit-btn">
+                <i class="fas fa-save"></i> Save Departments
+            </button>
+        </div>
     </div>
+    <!-- Card End -->
+
+
 }
 
 <style>
-    .form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    .form-container {
+        max-width: 700px;
+        margin: auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
     }
 
-    .invalid {
-        border-color: #dc3545 !important;
-        box-shadow: 0 0 5px rgba(220, 53, 69, 0.5) !important;
+    .form-group {
+        margin-bottom: 15px;
     }
 
-    .valid {
-        border-color: #28a745 !important;
-        box-shadow: 0 0 5px rgba(40, 167, 69, 0.5) !important;
+    .form-label {
+        color: #333;
     }
 
-    .invalid-feedback {
-        display: none;
-        color: #dc3545;
-        font-size: 0.875em;
-        margin-top: 0.25rem;
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
     }
 
-    .show-feedback .invalid-feedback {
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+    }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-danger {
+        margin-top: 10px;
+        font-size: 15px;
+    }
+
+    select.form-control {
+        width: 100% !important;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+        white-space: normal;
+        overflow: visible;
+        height: 50px;
+    }
+
+    .text-danger {
+        font-size: 12px;
+        margin-top: 5px;
         display: block;
     }
 </style>
 
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
+
+
 <script>
-    const form = document.getElementById('addSchoolForm');
-    const inputs = form.querySelectorAll('.form-control');
+    $(document).ready(function () {
+        var departmentCount = 1;
 
-    // Function to validate a single input
-    function validateInput(input) {
-        if (input.value.trim() === '' && input.hasAttribute('required')) {
-            input.classList.add('invalid');
-            input.classList.remove('valid');
-            input.parentElement.classList.add('show-feedback');
-        } else if (!input.checkValidity()) {
-            input.classList.add('invalid');
-            input.classList.remove('valid');
-            input.parentElement.classList.add('show-feedback');
-        } else {
-            input.classList.add('valid');
-            input.classList.remove('invalid');
-            input.parentElement.classList.remove('show-feedback');
-        }
-    }
+        $("#add-department").click(function () {
+            var html = `
+            <div class="department-entry">
+                <div class="form-group">
+                    <label class="form-label">Department Name</label>
+                    <input type="text" name="Departments[${departmentCount}].DepartmentName" class="form-control department-name" required placeholder="Enter Department Name" />
+                    <span class="text-danger" id="DepartmentNameError${departmentCount}"></span>
+                </div>
 
-    // Validate on blur (when user leaves the field)
-    inputs.forEach(input => {
-        input.addEventListener('blur', function () {
-            if (this.value.trim() !== '' || this.classList.contains('touched')) {
-                validateInput(this);
-            }
-            this.classList.add('touched');
+                <div class="form-group">
+                    <label class="form-label">HOD Name</label>
+                    <input type="text" name="Departments[${departmentCount}].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
+                    <span class="text-danger" id="HODError${departmentCount}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">HOD Email</label>
+                    <input type="email" name="Departments[${departmentCount}].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" />
+                    <span class="text-danger" id="HODEmailError${departmentCount}"></span>
+                </div>
+
+                <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
+            </div>`;
+            $("#dynamic-departments").append(html);
+            departmentCount++;
         });
 
-        // Real-time validation while typing, but only after first interaction
-        input.addEventListener('input', function () {
-            if (this.classList.contains('touched')) {
-                validateInput(this);
-            }
+        $(document).on("click", ".remove-department", function () {
+            $(this).closest(".department-entry").remove();
         });
-    });
-
-    // Validate all fields on form submission
-    form.addEventListener('submit', function (event) {
-        let isValid = true;
-        inputs.forEach(input => {
-            validateInput(input);
-            if (!input.checkValidity()) {
-                isValid = false;
-            }
-        });
-
-        if (!isValid) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
     });
 </script>
+
+

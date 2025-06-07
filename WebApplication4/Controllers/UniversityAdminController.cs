@@ -11,6 +11,8 @@ using WebApplication4.Models;
 using System.Dynamic;
 using Org.BouncyCastle.Crypto.Generators;
 using System.Drawing;
+using System.Web.UI.WebControls;
+using Org.BouncyCastle.Utilities;
 
 namespace WebApplication4.Controllers
 {
@@ -57,11 +59,11 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Login", "Admin");
             }
 
-            return View(new DEPARTMENT());
+            return View(new List<DEPARTMENT>());
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddDepartment(DEPARTMENT department)
+        public async Task<ActionResult> AddDepartment(List<DEPARTMENT> Departments)
         {
             if (!IsUniversityAdminLoggedIn())
             {
@@ -71,30 +73,60 @@ namespace WebApplication4.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.ErrorMessage = "Invalid input. Please fill all required fields.";
-                return View(department);
+                return View(Departments);
             }
 
             try
             {
                 int universityID = GetUniversityID();
-                department.Universityid = universityID;
-                department.createdDate = DateTime.Now;
-                department.IsActive = true;
-                department.IsActiveDate = DateTime.Now;
 
-                _db.DEPARTMENTs.Add(department);
-                await _db.SaveChangesAsync();
+                foreach (var dept in Departments)
+                {
+                    dept.Universityid = universityID;
+                    dept.createdDate = DateTime.Now;
+                    dept.IsActive = true;
+                    dept.IsActiveDate = DateTime.Now;
 
-                TempData["SuccessMessage"] = "School added successfully!";
+                    _db.DEPARTMENTs.Add(dept);
+                    await _db.SaveChangesAsync(); // Save to get DepartmentID for HOD login
+
+                    // ✅ Create HOD Login Entry
+                    var hodLogin = new Models.Login
+                    {
+                        Email = dept.HOD_Email,
+                        PasswordHash = "Hod@123", // Ideally, hash the password
+                        Role = "HOD",
+                        IsActive=true,
+                        DepartmentID = dept.DepartmentID,
+                        UniversityID = dept.Universityid,
+                        CreatedDate = DateTime.Now
+                    };
+
+                    _db.Logins.Add(hodLogin);
+                    await _db.SaveChangesAsync();
+
+                    // ✅ Send welcome email
+                    string subject = "Welcome to Our Platform!";
+                    string body = $"Hello {dept.HOD},<br/><br/>" +
+                                  $"You have been successfully added as a HOD. Here are your login details:<br/>" +
+                                  $"<strong>Username:</strong> {dept.HOD_Email}<br/>" +
+                                  $"<strong>Password:</strong> Hod@123 (Please change your password upon login).<br/><br/>" +
+                                  "Please log in and complete your profile.";
+
+                    await _emailService.SendEmailAsync(dept.HOD_Email, subject, body);
+                }
+
+                TempData["SuccessMessage"] = "Departments and HOD logins added successfully!";
                 return RedirectToAction("ManageDepartments");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in AddDepartment: {ex.Message}");
-                ViewBag.ErrorMessage = "An error occurred while adding the school.";
-                return View(department);
+                ViewBag.ErrorMessage = "An error occurred while adding the departments.";
+                return View(Departments);
             }
         }
+
 
         // ✅ Manage Departments
         public async Task<ActionResult> ManageDepartments()

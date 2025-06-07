@@ -78,6 +78,33 @@ namespace WebApplication4.Controllers
                             ViewBag.Message = "No university assigned to this administrator.";
                         }
                     }
+
+                    else if (user.Role == "HOD")
+                    {
+                        // Fetch the department where this HOD email is assigned
+                        var department = _db.DEPARTMENTs.FirstOrDefault(d => d.HOD_Email == user.Email);
+                        Session["UserRole"] = "HOD";
+
+                        if (department != null)
+                        {
+                            // Fetch the university details related to this department
+                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
+
+                            // Store relevant info in session
+                            Session["DepartmentID"] = department.DepartmentID;
+                            Session["DepartmentName"] = department.DepartmentName;
+                            Session["UniversityID"] = university?.UniversityID;
+                            Session["UniversityName"] = university?.UniversityNAME;
+
+                            // Redirect to HOD Dashboard
+                            return RedirectToAction("Index", "HOD");
+                        }
+                        else
+                        {
+                            ViewBag.Message = "No department assigned to this HOD.";
+                        }
+                    }
+
                     else if (user.Role == "Mentor")
                     {
                         // Store the mentor's university ID in the session
@@ -431,12 +458,39 @@ namespace WebApplication4.Controllers
                     department.Universityid = Universityid;
                     department.createdDate = DateTime.Now;
                     department.IsActive = true;
+                   
                     department.IsActiveDate = DateTime.Now;
 
                     _db.Set<DEPARTMENT>().Add(department);
+                    await _db.SaveChangesAsync();
+
+                    // ✅ Create HOD Login Entry
+                    var hodLogin = new Models.Login
+                    {
+                        Email = department.HOD_Email,
+                        PasswordHash = "Hod@123", // Ideally, hash the password
+                        Role = "HOD",
+                        IsActive = true,
+                        DepartmentID = department.DepartmentID,
+                        UniversityID = department.Universityid,
+                        CreatedDate = DateTime.Now
+                    };
+
+                    _db.Logins.Add(hodLogin);
+                    await _db.SaveChangesAsync();
+
+                    // ✅ Send welcome email
+                    string subject = "Welcome to Our Platform!";
+                    string body = $"Hello {department.HOD},<br/><br/>" +
+                                  $"You have been successfully added as a HOD. Here are your login details:<br/>" +
+                                  $"<strong>Username:</strong> {department.HOD_Email}<br/>" +
+                                  $"<strong>Password:</strong> Hod@123 (Please change your password upon login).<br/><br/>" +
+                                  "Please log in and complete your profile.";
+
+                    await _emailService.SendEmailAsync(department.HOD_Email, subject, body);
                 }
 
-                await _db.SaveChangesAsync();
+                
 
                 TempData["SuccessMessage"] = "Departments added successfully!";
                 return RedirectToAction("AddDepartment");

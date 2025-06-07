@@ -44,6 +44,7 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public string EventBannerPath { get; set; }
         public string EventStatus { get; set; }
+
         [NotMapped]
         public string ClubName;
 
@@ -55,6 +56,7 @@ namespace WebApplication4.Models
 
         [NotMapped]
         public string OrganizerName;
+
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual CLUB CLUB { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
