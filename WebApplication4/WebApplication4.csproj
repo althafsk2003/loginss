@@ -243,7 +243,6 @@
     <Compile Include="Models\CLUB.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\CLUB.Partial.cs" />
     <Compile Include="Models\ClubDetailsViewModel.cs" />
     <Compile Include="Models\ClubRegistration.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -261,7 +260,6 @@
     <Compile Include="Models\EVENT.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\EVENT.Partial.cs" />
     <Compile Include="Models\EventDetailsViewModel.cs" />
     <Compile Include="Models\EventDetailsViewsModel.cs" />
     <Compile Include="Models\EventDto.cs" />

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="ApprovalStatusTable">
           <Key>
             <PropertyRef Name="ApprovalStatusID" />
@@ -203,7 +203,7 @@
           <Property Name="District" Type="varchar" MaxLength="255" />
           <Property Name="DepartmentID" Type="int" />
         </EntityType>
-        <Association Name="FK__ClubRegis__Appro__7FEAFD3E">
+        <Association Name="FK__ClubRegis__Appro__7E37BEF6">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -215,7 +215,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__ClubI__7EF6D905">
+        <Association Name="FK__ClubRegis__ClubI__7F2BE32F">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -227,7 +227,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__UserI__7E02B4CC">
+        <Association Name="FK__ClubRegis__UserI__00200768">
           <End Role="USER" Type="Self.USER" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistrations" Multiplicity="*" />
           <ReferentialConstraint>
@@ -239,7 +239,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__ApprovalS__30C33EC3">
+        <Association Name="FK__CLUBS__ApprovalS__02FC7413">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -251,7 +251,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__Departmen__2EDAF651">
+        <Association Name="FK__CLUBS__Departmen__03F0984C">
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -263,7 +263,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__MentorID__2FCF1A8A">
+        <Association Name="FK__CLUBS__MentorID__04E4BC85">
           <End Role="Logins" Type="Self.Logins" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -275,7 +275,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__DEPARTMEN__Unive__656C112C">
+        <Association Name="FK__DEPARTMEN__Unive__07C12930">
           <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -287,7 +287,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventPhot__Event__67DE6983">
+        <Association Name="FK__EventPhot__Event__08B54D69">
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
           <End Role="EventPhotos" Type="Self.EventPhotos" Multiplicity="*" />
           <ReferentialConstraint>
@@ -299,7 +299,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__Approval__214BF109">
+        <Association Name="FK__EVENTS__Approval__0A9D95DB">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -311,7 +311,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__ClubID__2057CCD0">
+        <Association Name="FK__EVENTS__ClubID__0B91BA14">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -323,7 +323,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__EventOrg__22401542">
+        <Association Name="FK__EVENTS__EventOrg__0C85DE4D">
           <End Role="Logins" Type="Self.Logins" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="*" />
           <ReferentialConstraint>
@@ -335,7 +335,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventWinn__Event__6ABAD62E">
+        <Association Name="FK__EventWinn__Event__0D7A0286">
           <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
           <End Role="EventWinners" Type="Self.EventWinners" Multiplicity="*" />
           <ReferentialConstraint>
@@ -347,7 +347,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Notificat__Login__3F115E1A">
+        <Association Name="FK__Notificat__Login__10566F31">
           <End Role="Logins" Type="Self.Logins" Multiplicity="0..1" />
           <End Role="Notifications" Type="Self.Notifications" Multiplicity="*" />
           <ReferentialConstraint>
@@ -471,55 +471,55 @@
           <EntitySet Name="Notifications" EntityType="Self.Notifications" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UNIVERSITY" EntityType="Self.UNIVERSITY" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="USER" EntityType="Self.USER" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__ClubRegis__Appro__7FEAFD3E" Association="Self.FK__ClubRegis__Appro__7FEAFD3E">
+          <AssociationSet Name="FK__ClubRegis__Appro__7E37BEF6" Association="Self.FK__ClubRegis__Appro__7E37BEF6">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__ClubI__7EF6D905" Association="Self.FK__ClubRegis__ClubI__7EF6D905">
+          <AssociationSet Name="FK__ClubRegis__ClubI__7F2BE32F" Association="Self.FK__ClubRegis__ClubI__7F2BE32F">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__UserI__7E02B4CC" Association="Self.FK__ClubRegis__UserI__7E02B4CC">
+          <AssociationSet Name="FK__ClubRegis__UserI__00200768" Association="Self.FK__ClubRegis__UserI__00200768">
             <End Role="USER" EntitySet="USER" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__ApprovalS__30C33EC3" Association="Self.FK__CLUBS__ApprovalS__30C33EC3">
+          <AssociationSet Name="FK__CLUBS__ApprovalS__02FC7413" Association="Self.FK__CLUBS__ApprovalS__02FC7413">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__Departmen__2EDAF651" Association="Self.FK__CLUBS__Departmen__2EDAF651">
+          <AssociationSet Name="FK__CLUBS__Departmen__03F0984C" Association="Self.FK__CLUBS__Departmen__03F0984C">
             <End Role="DEPARTMENT" EntitySet="DEPARTMENT" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__MentorID__2FCF1A8A" Association="Self.FK__CLUBS__MentorID__2FCF1A8A">
+          <AssociationSet Name="FK__CLUBS__MentorID__04E4BC85" Association="Self.FK__CLUBS__MentorID__04E4BC85">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__DEPARTMEN__Unive__656C112C" Association="Self.FK__DEPARTMEN__Unive__656C112C">
+          <AssociationSet Name="FK__DEPARTMEN__Unive__07C12930" Association="Self.FK__DEPARTMEN__Unive__07C12930">
             <End Role="UNIVERSITY" EntitySet="UNIVERSITY" />
             <End Role="DEPARTMENT" EntitySet="DEPARTMENT" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__67DE6983" Association="Self.FK__EventPhot__Event__67DE6983">
+          <AssociationSet Name="FK__EventPhot__Event__08B54D69" Association="Self.FK__EventPhot__Event__08B54D69">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventPhotos" EntitySet="EventPhotos" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__Approval__214BF109" Association="Self.FK__EVENTS__Approval__214BF109">
+          <AssociationSet Name="FK__EVENTS__Approval__0A9D95DB" Association="Self.FK__EVENTS__Approval__0A9D95DB">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__ClubID__2057CCD0" Association="Self.FK__EVENTS__ClubID__2057CCD0">
+          <AssociationSet Name="FK__EVENTS__ClubID__0B91BA14" Association="Self.FK__EVENTS__ClubID__0B91BA14">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__EventOrg__22401542" Association="Self.FK__EVENTS__EventOrg__22401542">
+          <AssociationSet Name="FK__EVENTS__EventOrg__0C85DE4D" Association="Self.FK__EVENTS__EventOrg__0C85DE4D">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventWinn__Event__6ABAD62E" Association="Self.FK__EventWinn__Event__6ABAD62E">
+          <AssociationSet Name="FK__EventWinn__Event__0D7A0286" Association="Self.FK__EventWinn__Event__0D7A0286">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventWinners" EntitySet="EventWinners" />
           </AssociationSet>
-          <AssociationSet Name="FK__Notificat__Login__3F115E1A" Association="Self.FK__Notificat__Login__3F115E1A">
+          <AssociationSet Name="FK__Notificat__Login__10566F31" Association="Self.FK__Notificat__Login__10566F31">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="Notifications" EntitySet="Notifications" />
           </AssociationSet>
@@ -556,7 +556,8 @@
             <End Role="USER" EntitySet="USER" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="dummyclubsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -566,9 +567,9 @@
           </Key>
           <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__Appro__7FEAFD3E" FromRole="ApprovalStatusTable" ToRole="ClubRegistrations" />
-          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__ApprovalS__30C33EC3" FromRole="ApprovalStatusTable" ToRole="CLUBS" />
-          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__Approval__214BF109" FromRole="ApprovalStatusTable" ToRole="EVENTS" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__Appro__7E37BEF6" FromRole="ApprovalStatusTable" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__ApprovalS__02FC7413" FromRole="ApprovalStatusTable" ToRole="CLUBS" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__Approval__0A9D95DB" FromRole="ApprovalStatusTable" ToRole="EVENTS" />
         </EntityType>
         <EntityType Name="ClubRegistration">
           <Key>
@@ -588,9 +589,9 @@
           <Property Name="RegisteredAt" Type="DateTime" Precision="3" />
           <Property Name="DepartmentID" Type="Int32" />
           <Property Name="UniversityID" Type="Int32" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__ClubRegis__Appro__7FEAFD3E" FromRole="ClubRegistrations" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="CLUB" Relationship="Self.FK__ClubRegis__ClubI__7EF6D905" FromRole="ClubRegistrations" ToRole="CLUBS" />
-          <NavigationProperty Name="USER" Relationship="Self.FK__ClubRegis__UserI__7E02B4CC" FromRole="ClubRegistrations" ToRole="USER" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__ClubRegis__Appro__7E37BEF6" FromRole="ClubRegistrations" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="CLUB" Relationship="Self.FK__ClubRegis__ClubI__7F2BE32F" FromRole="ClubRegistrations" ToRole="CLUBS" />
+          <NavigationProperty Name="USER" Relationship="Self.FK__ClubRegis__UserI__00200768" FromRole="ClubRegistrations" ToRole="USER" />
           <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_ClubRegistrations_Department" FromRole="ClubRegistrations" ToRole="DEPARTMENT" />
           <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK_ClubRegistrations_University" FromRole="ClubRegistrations" ToRole="UNIVERSITY" />
         </EntityType>
@@ -610,11 +611,11 @@
           <Property Name="LogoImagePath" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="ApprovalStatusID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__CLUBS__ApprovalS__30C33EC3" FromRole="CLUBS" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__ClubI__7EF6D905" FromRole="CLUBS" ToRole="ClubRegistrations" />
-          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK__CLUBS__Departmen__2EDAF651" FromRole="CLUBS" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="Login" Relationship="Self.FK__CLUBS__MentorID__2FCF1A8A" FromRole="CLUBS" ToRole="Logins" />
-          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__ClubID__2057CCD0" FromRole="CLUBS" ToRole="EVENTS" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__CLUBS__ApprovalS__02FC7413" FromRole="CLUBS" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__ClubI__7F2BE32F" FromRole="CLUBS" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK__CLUBS__Departmen__03F0984C" FromRole="CLUBS" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__CLUBS__MentorID__04E4BC85" FromRole="CLUBS" ToRole="Logins" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__ClubID__0B91BA14" FromRole="CLUBS" ToRole="EVENTS" />
         </EntityType>
         <EntityType Name="Comment">
           <Key>
@@ -642,12 +643,12 @@
           <Property Name="Universityid" Type="Int32" />
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
+          <Property Name="HOD_Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK_ClubRegistrations_Department" FromRole="DEPARTMENT" ToRole="ClubRegistrations" />
-          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__Departmen__2EDAF651" FromRole="DEPARTMENT" ToRole="CLUBS" />
-          <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK__DEPARTMEN__Unive__656C112C" FromRole="DEPARTMENT" ToRole="UNIVERSITY" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__Departmen__03F0984C" FromRole="DEPARTMENT" ToRole="CLUBS" />
+          <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK__DEPARTMEN__Unive__07C12930" FromRole="DEPARTMENT" ToRole="UNIVERSITY" />
           <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_Department" FromRole="DEPARTMENT" ToRole="Logins" />
           <NavigationProperty Name="USERs" Relationship="Self.FK_Users_Department" FromRole="DEPARTMENT" ToRole="USER" />
-          <Property Name="HOD_Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="EventPhoto">
           <Key>
@@ -657,7 +658,7 @@
           <Property Name="EventId" Type="Int32" Nullable="false" />
           <Property Name="PhotoPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventPhot__Event__67DE6983" FromRole="EventPhotos" ToRole="EVENTS" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventPhot__Event__08B54D69" FromRole="EventPhotos" ToRole="EVENTS" />
         </EntityType>
         <EntityType Name="EventRegistration">
           <Key>
@@ -703,13 +704,13 @@
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="EventBannerPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="EventStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__EVENTS__Approval__214BF109" FromRole="EVENTS" ToRole="ApprovalStatusTable" />
-          <NavigationProperty Name="CLUB" Relationship="Self.FK__EVENTS__ClubID__2057CCD0" FromRole="EVENTS" ToRole="CLUBS" />
+          <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__EVENTS__Approval__0A9D95DB" FromRole="EVENTS" ToRole="ApprovalStatusTable" />
+          <NavigationProperty Name="CLUB" Relationship="Self.FK__EVENTS__ClubID__0B91BA14" FromRole="EVENTS" ToRole="CLUBS" />
           <NavigationProperty Name="Comments" Relationship="Self.FK_Comments_Events" FromRole="EVENTS" ToRole="Comments" />
-          <NavigationProperty Name="EventPhotos" Relationship="Self.FK__EventPhot__Event__67DE6983" FromRole="EVENTS" ToRole="EventPhotos" />
+          <NavigationProperty Name="EventPhotos" Relationship="Self.FK__EventPhot__Event__08B54D69" FromRole="EVENTS" ToRole="EventPhotos" />
           <NavigationProperty Name="EventRegistrations" Relationship="Self.FK_Registrations_Events" FromRole="EVENTS" ToRole="EventRegistrations" />
-          <NavigationProperty Name="Login" Relationship="Self.FK__EVENTS__EventOrg__22401542" FromRole="EVENTS" ToRole="Logins" />
-          <NavigationProperty Name="EventWinners" Relationship="Self.FK__EventWinn__Event__6ABAD62E" FromRole="EVENTS" ToRole="EventWinners" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__EVENTS__EventOrg__0C85DE4D" FromRole="EVENTS" ToRole="Logins" />
+          <NavigationProperty Name="EventWinners" Relationship="Self.FK__EventWinn__Event__0D7A0286" FromRole="EVENTS" ToRole="EventWinners" />
         </EntityType>
         <EntityType Name="EventWinner">
           <Key>
@@ -720,7 +721,7 @@
           <Property Name="WinnerName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Prize" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventWinn__Event__6ABAD62E" FromRole="EventWinners" ToRole="EVENTS" />
+          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventWinn__Event__0D7A0286" FromRole="EventWinners" ToRole="EVENTS" />
         </EntityType>
         <EntityType Name="Login">
           <Key>
@@ -736,10 +737,10 @@
           <Property Name="DepartmentID" Type="Int32" />
           <Property Name="OTP" Type="String" MaxLength="6" FixedLength="false" Unicode="true" />
           <Property Name="OTPExpiry" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__MentorID__2FCF1A8A" FromRole="Logins" ToRole="CLUBS" />
+          <NavigationProperty Name="CLUBS" Relationship="Self.FK__CLUBS__MentorID__04E4BC85" FromRole="Logins" ToRole="CLUBS" />
           <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_Logins_Department" FromRole="Logins" ToRole="DEPARTMENT" />
-          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__EventOrg__22401542" FromRole="Logins" ToRole="EVENTS" />
-          <NavigationProperty Name="Notifications" Relationship="Self.FK__Notificat__Login__3F115E1A" FromRole="Logins" ToRole="Notifications" />
+          <NavigationProperty Name="EVENTS" Relationship="Self.FK__EVENTS__EventOrg__0C85DE4D" FromRole="Logins" ToRole="EVENTS" />
+          <NavigationProperty Name="Notifications" Relationship="Self.FK__Notificat__Login__10566F31" FromRole="Logins" ToRole="Notifications" />
           <NavigationProperty Name="UNIVERSITY" Relationship="Self.FK_Logins_University" FromRole="Logins" ToRole="UNIVERSITY" />
         </EntityType>
         <EntityType Name="Notification">
@@ -753,7 +754,7 @@
           <Property Name="StartDate" Type="DateTime" Precision="3" />
           <Property Name="EndDate" Type="DateTime" Precision="3" />
           <Property Name="CreatedDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Login" Relationship="Self.FK__Notificat__Login__3F115E1A" FromRole="Notifications" ToRole="Logins" />
+          <NavigationProperty Name="Login" Relationship="Self.FK__Notificat__Login__10566F31" FromRole="Notifications" ToRole="Logins" />
         </EntityType>
         <EntityType Name="UNIVERSITY">
           <Key>
@@ -770,7 +771,7 @@
           <Property Name="IsActive" Type="Boolean" />
           <Property Name="IsActiveDate" Type="DateTime" Precision="3" />
           <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK_ClubRegistrations_University" FromRole="UNIVERSITY" ToRole="ClubRegistrations" />
-          <NavigationProperty Name="DEPARTMENTs" Relationship="Self.FK__DEPARTMEN__Unive__656C112C" FromRole="UNIVERSITY" ToRole="DEPARTMENT" />
+          <NavigationProperty Name="DEPARTMENTs" Relationship="Self.FK__DEPARTMEN__Unive__07C12930" FromRole="UNIVERSITY" ToRole="DEPARTMENT" />
           <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_University" FromRole="UNIVERSITY" ToRole="Logins" />
         </EntityType>
         <EntityType Name="USER">
@@ -797,10 +798,10 @@
           <Property Name="PhotoPath" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="District" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="DepartmentID" Type="Int32" />
-          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__UserI__7E02B4CC" FromRole="USER" ToRole="ClubRegistrations" />
+          <NavigationProperty Name="ClubRegistrations" Relationship="Self.FK__ClubRegis__UserI__00200768" FromRole="USER" ToRole="ClubRegistrations" />
           <NavigationProperty Name="DEPARTMENT" Relationship="Self.FK_Users_Department" FromRole="USER" ToRole="DEPARTMENT" />
         </EntityType>
-        <Association Name="FK__ClubRegis__Appro__7FEAFD3E">
+        <Association Name="FK__ClubRegis__Appro__7E37BEF6">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
           <ReferentialConstraint>
@@ -812,7 +813,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__ApprovalS__30C33EC3">
+        <Association Name="FK__CLUBS__ApprovalS__02FC7413">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
           <ReferentialConstraint>
@@ -824,7 +825,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__Approval__214BF109">
+        <Association Name="FK__EVENTS__Approval__0A9D95DB">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -836,7 +837,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__ClubI__7EF6D905">
+        <Association Name="FK__ClubRegis__ClubI__7F2BE32F">
           <End Role="CLUBS" Type="Self.CLUB" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
           <ReferentialConstraint>
@@ -848,7 +849,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ClubRegis__UserI__7E02B4CC">
+        <Association Name="FK__ClubRegis__UserI__00200768">
           <End Role="USER" Type="Self.USER" Multiplicity="0..1" />
           <End Role="ClubRegistrations" Type="Self.ClubRegistration" Multiplicity="*" />
           <ReferentialConstraint>
@@ -884,7 +885,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__Departmen__2EDAF651">
+        <Association Name="FK__CLUBS__Departmen__03F0984C">
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
           <ReferentialConstraint>
@@ -896,7 +897,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CLUBS__MentorID__2FCF1A8A">
+        <Association Name="FK__CLUBS__MentorID__04E4BC85">
           <End Role="Logins" Type="Self.Login" Multiplicity="1" />
           <End Role="CLUBS" Type="Self.CLUB" Multiplicity="*" />
           <ReferentialConstraint>
@@ -908,7 +909,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__ClubID__2057CCD0">
+        <Association Name="FK__EVENTS__ClubID__0B91BA14">
           <End Role="CLUBS" Type="Self.CLUB" Multiplicity="0..1" />
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -944,7 +945,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__DEPARTMEN__Unive__656C112C">
+        <Association Name="FK__DEPARTMEN__Unive__07C12930">
           <End Role="UNIVERSITY" Type="Self.UNIVERSITY" Multiplicity="0..1" />
           <End Role="DEPARTMENT" Type="Self.DEPARTMENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -980,7 +981,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventPhot__Event__67DE6983">
+        <Association Name="FK__EventPhot__Event__08B54D69">
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
           <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1006,7 +1007,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EVENTS__EventOrg__22401542">
+        <Association Name="FK__EVENTS__EventOrg__0C85DE4D">
           <End Role="Logins" Type="Self.Login" Multiplicity="1" />
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1018,7 +1019,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventWinn__Event__6ABAD62E">
+        <Association Name="FK__EventWinn__Event__0D7A0286">
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
           <End Role="EventWinners" Type="Self.EventWinner" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1030,7 +1031,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Notificat__Login__3F115E1A">
+        <Association Name="FK__Notificat__Login__10566F31">
           <End Role="Logins" Type="Self.Login" Multiplicity="0..1" />
           <End Role="Notifications" Type="Self.Notification" Multiplicity="*" />
           <ReferentialConstraint>
@@ -1068,23 +1069,23 @@
           <EntitySet Name="Notifications" EntityType="Self.Notification" />
           <EntitySet Name="UNIVERSITies" EntityType="Self.UNIVERSITY" />
           <EntitySet Name="USERs" EntityType="Self.USER" />
-          <AssociationSet Name="FK__ClubRegis__Appro__7FEAFD3E" Association="Self.FK__ClubRegis__Appro__7FEAFD3E">
+          <AssociationSet Name="FK__ClubRegis__Appro__7E37BEF6" Association="Self.FK__ClubRegis__Appro__7E37BEF6">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__ApprovalS__30C33EC3" Association="Self.FK__CLUBS__ApprovalS__30C33EC3">
+          <AssociationSet Name="FK__CLUBS__ApprovalS__02FC7413" Association="Self.FK__CLUBS__ApprovalS__02FC7413">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__Approval__214BF109" Association="Self.FK__EVENTS__Approval__214BF109">
+          <AssociationSet Name="FK__EVENTS__Approval__0A9D95DB" Association="Self.FK__EVENTS__Approval__0A9D95DB">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTables" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__ClubI__7EF6D905" Association="Self.FK__ClubRegis__ClubI__7EF6D905">
+          <AssociationSet Name="FK__ClubRegis__ClubI__7F2BE32F" Association="Self.FK__ClubRegis__ClubI__7F2BE32F">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__ClubRegis__UserI__7E02B4CC" Association="Self.FK__ClubRegis__UserI__7E02B4CC">
+          <AssociationSet Name="FK__ClubRegis__UserI__00200768" Association="Self.FK__ClubRegis__UserI__00200768">
             <End Role="USER" EntitySet="USERs" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
@@ -1096,15 +1097,15 @@
             <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__Departmen__2EDAF651" Association="Self.FK__CLUBS__Departmen__2EDAF651">
+          <AssociationSet Name="FK__CLUBS__Departmen__03F0984C" Association="Self.FK__CLUBS__Departmen__03F0984C">
             <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__CLUBS__MentorID__2FCF1A8A" Association="Self.FK__CLUBS__MentorID__2FCF1A8A">
+          <AssociationSet Name="FK__CLUBS__MentorID__04E4BC85" Association="Self.FK__CLUBS__MentorID__04E4BC85">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="CLUBS" EntitySet="CLUBS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__ClubID__2057CCD0" Association="Self.FK__EVENTS__ClubID__2057CCD0">
+          <AssociationSet Name="FK__EVENTS__ClubID__0B91BA14" Association="Self.FK__EVENTS__ClubID__0B91BA14">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
@@ -1116,7 +1117,7 @@
             <End Role="Comments" EntitySet="Comments" />
             <End Role="Comments1" EntitySet="Comments" />
           </AssociationSet>
-          <AssociationSet Name="FK__DEPARTMEN__Unive__656C112C" Association="Self.FK__DEPARTMEN__Unive__656C112C">
+          <AssociationSet Name="FK__DEPARTMEN__Unive__07C12930" Association="Self.FK__DEPARTMEN__Unive__07C12930">
             <End Role="UNIVERSITY" EntitySet="UNIVERSITies" />
             <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
           </AssociationSet>
@@ -1128,7 +1129,7 @@
             <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
             <End Role="USER" EntitySet="USERs" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__67DE6983" Association="Self.FK__EventPhot__Event__67DE6983">
+          <AssociationSet Name="FK__EventPhot__Event__08B54D69" Association="Self.FK__EventPhot__Event__08B54D69">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventPhotos" EntitySet="EventPhotos" />
           </AssociationSet>
@@ -1136,15 +1137,15 @@
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventRegistrations" EntitySet="EventRegistrations" />
           </AssociationSet>
-          <AssociationSet Name="FK__EVENTS__EventOrg__22401542" Association="Self.FK__EVENTS__EventOrg__22401542">
+          <AssociationSet Name="FK__EVENTS__EventOrg__0C85DE4D" Association="Self.FK__EVENTS__EventOrg__0C85DE4D">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="EVENTS" EntitySet="EVENTS" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventWinn__Event__6ABAD62E" Association="Self.FK__EventWinn__Event__6ABAD62E">
+          <AssociationSet Name="FK__EventWinn__Event__0D7A0286" Association="Self.FK__EventWinn__Event__0D7A0286">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventWinners" EntitySet="EventWinners" />
           </AssociationSet>
-          <AssociationSet Name="FK__Notificat__Login__3F115E1A" Association="Self.FK__Notificat__Login__3F115E1A">
+          <AssociationSet Name="FK__Notificat__Login__10566F31" Association="Self.FK__Notificat__Login__10566F31">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="Notifications" EntitySet="Notifications" />
           </AssociationSet>
@@ -1221,7 +1222,6 @@
           <EntitySetMapping Name="DEPARTMENTs">
             <EntityTypeMapping TypeName="dummyclubsModel.DEPARTMENT">
               <MappingFragment StoreEntitySet="DEPARTMENT">
-                <ScalarProperty Name="HOD_Email" ColumnName="HOD_Email" />
                 <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
                 <ScalarProperty Name="DepartmentName" ColumnName="DepartmentName" />
                 <ScalarProperty Name="HOD" ColumnName="HOD" />
@@ -1229,6 +1229,7 @@
                 <ScalarProperty Name="Universityid" ColumnName="Universityid" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
                 <ScalarProperty Name="IsActiveDate" ColumnName="IsActiveDate" />
+                <ScalarProperty Name="HOD_Email" ColumnName="HOD_Email" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
