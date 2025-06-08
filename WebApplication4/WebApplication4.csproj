@@ -228,6 +228,7 @@
     <Compile Include="Controllers\AdminDashboardController.cs" />
     <Compile Include="Controllers\ClubAdminController.cs" />
     <Compile Include="Controllers\ClubsController.cs" />
+    <Compile Include="Controllers\HODController.cs" />
     <Compile Include="Controllers\MentorController.cs" />
     <Compile Include="Controllers\stuloginController.cs" />
     <Compile Include="Controllers\UniversityAdminController.cs" />
@@ -381,6 +382,7 @@
     <Content Include="wwwroot\Images\Screenshot 2025-04-08 160030.png" />
     <Content Include="wwwroot\videos\clubs11.mp4" />
     <Content Include="wwwroot\videos\GUIDE Video .mp4" />
+    <Content Include="wwwroot\videos\icfai.mp4" />
     <EntityDeploy Include="Models\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
@@ -476,6 +478,14 @@
     <Content Include="Views\UniversityAdmin\ViewAllDepartments.cshtml" />
     <Content Include="Views\UniversityAdmin\ViewClubs.cshtml" />
     <Content Include="Views\UniversityAdmin\ViewEvents.cshtml" />
+    <Content Include="Views\HOD\Index.cshtml" />
+    <Content Include="Views\Shared\_HodLayout.cshtml" />
+    <Content Include="Views\HOD\AddMentor.cshtml" />
+    <Content Include="Views\HOD\ManageMentors.cshtml" />
+    <Content Include="Views\HOD\ViewMentors.cshtml" />
+    <Content Include="Views\HOD\ClubRequests.cshtml" />
+    <Content Include="Views\HOD\ManageClubs.cshtml" />
+    <Content Include="Views\HOD\ClubStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

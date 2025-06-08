@@ -1,0 +1,220 @@
+﻿@model List<WebApplication4.Models.CLUB>
+
+@{
+    Layout = "~/Views/Shared/_HodLayout.cshtml";
+    ViewBag.Title = "Manage Clubs";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Manage Clubs</h2>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Club Name</th>
+                        <th>Description</th>
+                        <th>Department</th>
+                        <th>Approval Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var club in Model)
+                    {
+                        <tr>
+                            <td>@club.ClubName</td>
+                            <td>
+                                <span class="short-desc">
+                                    @club.Description.Substring(0, Math.Min(50, club.Description.Length))@((club.Description.Length > 50) ? "..." : "")
+                                </span>
+                                @if (club.Description.Length > 50)
+                                {
+                                    <span class="full-desc d-none">@club.Description</span>
+                                    <a href="#" class="read-more-toggle">Read more</a>
+                                }
+                            </td>
+                            <td>@club.DEPARTMENT.DepartmentName</td>
+                            <td>@club.ApprovalStatusTable.Status</td>
+                            <td>
+                                @* Activate and Deactivate buttons *@
+                                @if (club.IsActive == true)
+                                {
+                                    <a href="@Url.Action("DeactivateClub", "HOD", new { id = club.ClubID })" class="btn btn-warning">Deactivate</a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("ActivateClub", "HOD", new { id = club.ClubID })" class="btn btn-success">Activate</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* Pagination Links with Page Numbers *@
+        <div class="pagination-container">
+            <div class="pagination-info mb-2">
+                Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
+            </div>
+
+            <ul class="pagination">
+                @for (var i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("ManageClubs", new { page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <p class="text-center">No clubs found to manage.</p>
+    }
+</div>
+
+<!-- ✅ CSS Styling -->
+<style>
+    .table {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+        .table th {
+            text-align: center;
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 10px;
+        }
+
+    .alert-success {
+        font-size: 16px;
+        font-weight: bold;
+        color: green;
+        text-align: center;
+    }
+
+    .btn {
+        margin: 5px;
+    }
+
+    .btn-warning {
+        background-color: #f39c12;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    /* Pagination Styles */
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .page-item {
+        display: flex;
+    }
+
+    .page-link {
+        display: block;
+        padding: 8px 14px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .page-link:hover {
+            background-color: #d0d0d0;
+        }
+
+    .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .short-desc,
+    .full-desc {
+        display: inline;
+    }
+
+    .read-more-toggle {
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: auto;
+        margin-left: 5px;
+        font-size: 0.9em;
+    }
+
+    .d-none {
+        display: none;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".read-more-toggle").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                var shortDesc = btn.parentElement.querySelector(".short-desc");
+                var fullDesc = btn.parentElement.querySelector(".full-desc");
+
+                if (fullDesc.classList.contains("d-none")) {
+                    shortDesc.classList.add("d-none");
+                    fullDesc.classList.remove("d-none");
+                    btn.textContent = "Read less";
+                } else {
+                    fullDesc.classList.add("d-none");
+                    shortDesc.classList.remove("d-none");
+                    btn.textContent = "Read more";
+                }
+            });
+        });
+    });
+</script>

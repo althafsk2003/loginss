@@ -91,6 +91,23 @@
             background-color: #007bff;
             color: white;
         }
+
+        .short-desc,
+        .full-desc {
+            display: inline;
+        }
+
+        .read-more-toggle {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: auto;
+            margin-left: 5px;
+            font-size: 0.9em;
+        }
+
+        .d-none {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -142,7 +159,16 @@
 
                         <tr class="club-row" data-status="@club.ApprovalStatusID">
                             <td>@club.ClubName</td>
-                            <td>@club.Description</td>
+                            <td>
+                                <span class="short-desc">
+                                    @club.Description.Substring(0, Math.Min(50, club.Description.Length))@((club.Description.Length > 50) ? "..." : "")
+                                </span>
+                                @if (club.Description.Length > 50)
+                                {
+                                    <span class="full-desc d-none">@club.Description</span>
+                                    <a href="#" class="read-more-toggle">Read more</a>
+                                }
+                            </td>
                             <td>@club.DEPARTMENT.UNIVERSITY.UniversityNAME</td>
                             <td>@club.DEPARTMENT.DepartmentName</td>
                             <td>
@@ -188,10 +214,35 @@
     </div>
 
     <!-- JavaScript for Filtering -->
+    <!-- JavaScript for Read More Toggle -->
     <script>
-        function filterTable(status) {
-            window.location.href = '@Url.Action("ViewClubStatus", "Mentor")' + '?filter=' + status;
-        }
+    // Run when the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".read-more-toggle").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                var shortDesc = btn.parentElement.querySelector(".short-desc");
+                var fullDesc = btn.parentElement.querySelector(".full-desc");
+
+                if (fullDesc.classList.contains("d-none")) {
+                    shortDesc.classList.add("d-none");
+                    fullDesc.classList.remove("d-none");
+                    btn.textContent = "Read less";
+                } else {
+                    fullDesc.classList.add("d-none");
+                    shortDesc.classList.remove("d-none");
+                    btn.textContent = "Read more";
+                }
+            });
+        });
+    });
+
+    // Filter Function (Keep separate)
+    function filterTable(status) {
+        window.location.href = '@Url.Action("ViewClubStatus", "Mentor")' + '?filter=' + status;
+    }
     </script>
+
 </body>
 </html>

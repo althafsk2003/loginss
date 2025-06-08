@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - HOD Dashboard</title>
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        /* 🌟 General Reset & Base Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif; /* Match Admin Dashboard */
+        }
+
+        body {
+            background-color: #f4f6f9; /* Consistent background */
+            color: #333;
+        }
+
+        /* 🎨 Header Styling */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #007bff; /* Primary blue from Admin Dashboard */
+            color: white;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hamburger {
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s ease;
+        }
+
+        .hamburger:hover {
+            transform: scale(1.1); /* Subtle hover effect */
+        }
+
+        .header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* 📱 Sidebar Popup Styling */
+        .sidebar-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            z-index: 2000;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .sidebar-popup.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px; /* Slightly narrower than Admin Dashboard for HOD context */
+            height: 100%;
+            background: #343a40; /* Dark sidebar background */
+            padding: 20px;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(-100%); /* Hidden by default */
+        }
+
+        .sidebar-popup.active .sidebar {
+            transform: translateX(0); /* Slide in when active */
+        }
+
+        .sidebar .close-btn {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: right;
+            padding: 10px;
+            transition: color 0.2s ease;
+        }
+
+        .sidebar .close-btn:hover {
+            color: #adb5bd; /* Lighter on hover */
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin: 5px 0;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a:hover {
+            background: #495057; /* Hover background */
+            transform: translateX(5px); /* Subtle slide effect */
+        }
+
+        .sidebar .collapse {
+            padding-left: 15px;
+        }
+
+        .sidebar .nested-collapse {
+            padding-left: 30px;
+            font-size: 0.95rem;
+        }
+
+        .sidebar .fa-caret-down {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar a[aria-expanded="true"] .fa-caret-down {
+            transform: rotate(180deg);
+        }
+
+        .sidebar .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-weight: 500;
+            margin-top: auto; /* Push to bottom */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .sidebar .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* 📜 Content Styling */
+        .content {
+            padding: 20px;
+            width: 100%;
+            margin-top: 70px; /* Adjust for fixed header */
+            background-color: #fff;
+            border-radius: 8px;
+            margin-left: 20px;
+            margin-right: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            min-height: calc(100vh - 70px);
+        }
+
+        /* 📱 Responsive Design */
+        @@media (max-width: 768px) {
+            .header {
+                padding: 12px 15px;
+            }
+
+            .header h2 {
+                font-size: 1.4rem;
+            }
+
+            .hamburger {
+                font-size: 22px;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .sidebar a {
+                font-size: 0.95rem;
+                padding: 8px;
+            }
+
+            .sidebar .nested-collapse {
+                padding-left: 25px;
+                font-size: 0.9rem;
+            }
+
+            .content {
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 15px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .header h2 {
+                font-size: 1.2rem;
+            }
+
+            .sidebar a i {
+                font-size: 1.1rem;
+            }
+
+            .sidebar .btn-danger {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header bg-primary text-white py-3">
+        <i class="fas fa-bars hamburger"></i>
+        <h2>HOD Dashboard</h2>
+        <div style="width: 24px;"></div> <!-- Placeholder for symmetry -->
+    </div>
+
+    <!-- Sidebar Popup -->
+    <div class="sidebar-popup">
+        <div class="sidebar bg-dark text-white">
+            <div class="close-btn"><i class="fas fa-times"></i></div>
+            <a href="@Url.Action("Index", "HOD")"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+
+            <!-- Mentors Section -->
+            <a href="#mentorsSubmenu" data-toggle="collapse" aria-expanded="false">
+                <i class="fas fa-user-tie"></i> Mentors <i class="fas fa-caret-down float-right"></i>
+            </a>
+            <div id="mentorsSubmenu" class="collapse">
+                <a href="@Url.Action("AddMentor", "HOD")" class="nested-collapse"><i class="fas fa-user-plus"></i> Add Mentor</a>
+                <a href="@Url.Action("ManageMentors", "HOD")" class="nested-collapse"><i class="fas fa-tools"></i> Manage Mentors</a>
+                <a href="@Url.Action("ViewMentors", "HOD")" class="nested-collapse"><i class="fas fa-eye"></i> View Mentors</a>
+            </div>
+
+            <!-- Clubs Section -->
+            <a href="#clubsSubmenu" data-toggle="collapse" aria-expanded="false">
+                <i class="fas fa-users"></i> Clubs <i class="fas fa-caret-down float-right"></i>
+            </a>
+            <div id="clubsSubmenu" class="collapse">
+                <a href="@Url.Action("ClubRequests", "HOD")" class="nested-collapse"><i class="fas fa-envelope-open-text"></i> View Club Requests</a>
+                <a href="@Url.Action("ManageClubs", "HOD")" class="nested-collapse"><i class="fas fa-cogs"></i> Manage Clubs</a>
+                <a href="@Url.Action("ClubStatus", "HOD")" class="nested-collapse"><i class="fas fa-list"></i> View Clubs</a>
+            </div>
+
+            <a href="@Url.Action("ChangePassword", "HOD")"><i class="fas fa-key"></i> Change Password</a>
+            <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger mt-3"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        @RenderBody()
+    </div>
+
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Toggle sidebar popup on hamburger click
+            $('.hamburger').click(function () {
+                $('.sidebar-popup').addClass('active');
+            });
+
+            // Close sidebar popup on close button click
+            $('.close-btn').click(function () {
+                $('.sidebar-popup').removeClass('active');
+            });
+
+            // Close sidebar popup when clicking outside
+            $('.sidebar-popup').click(function (e) {
+                if ($(e.target).hasClass('sidebar-popup')) {
+                    $('.sidebar-popup').removeClass('active');
+                }
+            });
+
+            // Collapsible Submenu Toggle
+            $('[data-toggle="collapse"]').click(function (e) {
+                e.preventDefault();
+                const target = $(this.getAttribute('href'));
+                const isExpanded = $(this).attr('aria-expanded') === 'true';
+
+                // Close other open submenus
+                $('.collapse.show').not(target).removeClass('show').prev('[data-toggle="collapse"]').attr('aria-expanded', 'false');
+
+                // Toggle current submenu
+                target.toggleClass('show');
+                $(this).attr('aria-expanded', !isExpanded);
+            });
+        });
+    </script>
+
+    <!-- Render custom scripts from views -->
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
