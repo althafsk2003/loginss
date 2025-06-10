@@ -648,6 +648,32 @@ namespace WebApplication4.Controllers
             return RedirectToAction("Login");
         }
 
+        public ActionResult EventsForApproval()
+        {
+            // Step 1: Get logged-in HOD's email
+            string email = User.Identity.Name;
+
+            // Step 2: Get HOD's department ID from Logins table
+            var hod = _db.Logins.FirstOrDefault(l => l.Email == email && l.Role == "HOD");
+            if (hod == null)
+                return HttpNotFound("HOD not found");
+
+            int departmentId = (int)hod.DepartmentID;
+
+            // Step 3: Get all club IDs under this department
+            var clubIds = _db.CLUBS
+                .Where(c => c.DepartmentID == departmentId)
+                .Select(c => c.ClubID)
+                .ToList();
+
+            // Step 4: Get all events for those clubs that are pending HOD approval
+            var events = _db.EVENTS
+                .Where(e => e.ApprovalStatusID == 4 && clubIds.Contains((int)e.ClubID))
+                .ToList();
+
+            return View(events);
+        }
+
 
     }
 }

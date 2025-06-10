@@ -364,11 +364,21 @@
                                 }
                                 <strong>Club Name:</strong> <span>@ViewBag.ClubNames[(int)item.ClubID]</span>
                                 <strong>University:</strong> <span>ICFAI Foundation for Higher Education</span>
+                                @if (!string.IsNullOrEmpty(item.BudgetDocumentPath))
+                                {
+                                    <strong>Budget:</strong>
+                                    <span>
+                                        <a href="@Url.Content(item.BudgetDocumentPath)" target="_blank" style="color:#007bff; text-decoration: underline;">
+                                            View Budget
+                                        </a>
+                                    </span>
+                                }
                             </div>
                         </div>
                         <div class="event-card-buttons">
-                            <form action="@Url.Action("ApproveEventRequest", new { eventId = item.EventID })" method="post">
-                                <button type="submit" class="btn btn-success">Approve</button>
+                            <form action="@Url.Action("ForwardEventToHOD", "Mentor", new { eventId = item.EventID, clubId = item.ClubID })" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-success">Post to HOD</button>
                             </form>
 
                             <div style="display: flex; flex-direction: column; align-items: center;">
@@ -387,7 +397,6 @@
         </div>
     }
 </div>
-
 
 @section Scripts {
     <script>

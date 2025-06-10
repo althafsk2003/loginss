@@ -556,7 +556,6 @@ namespace WebApplication4.Controllers
             return View(); // No model is passed initially
         }
 
-
         // POST: View Event Requests (Filtered)
         [HttpPost]
         public ActionResult ViewEventRequests(int selectedClubId)
@@ -601,7 +600,6 @@ namespace WebApplication4.Controllers
                 .Where(le => emailToName.ContainsKey(le.Value))
                 .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
 
-
             ViewBag.ClubNames = _db.CLUBS
                 .ToDictionary(c => c.ClubID, c => c.ClubName);
 
@@ -612,62 +610,90 @@ namespace WebApplication4.Controllers
             return View(events); // Pass events list as the model
         }
 
-
-        // POST: Approve Event Request
         [HttpPost]
-        public ActionResult ApproveEventRequest(int eventId)
+        [ValidateAntiForgeryToken]
+        public ActionResult ForwardEventToHOD(int eventId, int clubId)
         {
             if (Session["UserEmail"] == null)
             {
                 return RedirectToAction("Login", "Admin");
             }
 
-            var eventToApprove = _db.EVENTS.Find(eventId);
-            if (eventToApprove == null)
+            var eventToForward = _db.EVENTS.Find(eventId);
+            if (eventToForward == null)
             {
                 return HttpNotFound("Event not found");
             }
 
-            eventToApprove.ApprovalStatusID = 2; // 2 = Approved
-            //eventToApprove.IsActive = true;
+            // Find the department associated with the club
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubId);
+            if (club == null)
+            {
+                TempData["ErrorMessage"] = "Club not found.";
+                return RedirectToAction("ViewEventRequests");
+            }
+
+            // Find the department and HOD's email
+            var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
+            if (department == null || string.IsNullOrEmpty(department.HOD_Email))
+            {
+                TempData["ErrorMessage"] = "Department or HOD email not found for the club.";
+                return RedirectToAction("ViewEventRequests");
+            }
+
+            // Find the HOD's LoginID using HODEmail
+            var hodLogin = _db.Logins.FirstOrDefault(l => l.Email == department.HOD_Email);
+            if (hodLogin == null)
+            {
+                TempData["ErrorMessage"] = "HOD login not found for the email.";
+                return RedirectToAction("ViewEventRequests");
+            }
+
+            // Mark the event as "Pending HOD Approval"
+            eventToForward.ApprovalStatusID = 4; // 4 = Pending HOD Approval
 
             try
             {
                 _db.SaveChanges();
 
-                // ✅ OrganizerID is the Club Admin's LoginID
-                if (eventToApprove.EventOrganizerID == null)
+                // Notify the event organizer
+                if (eventToForward.EventOrganizerID != null)
                 {
-                    TempData["ErrorMessage"] = "Club Admin (Organizer) ID not found. Notification not sent.";
-                }
-                else
-                {
-                    var notification = new Notification
+                    var organizerNotification = new Notification
                     {
-                        LoginID = eventToApprove.EventOrganizerID,
-                        Message = $" Your event '{eventToApprove.EventName}' has been approved!",
+                        LoginID = eventToForward.EventOrganizerID,
+                        Message = $"✅ Your event '{eventToForward.EventName}' has been forwarded to the HOD for approval.",
                         IsRead = false,
                         StartDate = DateTime.Now,
                         EndDate = DateTime.Now.AddDays(7),
                         CreatedDate = DateTime.Now
                     };
-
-                    _db.Notifications.Add(notification);
-                    _db.SaveChanges();
-
-                    TempData["SuccessMessage"] = "Event approved successfully! Notification sent to the club admin.";
+                    _db.Notifications.Add(organizerNotification);
                 }
+
+                // Notify the HOD
+                var hodNotification = new Notification
+                {
+                    LoginID = hodLogin.LoginID,
+                    Message = $"📬 A new event '{eventToForward.EventName}' from club '{club.ClubName}' requires your approval.",
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                };
+                _db.Notifications.Add(hodNotification);
+
+                _db.SaveChanges();
+
+                TempData["SuccessMessage"] = "Event forwarded to HOD successfully!";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "An error occurred while approving the event: " + ex.Message;
+                TempData["ErrorMessage"] = "An error occurred while forwarding the event: " + ex.Message;
             }
 
             return RedirectToAction("ViewEventRequests");
         }
-
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]

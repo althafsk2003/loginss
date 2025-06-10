@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Newtonsoft.Json
+@{
     Layout = "~/Views/Shared/_MentorLayout.cshtml";
     ViewBag.Title = "Mentor Dashboard";
     var clubNames = ViewBag.ClubNames as List<string> ?? new List<string> { "No Clubs" };
@@ -12,7 +13,18 @@
         <div class="col-lg-4 col-md-12 mb-4">
             <!-- Mentor Info Card -->
             <div class="card shadow-lg border-0 hover-card h-100 mentor-card">
-                <div class="card-body text-center">
+                <div class="card-body text-center position-relative">
+                    <!-- Bell Button -->
+                    <button class="btn btn-icon position-absolute top-0 end-0 m-2" type="button" id="notificationsButton" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                        <i class="fas fa-bell fa-lg text-primary"></i>
+                        @{
+                            var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
+                            if (notifications != null && notifications.Count > 0)
+                            {
+                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">@notifications.Count</span>
+                            }
+                        }
+                    </button>
                     <!-- Avatar -->
                     <div class="avatar-circle mx-auto mb-3">
                         <i class="fas fa-user fa-2x text-white"></i>
@@ -25,46 +37,6 @@
                         <p class="mb-2"><i class="fas fa-building me-2 text-primary"></i><strong>Department:</strong> @ViewBag.Department.DepartmentName</p>
                         <p class="mb-2"><i class="fas fa-users me-2 text-primary"></i><strong>Total Clubs:</strong> @ViewBag.ClubsCount</p>
                         <p class="mb-2"><i class="fas fa-calendar-check me-2 text-primary"></i><strong>Total Events:</strong> @ViewBag.EventsCount</p>
-                    </div>
-                    <!-- Notifications Button -->
-                    <div class="mt-4">
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle position-relative w-100" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-bell me-2"></i> Notifications
-                                @{
-                                    var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
-                                    if (notifications != null && notifications.Count > 0)
-                                    {
-                                        <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">@notifications.Count</span>
-                                    }
-                                }
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end w-100" aria-labelledby="notificationDropdown">
-                                @{
-                                    if (notifications != null && notifications.Count > 0)
-                                    {
-                                        foreach (var notification in notifications)
-                                        {
-                                            <li>
-                                                <a class="dropdown-item d-flex justify-content-between align-items-center hover-notification"
-                                                   href="@Url.Action("MarkNotificationAsRead", "Mentor", new { notificationId = notification.NotificationID })">
-                                                    <span>@notification.Message</span>
-                                                    <small class="text-muted">@(notification.StartDate?.ToString("MMM dd, yyyy") ?? "N/A")</small>
-                                                </a>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                        }
-                                        <li>
-                                            <a class="dropdown-item text-center text-danger" href="@Url.Action("ClearAllNotifications", "Mentor")">Clear All Notifications</a>
-                                        </li>
-                                    }
-                                    else
-                                    {
-                                        <li><span class="dropdown-item text-center">No new notifications</span></li>
-                                    }
-                                }
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -82,9 +54,52 @@
     </div>
 </div>
 
+<!-- Notifications Modal -->
+<div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @{
+                    if (notifications != null && notifications.Count > 0)
+                    {
+                        <ul class="list-unstyled" id="notificationList">
+                            @foreach (var notification in notifications)
+                            {
+                                <li class="notification-item mb-3" data-notification-id="@notification.NotificationID">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>@notification.Message</span>
+                                        <small class="text-muted">@(notification.StartDate?.ToString("MMM dd, yyyy") ?? "N/A")</small>
+                                    </div>
+                                    <hr class="dropdown-divider my-2">
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-center">
+                            <form id="clearNotificationsForm" action="@Url.Action("ClearAllNotifications", "Mentor")" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="text-danger text-decoration-none border-0 bg-transparent">Clear All Notifications</button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted" id="notificationList">No notifications available.</p>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Styles {
     <style>
-        /* Advanced Color Palette */
         :root {
             --primary-gradient-start: #4a00e0;
             --primary-gradient-end: #8e2de2;
@@ -95,7 +110,6 @@
             --shadow-color: rgba(0, 0, 0, 0.15);
         }
 
-        /* Mentor Card Styling */
         .mentor-card {
             background: linear-gradient(145deg, var(--secondary-color), #ffffff);
             border-radius: 16px;
@@ -153,63 +167,16 @@
             font-weight: 600;
         }
 
-        /* Notification Dropdown */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+        .btn-icon {
+            background: transparent;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            padding: 0.8rem 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            padding: 0.5rem;
+            transition: transform 0.3s ease, color 0.3s ease;
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #3a00b8, #751cb8);
-            transform: scale(1.05);
-        }
-
-        .btn-primary::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease, height 0.4s ease;
-        }
-
-        .btn-primary:hover::after {
-            width: 200px;
-            height: 200px;
-        }
-
-        .dropdown-menu {
-            border-radius: 10px;
-            box-shadow: 0 6px 16px var(--shadow-color);
-            max-height: 320px;
-            overflow-y: auto;
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .hover-notification {
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .hover-notification:hover {
-            background-color: var(--secondary-color);
-            transform: translateX(5px);
-        }
-
-        .dropdown-item {
-            font-size: 0.95rem;
-            padding: 0.8rem 1.2rem;
-            color: var(--text-primary);
+        .btn-icon:hover {
+            transform: scale(1.2);
+            color: var(--primary-gradient-end);
         }
 
         .badge.bg-danger {
@@ -222,7 +189,19 @@
             transform: scale(1);
         }
 
-        /* Chart Card Styling */
+        .notification-item {
+            transition: background-color 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            box-shadow: 0 6px 16px var(--shadow-color);
+        }
+
         .chart-card {
             background: linear-gradient(145deg, #ffffff, var(--secondary-color));
             border-radius: 16px;
@@ -266,7 +245,6 @@
             display: block !important;
         }
 
-        /* Responsive Adjustments */
         @@media (max-width: 991px) {
             .col-lg-4, .col-lg-8 {
                 margin-bottom: 2rem;
@@ -289,13 +267,8 @@
                 font-size: 1.3rem;
             }
 
-            .btn-primary {
-                font-size: 0.9rem;
-                padding: 0.7rem 1.2rem;
-            }
-
-            .dropdown-menu {
-                max-height: 240px;
+            .btn-icon {
+                padding: 0.4rem;
             }
 
             .chart-container, #clubEventChart {
@@ -312,22 +285,102 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
+        // Chart.js local fallback
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded from CDN. Attempting local fallback.');
+            document.write('<script src="/Scripts/chart.umd.min.js"><\/script>');
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            // Log data for debugging
-            const clubLabels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(clubNames));
-            const eventData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(eventCounts));
-            console.log('Club Labels:', clubLabels);
-            console.log('Event Data:', eventData);
+            // Debug notifications button
+            const notificationsButton = document.getElementById('notificationsButton');
+            if (notificationsButton) {
+                notificationsButton.addEventListener('click', function () {
+                    console.log('Notifications button clicked');
+                    const modal = document.getElementById('notificationsModal');
+                    if (modal) {
+                        console.log('Modal found in DOM');
+                    } else {
+                        console.error('Modal #notificationsModal not found in DOM');
+                    }
+                });
+            } else {
+                console.error('Notifications button #notificationsButton not found in DOM');
+            }
+
+            // Handle clear notifications form submission
+            const clearForm = document.getElementById('clearNotificationsForm');
+            if (clearForm) {
+                clearForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    console.log('Clear Notifications form submitted');
+                    fetch(clearForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}...`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Notifications cleared successfully');
+                            // Update UI
+                            const notificationList = document.getElementById('notificationList');
+                            notificationList.innerHTML = '<p class="text-center text-muted">No notifications available.</p>';
+                            const badge = document.querySelector('.badge.bg-danger');
+                            if (badge) badge.remove();
+                        } else {
+                            console.error('Failed to clear notifications:', data.message);
+                            alert('Error clearing notifications: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error clearing notifications:', error);
+                        alert('Error clearing notifications. Check console for details.');
+                    });
+                });
+            }
+
+            // Debug data for chart
+            const clubLabelsRaw = '@Html.Raw(JsonConvert.SerializeObject(clubNames))';
+            const eventDataRaw = '@Html.Raw(JsonConvert.SerializeObject(eventCounts))';
+            console.log('Raw Club Labels:', clubLabelsRaw);
+            console.log('Raw Event Data:', eventDataRaw);
+
+            let clubLabels, eventData;
+            try {
+                clubLabels = JSON.parse(clubLabelsRaw);
+                eventData = JSON.parse(eventDataRaw);
+            } catch (e) {
+                console.error('JSON Parse Error:', e.message);
+                clubLabels = ['No Clubs'];
+                eventData = [0];
+            }
+
+            console.log('Parsed Club Labels:', clubLabels, 'Type:', typeof clubLabels);
+            console.log('Parsed Event Data:', eventData, 'Type:', typeof eventData);
+            console.log('Club Labels Length:', clubLabels.length, 'Event Data Length:', eventData.length);
 
             // Validate data
-            let validLabels = clubLabels && Array.isArray(clubLabels) && clubLabels.length > 0 ? clubLabels : ['No Clubs'];
-            let validData = eventData && Array.isArray(eventData) && eventData.length > 0 && eventData.every(v => v != null && !isNaN(v) && v >= 0) ? eventData : [0];
+            let validLabels = Array.isArray(clubLabels) && clubLabels.length > 0 ? clubLabels : ['No Clubs'];
+            let validData = Array.isArray(eventData) && eventData.length > 0 && eventData.every(v => v != null && !isNaN(v) && v >= 0) ? eventData : [0];
 
             if (validLabels.length !== validData.length) {
                 console.warn('Data mismatch: Labels and data lengths differ. Adjusting to minimum length.');
                 const minLength = Math.min(validLabels.length, validData.length);
                 validLabels = validLabels.slice(0, minLength);
                 validData = validData.slice(0, minLength);
+                console.log('Adjusted Labels:', validLabels);
+                console.log('Adjusted Data:', validData);
             }
 
             const ctx = document.getElementById('clubEventChart');
@@ -338,17 +391,17 @@
             }
 
             try {
-                new Chart(ctx.getContext('2d'), {
+                new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: validLabels,
                         datasets: [{
                             label: 'All Events',
                             data: validData,
-                            backgroundColor: 'rgba(74, 0, 224, 0.6)', /* Matches primary gradient start */
+                            backgroundColor: 'rgba(74, 0, 224, 0.6)',
                             borderColor: 'rgba(74, 0, 224, 1)',
                             borderWidth: 1,
-                            hoverBackgroundColor: 'rgba(142, 45, 226, 0.8)', /* Matches primary gradient end */
+                            hoverBackgroundColor: 'rgba(142, 45, 226, 0.8)',
                             hoverBorderColor: 'rgba(142, 45, 226, 1)'
                         }]
                     },
@@ -420,8 +473,42 @@
                 });
                 console.log('Chart initialized successfully.');
             } catch (error) {
-                console.error('Error initializing chart:', error);
+                console.error('Error initializing chart:', error.message, error.stack);
                 alert('Error rendering chart. Check console for details.');
+            }
+
+            // Mark Notifications as Read (unchanged)
+            const notificationsModal = document.getElementById('notificationsModal');
+            if (notificationsModal) {
+                console.log('Notifications modal found on page load');
+                notificationsModal.addEventListener('shown.bs.modal', function () {
+                    console.log('Notifications modal shown');
+                    const notificationItems = document.querySelectorAll('.notification-item');
+                    notificationItems.forEach(item => {
+                        const notificationId = item.getAttribute('data-notification-id');
+                        if (notificationId) {
+                            fetch('@Url.Action("MarkNotificationAsRead", "Mentor")', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                                },
+                                body: JSON.stringify({ notificationId: parseInt(notificationId) })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    console.log(`Notification ${notificationId} marked as read.`);
+                                } else {
+                                    console.error(`Failed to mark notification ${notificationId} as read: ${data.message}`);
+                                }
+                            })
+                            .catch(error => console.error('Error marking notification as read:', error));
+                        }
+                    });
+                });
+            } else {
+                console.error('Notifications modal #notificationsModal not found on page load');
             }
         });
     </script>

@@ -98,27 +98,27 @@
             <input type="hidden" name="EventOrganizerID" value="@Model.EventOrganizerID" />
 
             <div class="row g-1">
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Organizer Name:</label>
                     <input type="text" class="form-control bg-light" value="@ViewBag.OrganizerName" readonly />
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Club Name:</label>
                     <input type="text" class="form-control bg-light" value="@Model.ClubName" readonly />
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Department:</label>
                     <input type="text" class="form-control bg-light" value="@Model.Department" readonly />
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>University:</label>
                     <input type="text" class="form-control bg-light" value="@Model.University" readonly />
                 </div>
 
-                <div class="col-md-12 form-group">
+                <div class="col-md-4 form-group">
                     <label>Event Name:</label>
                     <input type="text" name="EventName" id="EventName" class="form-control" required />
                     <div id="EventNameError" class="error-message"></div>
@@ -130,7 +130,7 @@
                     <div id="EventDescriptionError" class="error-message"></div>
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Event Type:</label>
                     <select name="EventType" id="EventType" class="form-select" required>
                         <option value="">Select Type</option>
@@ -140,22 +140,28 @@
                     <div id="EventTypeError" class="error-message"></div>
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Start Date & Time:</label>
                     <input type="datetime-local" name="EventStartDateAndTime" id="EventStartDateAndTime" class="form-control" required />
                     <div id="EventStartDateAndTimeError" class="error-message"></div>
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>End Date & Time:</label>
                     <input type="datetime-local" name="EventEndDateAndTime" id="EventEndDateAndTime" class="form-control" required />
                     <div id="EventEndDateAndTimeError" class="error-message"></div>
                 </div>
 
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     <label>Event Poster:</label>
-                    <input type="file" name="EventPoster" id="EventPoster" class="form-control" required accept="image/png,image/jpeg,image/jpg" />
+                    <input type="file" name="EventPoster" id="EventPoster" class="form-control" required accept="image/png,image/jpeg,image/jpg,image/webp" />
                     <div id="EventPosterError" class="error-message"></div>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <label for="BudgetDocument">Upload Budget Document</label>
+                    <input type="file" name="BudgetDocument" id="BudgetDocument" class="form-control" accept=".pdf,.xls,.xlsx" />
+                    <div id="BudgetDocumentError" class="error-message"></div>
                 </div>
 
                 <div class="col-md-12 text-center mt-1">
@@ -174,9 +180,10 @@
         document.getElementById('EventStartDateAndTime').addEventListener('input', validateStartDateTime);
         document.getElementById('EventEndDateAndTime').addEventListener('input', validateEndDateTime);
         document.getElementById('EventPoster').addEventListener('change', validateEventPoster);
+        document.getElementById('BudgetDocument').addEventListener('change', validateBudgetDocument);
     });
 
-   /* function validateEventName() {
+/*    function validateEventName() {
         const eventName = document.getElementById('EventName');
         const error = document.getElementById('EventNameError');
         if (eventName.value.trim().length < 5) {
@@ -240,7 +247,7 @@
         const end = document.getElementById('EventEndDateAndTime');
         const error = document.getElementById('EventEndDateAndTimeError');
         if (!end.value) {
-            error.textContent = "End Date & Time is required.";
+            error.textContent = "End Date & time is required.";
             error.style.display = "block";
             end.classList.add('is-invalid');
             return false;
@@ -254,8 +261,14 @@
     function validateEventPoster() {
         const poster = document.getElementById('EventPoster');
         const error = document.getElementById('EventPosterError');
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        const maxSize = 1 * 1024 * 1024; // 1 MB
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+        const maxSize = 2 * 1024 * 1024; // 2 MB
+        const minWidth = 800;
+        const minHeight = 600;
+        const maxWidth = 3000;
+        const maxHeight = 3000;
+        const targetAspectRatios = [4 / 3, 16 / 9]; // 1.333 and 1.778
+        const aspectRatioTolerance = 0.1;
 
         if (!poster.files.length) {
             error.textContent = "Event Poster is required.";
@@ -266,25 +279,112 @@
 
         const file = poster.files[0];
         if (!allowedTypes.includes(file.type)) {
-            error.textContent = "Only JPG, JPEG, or PNG files are allowed.";
+            error.textContent = "Only JPG, JPEG, PNG, or WEBP files are allowed.";
             error.style.display = "block";
             poster.classList.add('is-invalid');
             return false;
         }
 
         if (file.size > maxSize) {
-            error.textContent = "Image must be smaller than 1MB.";
+            error.textContent = "Image must be smaller than 2MB.";
             error.style.display = "block";
             poster.classList.add('is-invalid');
             return false;
         }
 
+        // Check dimensions and aspect ratio
+        return new Promise((resolve) => {
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                img.src = e.target.result;
+
+                img.onload = () => {
+                    const width = img.width;
+                    const height = img.height;
+                    const aspectRatio = width / height;
+
+                    if (width < minWidth || height < minHeight) {
+                        error.textContent = "Image must be at least 800x600 pixels.";
+                        error.style.display = "block";
+                        poster.classList.add('is-invalid');
+                        resolve(false);
+                        return;
+                    }
+
+                    if (width > maxWidth || height > maxHeight) {
+                        error.textContent = "Image must not exceed 3000x3000 pixels.";
+                        error.style.display = "block";
+                        poster.classList.add('is-invalid');
+                        resolve(false);
+                        return;
+                    }
+
+                    const isValidAspectRatio = targetAspectRatios.some(
+                        (ratio) =>
+                            Math.abs(aspectRatio - ratio) <= aspectRatioTolerance
+                    );
+
+                    if (!isValidAspectRatio) {
+                        error.textContent = "Image should have a 4:3 or 16:9 aspect ratio.";
+                        error.style.display = "block";
+                        poster.classList.add('is-invalid');
+                        resolve(false);
+                        return;
+                    }
+
+                    error.style.display = "none";
+                    poster.classList.remove('is-invalid');
+                    resolve(true);
+                };
+
+                img.onerror = () => {
+                    error.textContent = "Error loading image.";
+                    error.style.display = "block";
+                    poster.classList.add('is-invalid');
+                    resolve(false);
+                };
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function validateBudgetDocument() {
+        const budgetDoc = document.getElementById('BudgetDocument');
+        const error = document.getElementById('BudgetDocumentError');
+        const allowedTypes = ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        const maxSize = 1 * 1024 * 1024; // 1 MB
+
+        if (!budgetDoc.files.length) {
+            error.textContent = "Budget Document is optional but recommended.";
+            error.style.display = "block";
+            budgetDoc.classList.add('is-invalid');
+            return false;
+        }
+
+        const file = budgetDoc.files[0];
+        if (!allowedTypes.includes(file.type)) {
+            error.textContent = "Only PDF, XLS, or XLSX files are allowed.";
+            error.style.display = "block";
+            budgetDoc.classList.add('is-invalid');
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            error.textContent = "Document must be smaller than 1MB.";
+            error.style.display = "block";
+            budgetDoc.classList.add('is-invalid');
+            return false;
+        }
+
         error.style.display = "none";
-        poster.classList.remove('is-invalid');
+        budgetDoc.classList.remove('is-invalid');
         return true;
     }
 
-    function validateForm(event) {
+    async function validateForm(event) {
         event.preventDefault();
 
         const isValid =
@@ -293,7 +393,8 @@
             validateEventType() &
             validateStartDateTime() &
             validateEndDateTime() &
-            validateEventPoster();
+            (await validateEventPoster()) &
+            validateBudgetDocument();
 
         if (isValid) {
             document.getElementById('eventForm').submit();

@@ -1,10 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.EnterpriseServices.CompensatingResourceManager;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -109,7 +107,7 @@ namespace WebApplication1.Controllers
         // POST: Request Event Submission
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RequestEvent(EVENT model, HttpPostedFileBase EventPoster)
+        public ActionResult RequestEvent(EVENT model, HttpPostedFileBase EventPoster ,HttpPostedFileBase BudgetDocument)
         {
             if (Session["UserEmail"] == null)
             {
@@ -119,6 +117,12 @@ namespace WebApplication1.Controllers
             if (!ModelState.IsValid)
             {
                 return View(model);
+            }
+
+            string uploadsFolder = Server.MapPath("~/uploads");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
             }
 
             string userEmail = Session["UserEmail"].ToString();
@@ -133,12 +137,6 @@ namespace WebApplication1.Controllers
             string filePath = null;
             if (EventPoster != null && EventPoster.ContentLength > 0)
             {
-                string uploadsFolder = Server.MapPath("~/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(EventPoster.FileName);
                 string savePath = Path.Combine(uploadsFolder, uniqueFileName);
                 EventPoster.SaveAs(savePath);
@@ -152,6 +150,16 @@ namespace WebApplication1.Controllers
             if (string.IsNullOrEmpty(filePath))
             {
                 filePath = "DefaultPath"; // Set a default path if needed
+            }
+
+            // --- Upload Budget Document ---
+            string budgetPath = null;
+            if (BudgetDocument != null && BudgetDocument.ContentLength > 0)
+            {
+                string budgetFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(BudgetDocument.FileName);
+                string budgetSavePath = Path.Combine(uploadsFolder, budgetFileName);
+                BudgetDocument.SaveAs(budgetSavePath);
+                budgetPath = "/uploads/" + budgetFileName;
             }
 
             // Check if the club admin's RegistrationID exists in the Logins table
@@ -175,6 +183,7 @@ namespace WebApplication1.Controllers
                 EventCreatedDate = DateTime.Now,
                 EventStartDateAndTime = model.EventStartDateAndTime,
                 EventEndDateAndTime = model.EventEndDateAndTime,
+                BudgetDocumentPath = budgetPath, // ✅ Newly added
                 EventPoster = filePath, // ✅ Ensure this is assigned correctly
                 IsActive = false
             };
@@ -233,16 +242,36 @@ namespace WebApplication1.Controllers
 
         public ActionResult UpcomingEvents()
         {
+            // Check if the user is logged in
+            if (Session["UserEmail"] == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+
+            // Get logged-in user's email
+            string userEmail = Session["UserEmail"].ToString();
+
+            // Fetch Club Admin details
+            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
+
+            if (clubAdmin == null)
+            {
+                return HttpNotFound("Club Admin not found");
+            }
+
+            // Get the ClubID for the logged-in club admin
+            int clubId = clubAdmin.ClubID ?? 0; // Handle null case if necessary
+
             using (var db = new dummyclubsEntities())
             {
-                // Approved but not yet posted to website
+                // Approved but not yet posted to website, filtered by ClubID
                 var approvedNotPosted = db.EVENTS
-                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == false)
+                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == false && e.ClubID == clubId)
                     .ToList();
 
-                // Approved and already posted upcoming events (not yet concluded)
+                // Approved and already posted upcoming events (not yet concluded), filtered by ClubID
                 var postedUpcoming = db.EVENTS
-                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == true && e.EventStatus == "Upcoming posted")
+                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == true && e.EventStatus == "Upcoming posted" && e.ClubID == clubId)
                     .ToList();
 
                 var model = new UpcomingEventsViewModel
@@ -550,11 +579,31 @@ namespace WebApplication1.Controllers
 
         public ActionResult ConcludedEvents()
         {
+            // Check if the user is logged in
+            if (Session["UserEmail"] == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+
+            // Get logged-in user's email
+            string userEmail = Session["UserEmail"].ToString();
+
+            // Fetch Club Admin details
+            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
+
+            if (clubAdmin == null)
+            {
+                return HttpNotFound("Club Admin not found");
+            }
+
+            // Get the ClubID for the logged-in club admin
+            int clubId = clubAdmin.ClubID ?? 0; // Handle null case if necessary
+
             var today = DateTime.Today;
 
-            // Step 1: Find events where end date < today but status is not yet 'Concluded'
+            // Step 1: Find events where end date < today but status is not yet 'Concluded', filtered by ClubID
             var eventsToUpdate = _db.EVENTS
-                .Where(e => e.EventEndDateAndTime < today && e.EventStatus != "Concluded")
+                .Where(e => e.EventEndDateAndTime < today && e.EventStatus != "Concluded" && e.ClubID == clubId)
                 .ToList();
 
             // Step 2: Update their status
@@ -566,9 +615,9 @@ namespace WebApplication1.Controllers
             // Save changes to database
             _db.SaveChanges();
 
-            // Step 3: Fetch all concluded events
+            // Step 3: Fetch all concluded events for the club admin's club
             var concludedEvents = _db.EVENTS
-                .Where(e => e.EventStatus == "Concluded")
+                .Where(e => e.EventStatus == "Concluded" && e.ClubID == clubId)
                 .ToList();
 
             // Send to view
