@@ -127,6 +127,7 @@
           <Property Name="EventStatus" Type="varchar" MaxLength="50" />
           <Property Name="BudgetDocumentPath" Type="nvarchar" MaxLength="255" />
           <Property Name="ManualSheetPath" Type="nvarchar" MaxLength="255" />
+          <Property Name="EventBudget" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="EventWinners">
           <Key>
@@ -714,6 +715,7 @@
           <NavigationProperty Name="EventWinners" Relationship="Self.FK__EventWinn__Event__0D7A0286" FromRole="EVENTS" ToRole="EventWinners" />
           <Property Name="BudgetDocumentPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="ManualSheetPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="EventBudget" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="EventWinner">
           <Key>
@@ -1269,6 +1271,7 @@
           <EntitySetMapping Name="EVENTS">
             <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
               <MappingFragment StoreEntitySet="EVENTS">
+                <ScalarProperty Name="EventBudget" ColumnName="EventBudget" />
                 <ScalarProperty Name="ManualSheetPath" ColumnName="ManualSheetPath" />
                 <ScalarProperty Name="BudgetDocumentPath" ColumnName="BudgetDocumentPath" />
                 <ScalarProperty Name="ClubID" ColumnName="ClubID" />
