@@ -3,6 +3,7 @@
 @{
     Layout = "~/Views/Shared/_HodLayout.cshtml";
     ViewBag.Title = "Events Pending HOD Approval";
+    Layout = "~/Views/Shared/_HodLayout.cshtml";
 }
 
 <h2 class="mb-3">Events Awaiting Your Approval</h2>
@@ -29,13 +30,14 @@ else
             {
                 <tr>
                     <td>@ev.EventName</td>
-                    <td>@ev.ClubID?.ClubName</td>
+                    <td>@ev.Club?.ClubName</td>
                     <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy")</td>
                     <td>
-                        <a href="@Url.Action("DownloadEventForm", "HOD", new { id = ev.EventID })" class="btn btn-sm btn-primary">
-                            Download
+                        <a href="@Url.Action("ViewEventDetails", "HOD", new { id = ev.EventID })" class="btn btn-sm btn-info">
+                            Click here to view more
                         </a>
                     </td>
+
                     <td>
                         @using (Html.BeginForm("ApproveEvent", "HOD", FormMethod.Post, new { enctype = "multipart/form-data" }))
                         {

@@ -1,0 +1,37 @@
+﻿@model WebApplication4.Models.EVENT
+
+@{
+    ViewBag.Title = "Event Details";
+    Layout = "~/Views/Shared/_HodLayout.cshtml";
+}
+
+<h2>@Model.EventName - Details</h2>
+
+<table class="table table-bordered">
+    <tr><th>Club</th><td>@Model.CLUB?.ClubName</td></tr>
+    <tr><th>Event Date</th><td>@Model.EventStartDateAndTime.ToString("dd MMM yyyy")</td></tr>
+    //<tr><th>Venue</th><td>@Model.Venue</td></tr>
+    <tr><th>Description</th><td>@Model.EventDescription</td></tr>
+    <tr><th>Budget</th><td>@Model.Budget</td></tr>
+    <tr>
+        <th>Attachment</th>
+        <td>
+            <a href="@Url.Action("DownloadEventForm", "HOD", new { id = Model.EventID })" class="btn btn-primary btn-sm">
+                Download Event Form
+            </a>
+        </td>
+    </tr>
+</table>
+
+<!-- Approve/Reject Actions -->
+<div class="d-flex gap-3">
+    @using (Html.BeginForm("RejectEvent", "HOD", FormMethod.Post))
+    {
+        @Html.Hidden("eventId", Model.EventID)
+        <div class="form-group">
+            <label for="rejectionReason">Rejection Reason</label>
+            <input type="text" name="rejectionReason" class="form-control mb-2" required />
+        </div>
+        <button type="submit" class="btn btn-danger">Reject Event</button>
+    }
+</div>

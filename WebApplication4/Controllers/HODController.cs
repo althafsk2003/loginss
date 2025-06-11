@@ -675,5 +675,31 @@ namespace WebApplication4.Controllers
         }
 
 
+        public ActionResult DownloadEventForm(int id)
+        {
+            var evt = _db.EVENTS.Find(id);
+            if (evt == null)
+                return HttpNotFound();
+
+            return new Rotativa.ViewAsPdf("EventDetailsForDownload", evt)
+            {
+                FileName = $"{evt.EventName}_Details.pdf",
+                PageSize = Rotativa.Options.Size.A4
+            };
+        }
+
+        public ActionResult ViewEventDetails(int id)
+        {
+            var ev = _db.EVENTS
+                .Include(e => e.CLUB)  // ensure Club navigation is loaded
+                .FirstOrDefault(e => e.EventID == id);
+
+            if (ev == null)
+                return HttpNotFound();
+
+            return View(ev); // Create a ViewEventDetails.cshtml to show this
+        }
+
+
     }
 }
