@@ -651,7 +651,7 @@ namespace WebApplication4.Controllers
         public ActionResult EventsForApproval()
         {
             // Step 1: Get logged-in HOD's email
-            string email = User.Identity.Name;
+            string email = Session["UserEmail"]?.ToString();
 
             // Step 2: Get HOD's department ID from Logins table
             var hod = _db.Logins.FirstOrDefault(l => l.Email == email && l.Role == "HOD");
