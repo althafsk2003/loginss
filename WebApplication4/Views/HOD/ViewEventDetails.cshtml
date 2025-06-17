@@ -5,14 +5,195 @@
     Layout = "~/Views/Shared/_HodLayout.cshtml";
 }
 
-<h2>@Model.EventName - Details</h2>
+<style>
+    /* Custom styles for the Event Details page */
+    .event-details-container {
+        max-width: 1200px; /* Fixed invalid #1a1a8a */
+        margin: 2rem auto;
+        padding: 0 15px;
+    }
+
+    .event-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #fff;
+    }
+
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #007bff, #0056cc);
+        border-radius: 12px 12px 0 0;
+        padding: 1.5rem;
+        color: #fff;
+    }
+
+    .card-header h3 {
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .event-details {
+        padding: 2rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        flex: 0 0 200px;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #555;
+        font-size: 1rem;
+    }
+
+    .event-info p {
+        margin: 0.5rem 0;
+        line-height: 1.6;
+    }
+
+    .bold-heading {
+        font-weight: 600;
+        color: #222;
+    }
+
+    .emoji-line {
+        display: inline-block;
+        margin: 0.5rem 0;
+    }
+
+    .btn-primary-sm {
+        font-size: 0.9rem;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-primary-sm:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+        transform: scale(1.03);
+    }
+
+    .reject-section {
+        border-top: 1px solid #e9ecef;
+        padding-top: 2rem;
+        margin-top: 2rem;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 0.75rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn-danger {
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        transition: transform 0.2s ease, background-color 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        transform: scale(1.05);
+    }
+
+    .icon {
+        margin-right: 0.5rem;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 576px) {
+        .event-card {
+            padding: 1rem;
+        }
+
+        .card-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .detail-item {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0.8rem 0;
+        }
+
+        .detail-label {
+            flex: none;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="container event-details-container">
+    <div class="card event-card">
+        <div class="card-header">
+            <h3>@Model.EventName - Details</h3>
+        </div>
+        <div class="event-details">
+            <div class="detail-item">
+                <div class="detail-label">Club</div>
+                <div class="detail-value">@Model.CLUB.ClubName</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Event Date</div>
+                <div class="detail-value">@Model.EventStartDateAndTime.ToString("dd MMM yyyy")</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Venue</div>
+                <div class="detail-value">ICFAI, Hyderabad</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Description</div>
+                <div class="detail-value">
+                    <div class="event-info">
+                        @{
+                            string[] descriptionLines = Model.EventDescription.Split('\n');
+                            bool firstParagraph = true;
 
 <table class="table table-bordered">
-    @*<tr><th>Club</th><td>@Model.CLUB?.ClubName</td></tr>*@
+    <tr><th>Club</th><td>@Model.CLUB?.ClubName</td></tr>
     <tr><th>Event Date</th><td>@Model.EventStartDateAndTime.ToString("dd MMM yyyy")</td></tr>
-    <tr><th>Venue</th><td>ICFAI Hydreabad</td></tr>
+    //<tr><th>Venue</th><td>@Model.Venue</td></tr>
     <tr><th>Description</th><td>@Model.EventDescription</td></tr>
-    @*<tr><th>Budget</th><td>@Model.Budget</td></tr>*@
+    <tr><th>Budget</th><td>@Model.Budget</td></tr>
     <tr>
         <th>Attachment</th>
         <td>
@@ -23,15 +204,21 @@
     </tr>
 </table>
 
-<!-- Approve/Reject Actions -->
-<div class="d-flex gap-3">
-    @using (Html.BeginForm("RejectEvent", "HOD", FormMethod.Post))
-    {
-        @Html.Hidden("eventId", Model.EventID)
-        <div class="form-group">
-            <label for="rejectionReason">Rejection Reason</label>
-            <input type="text" name="rejectionReason" class="form-control mb-2" required />
+            <!-- Approve/Reject Section -->
+            <div class="reject-section">
+                <h5 class="mb-3 text-danger">Reject Event</h5>
+                @using (Html.BeginForm("RejectEvent", "HOD", FormMethod.Post))
+                {
+                    @Html.Hidden("eventId", Model.EventID)
+                    <div class="mb-3">
+                        <label for="rejectionReason" class="form-label">Rejection Reason</label>
+                        <input type="text" name="rejectionReason" class="form-control" placeholder="Enter reason..." required />
+                    </div>
+                    <button type="submit" class="btn btn-danger">
+                        <span class="icon">❌</span> Reject Event
+                    </button>
+                }
+            </div>
         </div>
-        <button type="submit" class="btn btn-danger">Reject Event</button>
-    }
+    </div>
 </div>

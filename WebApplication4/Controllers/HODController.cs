@@ -7,8 +7,15 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Data.Entity;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+
+
 
 using WebApplication4.Models;
+using System.Drawing;
+using System.Windows.Documents;
+using System.Xml.Linq;
 
 namespace WebApplication4.Controllers
 {
@@ -677,16 +684,17 @@ namespace WebApplication4.Controllers
 
         public ActionResult DownloadEventForm(int id)
         {
-            var evt = _db.EVENTS.Find(id);
-            if (evt == null)
-                return HttpNotFound();
+            var ev = _db.EVENTS.Find(id);
+            if (ev == null || string.IsNullOrEmpty(ev.BudgetDocumentPath))
+                return HttpNotFound("Event or budget document not found.");
 
-            return new Rotativa.ViewAsPdf("EventDetailsForDownload", evt)
-            {
-                FileName = $"{evt.EventName}_Details.pdf",
-                PageSize = Rotativa.Options.Size.A4
-            };
+            string filePath = Server.MapPath(ev.BudgetDocumentPath);
+            string fileName = Path.GetFileName(filePath);
+            string contentType = MimeMapping.GetMimeMapping(fileName);
+
+            return File(filePath, contentType, fileName); // download trigger
         }
+
 
         public ActionResult ViewEventDetails(int id)
         {
@@ -698,6 +706,145 @@ namespace WebApplication4.Controllers
                 return HttpNotFound();
 
             return View(ev); // Create a ViewEventDetails.cshtml to show this
+        }
+
+        [HttpPost]
+        public ActionResult RejectEvent(int eventId, string rejectionReason)
+        {
+            // Load event with club
+            var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
+            if (ev == null || ev.CLUB == null)
+                return HttpNotFound();
+
+            // Update event status
+            ev.RejectionReason = rejectionReason;
+            ev.ApprovalStatusID = 3;
+
+            // Notification message
+            string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected., go to manage events to view more 0000000000\nReason: {rejectionReason}";
+
+            // ✅ Notify mentor using MentorID directly
+            var mentorNotification = new Notification
+            {
+                LoginID = ev.CLUB.MentorID,
+                Message = message,
+                IsRead = false,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(7),
+                CreatedDate = DateTime.Now
+            };
+            _db.Notifications.Add(mentorNotification);
+
+            // ✅ Find ClubAdmin LoginID via ClubRegistrations table
+            var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
+            if (clubReg != null)
+            {
+                var clubAdminEmail = clubReg.Email; // adjust property name as needed
+
+                var login = _db.Logins.FirstOrDefault(l => l.Email == clubAdminEmail);
+                if (login != null)
+                {
+                    var clubAdminNotification = new Notification
+                    {
+                        LoginID = login.LoginID,
+                        Message = message,
+                        IsRead = false,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(7),
+                        CreatedDate = DateTime.Now
+                    };
+                    _db.Notifications.Add(clubAdminNotification);
+                }
+            }
+
+            _db.SaveChanges();
+            TempData["Message"] = "Event rejected and notifications sent!";
+            return RedirectToAction("PendingEvents");
+        }
+
+
+        public ActionResult GenerateDocument(int id)
+        {
+            var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == id);
+            if (ev == null) return HttpNotFound();
+
+            return View("GenerateApprovalForm", ev);
+        }
+
+        // Step 4: POST Action Method
+        [HttpPost]
+        public ActionResult ApproveEvent(int eventId, decimal approvedAmount)
+        {
+            var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == eventId);
+            if (ev == null) return HttpNotFound();
+
+            ev.ApprovalStatusID = 2;
+            string amountStr = ev.EventBudget.ToString(); // ✅
+
+
+            string uploadsFolder = Server.MapPath("~/uploads");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            string fileName = $"Approval_{eventId}_{DateTime.Now.Ticks}.pdf";
+            string filePath = Path.Combine(uploadsFolder, fileName);
+            ev.EventFormPath = "/uploads/" + fileName;
+
+            GenerateApprovalPDF(ev, approvedAmount, filePath);
+            _db.SaveChanges();
+
+            TempData["Message"] = "Approval document generated successfully!";
+            return RedirectToAction("PendingEvents");
+        }
+
+
+        // Step 4: POST Action Method
+        /* [HttpPost]
+         public ActionResult ApproveEvent(int eventId, decimal approvedAmount)
+         {
+             var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == eventId);
+             if (ev == null) return HttpNotFound();
+
+             ev.ApprovalStatusID = 2;
+             ev.ApprovedAmount = approvedAmount;
+
+             string uploadsFolder = Server.MapPath("~/uploads");
+             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+             string fileName = $"Approval_{eventId}_{DateTime.Now.Ticks}.pdf";
+             string filePath = Path.Combine(uploadsFolder, fileName);
+             ev.EventFormPath = "/uploads/" + fileName;
+
+             GenerateApprovalPDF(ev, approvedAmount, filePath);
+             _db.SaveChanges();
+
+             TempData["Message"] = "Approval document generated successfully!";
+             return RedirectToAction("PendingEvents");
+         }*/
+
+        // Step 5: PDF Generation Method using iTextSharp
+        public void GenerateApprovalPDF(EVENT ev, decimal amount, string fullPath)
+        {
+            using (FileStream fs = new FileStream(fullPath, FileMode.Create))
+            {
+                // Explicitly specify iTextSharp classes to avoid ambiguity
+                iTextSharp.text.Document doc = new iTextSharp.text.Document();
+                iTextSharp.text.pdf.PdfWriter.GetInstance(doc, fs);
+                doc.Open();
+
+                iTextSharp.text.Font headerFont = iTextSharp.text.FontFactory.GetFont("Arial", 16, iTextSharp.text.Font.BOLD);
+                iTextSharp.text.Font bodyFont = iTextSharp.text.FontFactory.GetFont("Arial", 12);
+
+                doc.Add(new iTextSharp.text.Paragraph("📄 Event Approval Document", headerFont));
+                doc.Add(new iTextSharp.text.Paragraph("\n"));
+                doc.Add(new iTextSharp.text.Paragraph($"Event: {ev.EventName}", bodyFont));
+                doc.Add(new iTextSharp.text.Paragraph($"Club: {ev.CLUB.ClubName}", bodyFont));
+                doc.Add(new iTextSharp.text.Paragraph($"Event Date: {ev.EventStartDateAndTime:dd MMM yyyy}", bodyFont));
+                doc.Add(new iTextSharp.text.Paragraph($"Requested Budget: ₹{ev.EventBudget}", bodyFont));
+                doc.Add(new iTextSharp.text.Paragraph($"✅ Approved Budget: ₹{amount}", bodyFont));
+                doc.Add(new iTextSharp.text.Paragraph("\n\nSignature of HOD: ________________________", bodyFont));
+
+                doc.Close();
+            }
         }
 
 

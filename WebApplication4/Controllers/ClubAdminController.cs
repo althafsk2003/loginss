@@ -183,6 +183,7 @@ namespace WebApplication1.Controllers
                 EventCreatedDate = DateTime.Now,
                 EventStartDateAndTime = model.EventStartDateAndTime,
                 EventEndDateAndTime = model.EventEndDateAndTime,
+                EventBudget=model.EventBudget,
                 BudgetDocumentPath = budgetPath, // ✅ Newly added
                 EventPoster = filePath, // ✅ Ensure this is assigned correctly
                 IsActive = false

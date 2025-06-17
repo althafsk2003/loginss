@@ -1,0 +1,24 @@
+﻿@model WebApplication4.Models.EVENT
+
+@{
+    ViewBag.Title = "Generate Approval Document";
+    Layout = "~/Views/Shared/_HodLayout.cshtml";
+}
+
+<h2>Generate Document for: @Model.EventName</h2>
+<table class="table table-bordered">
+    <tr><th>Club</th><td>@Model.CLUB.ClubName</td></tr>
+    <tr><th>Date</th><td>@Model.EventStartDateAndTime.ToString("dd MMM yyyy")</td></tr>
+    <tr><th>Description</th><td>@Model.EventDescription</td></tr>
+    <tr><th>Requested Budget</th><td>@Model.EventBudget</td></tr>
+</table>
+
+@using (Html.BeginForm("ApproveEvent", "HOD", FormMethod.Post))
+{
+    @Html.Hidden("eventId", Model.EventID)
+    <div class="form-group">
+        <label>Approved Amount</label>
+        <input type="number" name="approvedAmount" class="form-control mb-3" required />
+    </div>
+    <button type="submit" class="btn btn-success">Approve & Generate PDF</button>
+}

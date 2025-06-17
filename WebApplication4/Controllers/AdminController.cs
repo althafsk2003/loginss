@@ -44,7 +44,8 @@ namespace WebApplication4.Controllers
             if (ModelState.IsValid)
             {
                 // Check credentials in Logins table
-                var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username && u.PasswordHash == model.Password);
+                var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username
+                && u.PasswordHash == model.Password);
 
                 if (user != null)
                 {
@@ -1228,7 +1229,7 @@ namespace WebApplication4.Controllers
                 {
                     LoginID = club.MentorID, // Mentor's LoginID
                     Message = $"❌ Your club '{club.ClubName}' was rejected.\nReason: {reason}",
-                    IsRead = false, // Mark as unread
+                    IsRead = false, //   Mark as unread
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now.AddDays(7), // Notification expires in 7 days
                     CreatedDate = DateTime.Now
