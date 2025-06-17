@@ -3,7 +3,6 @@
 @{
     Layout = "~/Views/Shared/_HodLayout.cshtml";
     ViewBag.Title = "Events Pending HOD Approval";
-    Layout = "~/Views/Shared/_HodLayout.cshtml";
 }
 
 <h2 class="mb-3">Events Awaiting Your Approval</h2>
@@ -20,7 +19,7 @@ else
                 <th>Event Name</th>
                 <th>Club</th>
                 <th>Date</th>
-                <th>Download Form</th>
+                <th>Budget Document</th>
                 <th>Approve</th>
                 <th>Reject</th>
             </tr>
@@ -30,22 +29,41 @@ else
             {
                 <tr>
                     <td>@ev.EventName</td>
-                    <td>@ev.Club?.ClubName</td>
+                    <td>@ev.CLUB.ClubName</td>
                     <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy")</td>
                     <td>
-                        <a href="@Url.Action("ViewEventDetails", "HOD", new { id = ev.EventID })" class="btn btn-sm btn-info">
-                            Click here to view more
-                        </a>
-                    </td>
-
-                    <td>
-                        @using (Html.BeginForm("ApproveEvent", "HOD", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        @if (!string.IsNullOrEmpty(ev.BudgetDocumentPath))
                         {
-                            @Html.Hidden("eventId", ev.EventID)
-                            <input type="file" name="approvedForm" class="form-control mb-1" required />
-                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            <a href="@Url.Action("DownloadEventForm", "HOD", new { id = ev.EventID })"
+                               class="btn btn-sm btn-primary" download>
+                                📥 Download Event Form
+                            </a>
+                            <a href="@Url.Content(ev.BudgetDocumentPath)"
+                               target="_blank"
+                               class="btn btn-sm btn-outline-secondary ms-2">
+                                👁️ Preview
+                            </a>
+                        }
+                        else
+                        {
+                            <span>No document uploaded</span>
                         }
                     </td>
+                    <td>
+                        @if (string.IsNullOrEmpty(ev.EventFormPath))
+                        {
+                            <a href="@Url.Action("GenerateDocument", "HOD", new { id = ev.EventID })" class="btn btn-sm btn-warning">
+                                Generate Document
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Content(ev.EventFormPath)" target="_blank" class="btn btn-sm btn-outline-primary">
+                                📄 View Approval Form
+                            </a>
+                        }
+                    </td>
+
                     <td>
                         @using (Html.BeginForm("RejectEvent", "HOD", FormMethod.Post))
                         {
@@ -59,5 +77,3 @@ else
         </tbody>
     </table>
 }
-
-

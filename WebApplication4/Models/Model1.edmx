@@ -128,6 +128,9 @@
           <Property Name="BudgetDocumentPath" Type="nvarchar" MaxLength="255" />
           <Property Name="ManualSheetPath" Type="nvarchar" MaxLength="255" />
           <Property Name="EventBudget" Type="nvarchar" MaxLength="255" />
+          <Property Name="RejectionReason" Type="nvarchar" MaxLength="500" />
+          <Property Name="EventFormPath" Type="nvarchar" MaxLength="255" />
+          <Property Name="ApprovedAmount" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="EventWinners">
           <Key>
@@ -709,7 +712,10 @@
           <Property Name="EventStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="BudgetDocumentPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <Property Name="ManualSheetPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-<<<<<<< HEAD
+          <Property Name="EventBudget" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="RejectionReason" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="EventFormPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="ApprovedAmount" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="ApprovalStatusTable" Relationship="Self.FK__EVENTS__Approval__214BF109" FromRole="EVENTS" ToRole="ApprovalStatusTable" />
           <NavigationProperty Name="CLUB" Relationship="Self.FK__EVENTS__ClubID__2057CCD0" FromRole="EVENTS" ToRole="CLUBS" />
           <NavigationProperty Name="Comments" Relationship="Self.FK_Comments_Events" FromRole="EVENTS" ToRole="Comments" />
@@ -717,9 +723,6 @@
           <NavigationProperty Name="EventRegistrations" Relationship="Self.FK_Registrations_Events" FromRole="EVENTS" ToRole="EventRegistrations" />
           <NavigationProperty Name="Login" Relationship="Self.FK__EVENTS__EventOrg__22401542" FromRole="EVENTS" ToRole="Logins" />
           <NavigationProperty Name="EventWinners" Relationship="Self.FK__EventWinn__Event__6ABAD62E" FromRole="EVENTS" ToRole="EventWinners" />
-=======
-          <Property Name="EventBudget" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
->>>>>>> 6e84c6a57085c2437cb06a43e1650e922dab209c
         </EntityType>
         <EntityType Name="EventWinner">
           <Key>
@@ -1275,12 +1278,6 @@
           <EntitySetMapping Name="EVENTS">
             <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
               <MappingFragment StoreEntitySet="EVENTS">
-<<<<<<< HEAD
-=======
-                <ScalarProperty Name="EventBudget" ColumnName="EventBudget" />
-                <ScalarProperty Name="ManualSheetPath" ColumnName="ManualSheetPath" />
-                <ScalarProperty Name="BudgetDocumentPath" ColumnName="BudgetDocumentPath" />
->>>>>>> 6e84c6a57085c2437cb06a43e1650e922dab209c
                 <ScalarProperty Name="ClubID" ColumnName="ClubID" />
                 <ScalarProperty Name="EventID" ColumnName="EventID" />
                 <ScalarProperty Name="EventName" ColumnName="EventName" />
@@ -1303,6 +1300,10 @@
                 <ScalarProperty Name="EventStatus" ColumnName="EventStatus" />
                 <ScalarProperty Name="BudgetDocumentPath" ColumnName="BudgetDocumentPath" />
                 <ScalarProperty Name="ManualSheetPath" ColumnName="ManualSheetPath" />
+                <ScalarProperty Name="EventBudget" ColumnName="EventBudget" />
+                <ScalarProperty Name="RejectionReason" ColumnName="RejectionReason" />
+                <ScalarProperty Name="EventFormPath" ColumnName="EventFormPath" />
+                <ScalarProperty Name="ApprovedAmount" ColumnName="ApprovedAmount" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
