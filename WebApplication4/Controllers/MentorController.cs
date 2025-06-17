@@ -374,7 +374,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("AccessDenied", "Home");
             }
 
-            int loggedInMentorID = (int)Session["UserID"]; // Corrected variable name
+            int loggedInMentorID = (int)Session["UserID"];
 
             // Get clubs where the logged-in mentor is assigned
             var clubs = _db.CLUBS.Where(c => c.MentorID == loggedInMentorID)
@@ -382,6 +382,19 @@ namespace WebApplication4.Controllers
                                  .ToList();
 
             ViewBag.Clubs = new SelectList(clubs, "ClubID", "ClubName");
+
+            // Materialize club IDs into a list to use in Contains
+            var clubIds = _db.CLUBS
+                             .Where(c => c.MentorID == loggedInMentorID)
+                             .Select(c => c.ClubID)
+                             .ToList(); // Materialize to List<int>
+
+            // Calculate total registration count for the mentor across all their clubs
+            var totalRegistrations = _db.ClubRegistrations
+                               .Where(r => r.ClubID.HasValue && clubIds.Contains(r.ClubID.Value))
+                               .Count();
+
+            ViewBag.TotalRegistrations = totalRegistrations;
 
             return View();
         }
@@ -391,7 +404,7 @@ namespace WebApplication4.Controllers
         {
             var registrations = _db.ClubRegistrations
                        .Where(r => r.ClubID == clubId)
-                       .ToList() // Materialize the query before using .ToString()
+                       .ToList()
                        .Select(r => new
                        {
                            r.RegistrationID,
@@ -406,13 +419,12 @@ namespace WebApplication4.Controllers
                                ? r.RegisteredAt.Value.ToString("yyyy-MM-dd HH:mm")
                                : null
                        })
-                       .ToList(); // Convert to list after transformation
+                       .ToList();
 
             return Json(registrations, JsonRequestBehavior.AllowGet);
         }
+
         [HttpPost]
-
-
         public async Task<ActionResult> AssignRole(int registrationId, string role)
         {
             var registration = await _db.ClubRegistrations.FindAsync(registrationId);
@@ -425,20 +437,18 @@ namespace WebApplication4.Controllers
             registration.ApprovalStatusID = 2;
             await _db.SaveChangesAsync();
 
-            // If the role is "Club Admin", store credentials and send an email
             if (role == "Club Admin")
             {
                 var existingUser = await _db.Logins.FirstOrDefaultAsync(l => l.Email == registration.Email);
                 if (existingUser == null)
                 {
-                    // New login entry
                     var newUser = new Login
                     {
                         Email = registration.Email,
-                        PasswordHash = "clubadmin@123", // Default password
+                        PasswordHash = "clubadmin@123",
                         CreatedDate = DateTime.Now,
                         IsActive = true,
-                        UniversityID = ViewBag.UniversityID,  // Ensure these values are correct
+                        UniversityID = ViewBag.UniversityID,
                         DepartmentID = ViewBag.DepartmentID,
                         Role = "Club Admin"
                     };
@@ -446,7 +456,6 @@ namespace WebApplication4.Controllers
                     _db.Logins.Add(newUser);
                     await _db.SaveChangesAsync();
 
-                    // ✅ Send welcome email
                     string subject = "Club Admin Role Assigned";
                     string body = $"Hello {registration.FullName},<br/><br/>" +
                                   $"You have been assigned as a Club Admin. Here are your login details:<br/>" +
@@ -558,57 +567,105 @@ namespace WebApplication4.Controllers
 
         // POST: View Event Requests (Filtered)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult ViewEventRequests(int selectedClubId)
         {
+            // 1. Basic guards
             if (Session["UserEmail"] == null)
-            {
-                return RedirectToAction("Login", "Admin");
-            }
+                return Json(new { success = false, html = "Session expired" });
 
             string userEmail = Session["UserEmail"].ToString();
-            var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+            var login = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+            if (login == null)
+                return Json(new { success = false, html = "User not found" });
 
-            if (mentorLogin == null)
+            // 2. Pull pending events for the chosen club
+            var events = _db.EVENTS
+                           .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
+                           .ToList();
+
+            // 3. Lookup dictionaries for friendly names
+            var organizerNames = _db.Logins.ToDictionary(x => x.LoginID.ToString(), x => x.Email);
+            var clubNames = _db.CLUBS.ToDictionary(x => x.ClubID, x => x.ClubName);
+
+            // 4. Build the HTML string
+            var sb = new System.Text.StringBuilder();
+
+            if (!events.Any())
             {
-                return HttpNotFound("Mentor login not found");
+                sb.Append("<div class='alert alert-info mt-4'>No events are requested for the selected club.</div>");
+            }
+            else
+            {
+                sb.Append("<div class='row row-cols-1 g-4'>");
+
+                foreach (var item in events)
+                {
+                    string poster = !string.IsNullOrEmpty(item.EventPoster)
+                        ? $"<div class='event-card-image'><img src='{item.EventPoster}' class='img-fluid rounded' /></div>"
+                        : "";
+
+                    string budget = !string.IsNullOrEmpty(item.BudgetDocumentPath)
+                        ? $"<strong>Budget:</strong> <a href='{item.BudgetDocumentPath}' target='_blank'>View Budget</a><br />"
+                        : "";
+
+                    string organizer = organizerNames.TryGetValue(item.EventOrganizerID.ToString(), out var name)
+                                       ? name
+                                       : "Unknown";
+
+                    string clubName = clubNames.TryGetValue((int)item.ClubID, out var cName)
+                                       ? cName
+                                       : "Unknown Club";
+
+                    sb.Append($@"
+<div class='col'>
+  <div class='event-card'>
+    <div class='event-card-header'>Event Details</div>
+
+    <div class='event-content'>
+      {poster}
+      <div class='event-card-details'>
+        <strong>Event Name:</strong> {item.EventName}<br />
+        <strong>Description:</strong> {item.EventDescription}<br />
+        <strong>Event Type:</strong> {item.EventType}<br />
+        <strong>Start Date:</strong> {item.EventStartDateAndTime}<br />
+        <strong>End Date:</strong> {item.EventEndDateAndTime}<br />
+        <strong>Organizer:</strong> {organizer}<br />
+        <strong>Club:</strong> {clubName}<br />
+        <strong>University:</strong> ICFAI Foundation for Higher Education<br />
+        {budget}
+      </div>
+    </div>
+
+    <div class='event-card-buttons'>
+      <!-- Post to HOD -->
+      <form method='post' action='/Mentor/ForwardEventToHOD?eventId={item.EventID}&clubId={item.ClubID}'>
+        <!-- placeholder token; JS will inject the real value -->
+        <input name='__RequestVerificationToken' type='hidden' value='' />
+        <button type='submit' class='btn btn-success'>Post to HOD</button>
+      </form>
+
+      <!-- Reject flow -->
+      <div class='mt-2'>
+        <button type='button' class='btn btn-danger' onclick='toggleRejectBox({item.EventID})'>Reject</button>
+        <div id='reject-box-{item.EventID}' class='reject-box mt-2' style='display:none;'>
+          <textarea id='rejection-text-{item.EventID}' class='form-control mb-2' placeholder='Enter rejection reason...' required></textarea>
+          <button type='button' class='btn btn-sm btn-danger' onclick='submitRejection({item.EventID})'>Submit Rejection</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>");
+                }
+
+                sb.Append("</div>");
             }
 
-            ViewBag.Clubs = _db.CLUBS
-                .Where(c => c.MentorID == mentorLogin.LoginID)
-                .ToList();
-
-            var events = _db.EVENTS
-                .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
-                .ToList();
-
-            // Set the FilterApplied flag to true
-            ViewBag.FilterApplied = true;
-
-            // Fetch Organizer Names and Club Names separately and store them in ViewBag
-            var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
-
-            var loginIdToEmail = _db.Logins
-                .Where(l => loginIds.Contains(l.LoginID))
-                .ToDictionary(l => l.LoginID, l => l.Email);
-
-            var emailToName = _db.ClubRegistrations
-                .Where(cr => loginIdToEmail.Values.Contains(cr.Email))
-                .ToDictionary(cr => cr.Email, cr => cr.FullName);
-
-            // Final dictionary: LoginID => FullName
-            ViewBag.OrganizerNames = loginIdToEmail
-                .Where(le => emailToName.ContainsKey(le.Value))
-                .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
-
-            ViewBag.ClubNames = _db.CLUBS
-                .ToDictionary(c => c.ClubID, c => c.ClubName);
-
-            ViewBag.UniversityName = ViewBag.University; // Use ViewBag for university name
-
-            ViewBag.Universities = _db.UNIVERSITies.ToList(); // Setting universities list to ViewBag
-
-            return View(events); // Pass events list as the model
+            // 5. Return JSON with the generated markup
+            return Json(new { success = true, html = sb.ToString() });
         }
+
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

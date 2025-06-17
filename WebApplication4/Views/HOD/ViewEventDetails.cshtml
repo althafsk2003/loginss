@@ -8,11 +8,11 @@
 <h2>@Model.EventName - Details</h2>
 
 <table class="table table-bordered">
-    <tr><th>Club</th><td>@Model.CLUB?.ClubName</td></tr>
+    @*<tr><th>Club</th><td>@Model.CLUB?.ClubName</td></tr>*@
     <tr><th>Event Date</th><td>@Model.EventStartDateAndTime.ToString("dd MMM yyyy")</td></tr>
-    //<tr><th>Venue</th><td>@Model.Venue</td></tr>
+    <tr><th>Venue</th><td>ICFAI Hydreabad</td></tr>
     <tr><th>Description</th><td>@Model.EventDescription</td></tr>
-    <tr><th>Budget</th><td>@Model.Budget</td></tr>
+    @*<tr><th>Budget</th><td>@Model.Budget</td></tr>*@
     <tr>
         <th>Attachment</th>
         <td>

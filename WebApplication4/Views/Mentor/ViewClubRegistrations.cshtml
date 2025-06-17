@@ -19,9 +19,19 @@
             }
         </select>
     </div>
+
+    <!-- Display total registration count -->
+    <div id="registrationCount" class="mb-3 text-center" style="font-size: 1.1rem; font-weight: 600; color: #333;">
+        Total Registrations: @(ViewBag.TotalRegistrations ?? 0)
+    </div>
+
+    <!-- Doughnut chart for registration count -->
+    <div class="chart-container mb-3 text-center" style="max-width: 300px; height: 300px; margin: 0 auto;">
+        <canvas id="registrationChart" width="300" height="300"></canvas>
+    </div>
 </div>
 
-<!-- Modal for displaying registrations -->
+<!-- Modal for displaying registrations table -->
 <div class="modal fade" id="registrationsModal" tabindex="-1" aria-labelledby="registrationsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -255,6 +265,17 @@
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #0056b3, #003d80);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -284,6 +305,19 @@
             padding: 8px;
             border-radius: 6px;
         }
+
+        .chart-container {
+            position: relative;
+            display: inline-block;
+            width: 300px;
+            height: 300px;
+        }
+
+            #registrationChart, .chart-container #registrationChart {
+                opacity: 1 !important;
+                transition: none !important;
+                animation: none !important;
+            }
 
         @@media (max-width: 768px) {
             .registrations-container {
@@ -322,11 +356,24 @@
                 font-size: 0.8rem;
                 max-width: 180px;
             }
+
+            .chart-container {
+                max-width: 200px;
+                height: 200px;
+            }
+
+            #registrationChart {
+                width: 200px !important;
+                height: 200px !important;
+            }
         }
     </style>
 }
 
 @section Scripts {
+    <!-- Include Chart.js (pinned to a stable version) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+
     <script>
         $(document).ready(function () {
             console.log("Document ready: ClubRegistrations view loaded");
@@ -337,6 +384,74 @@
                 alert("Error: Bootstrap JavaScript is not loaded properly.");
                 return;
             }
+
+            // Initialize doughnut chart
+            var ctx = document.getElementById('registrationChart').getContext('2d');
+            var totalRegistrations = @(ViewBag.TotalRegistrations ?? 0);
+
+            if (!ctx.chart) {
+                var chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Total Registrations'],
+                        datasets: [{
+                            data: [totalRegistrations],
+                            backgroundColor: ['#007bff'],
+                            borderColor: ['#ffffff'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: false, // Disable all animations
+                        animations: {
+                            numbers: { duration: 0 },
+                            colors: { duration: 0 },
+                            x: { duration: 0 },
+                            y: { duration: 0 }
+                        },
+                        transitions: {
+                            active: { animation: { duration: 0 } },
+                            hide: { animation: { duration: 0 } },
+                            show: { animation: { duration: 0 } }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: '#333', font: { size: 14 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Total Club Registrations',
+                                color: '#333',
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return 'Total Registrations: ' + context.parsed;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+                ctx.chart = chart;
+                console.log("Chart initialized without animations");
+            } else {
+                console.warn("Chart already initialized, skipping re-initialization");
+            }
+
+            // Debug canvas opacity
+            setTimeout(function () {
+                var canvas = document.getElementById('registrationChart');
+                var computedStyle = window.getComputedStyle(canvas);
+                console.log("Canvas opacity after 1s: " + computedStyle.opacity);
+                if (computedStyle.opacity < 1) {
+                    console.warn("Canvas fading detected! Check for CSS or JS altering opacity.");
+                }
+            }, 1000);
 
             // Initialize tooltips for Role Justification
             $('body').tooltip({
@@ -349,7 +464,7 @@
                 }
             });
 
-            // When a club is selected, fetch its registrations and show modal
+            // Update chart and table on club selection
             $("#clubDropdown").change(function () {
                 var clubId = $(this).val();
                 console.log("Club selected: " + clubId);
@@ -362,6 +477,16 @@
                         success: function (data) {
                             console.log("AJAX success: Data received", data);
 
+                            // Update chart
+                            var newTotal = data.length;
+                            if (ctx.chart) {
+                                ctx.chart.data.datasets[0].data = [newTotal];
+                                ctx.chart.update('none'); // Update without animations
+                                console.log("Chart updated with new total:", newTotal);
+                            }
+                            $("#registrationCount").text("Total Registrations: " + newTotal);
+
+                            // Populate table
                             var tableBody = $("#registrationsTable tbody");
                             tableBody.empty();
 

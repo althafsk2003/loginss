@@ -73,28 +73,6 @@
                 outline: none;
             }
 
-        .button-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #007bff, #6610f2);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            .btn-primary:hover {
-                background: linear-gradient(135deg, #0056b3, #520dc2);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
         /* Event Card Styling */
         .event-card {
             display: flex;
@@ -295,126 +273,87 @@
     </style>
 }
 
-<div class="container">
-    <h2>View Event Requests</h2>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+<div class="d-flex justify-content-center align-items-center" style="min-height: 49vh;">
+    <div class="container" style="max-width: 700px;">
 
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+        <h2 class="text-center mb-4">View Event Requests</h2>
 
-    @using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
-    {
-        <div class="form-group">
-            <label for="selectedClubId">Select Club:</label>
-            @Html.DropDownList("selectedClubId", new SelectList(ViewBag.Clubs, "ClubID", "ClubName"), "Select a Club", new { @class = "form-control" })
-        </div>
-        <div class="button-container">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
-    }
+        @Html.AntiForgeryToken() <!-- Gives us the token we need -->
+        <!-- === Club selector card === -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Select Club</h5>
 
-    @if (ViewBag.FilterApplied != null && (Model == null || Model.Count == 0))
-    {
-        <div class="alert alert-info mt-4" role="alert">
-            No events are requested for the selected club.
-        </div>
-    }
-    else if (Model != null && Model.Count > 0)
-    {
-        <div class="row row-cols-1 g-4">
-            @foreach (var item in Model)
-            {
-                <div class="col">
-                    <div class="event-card">
-                        <div class="event-card-header">
-                            Event Details
-                        </div>
-                        <div class="event-content">
-                            @if (!string.IsNullOrEmpty(item.EventPoster))
-                            {
-                                <div class="event-card-image">
-                                    <img src="@item.EventPoster" class="img-fluid rounded" alt="Event Poster">
-                                </div>
-                            }
-                            <div class="event-card-details">
-                                <strong>Event Name:</strong> <span>@item.EventName</span>
-                                <strong>Description:</strong> <span>@item.EventDescription</span>
-                                <strong>Event Type:</strong> <span>@item.EventType</span>
-                                <strong>Start Date:</strong> <span>@item.EventStartDateAndTime</span>
-                                <strong>End Date:</strong> <span>@item.EventEndDateAndTime</span>
-                                @if (ViewBag.OrganizerNames.ContainsKey(item.EventOrganizerID.ToString()))
-                                {
-                                    <strong>Organizer:</strong> <span>@ViewBag.OrganizerNames[item.EventOrganizerID.ToString()]</span>
-                                }
-                                else
-                                {
-                                    <strong>Organizer:</strong> <span>unknown</span>
-                                }
-                                <strong>Club Name:</strong> <span>@ViewBag.ClubNames[(int)item.ClubID]</span>
-                                <strong>University:</strong> <span>ICFAI Foundation for Higher Education</span>
-                                @if (!string.IsNullOrEmpty(item.BudgetDocumentPath))
-                                {
-                                    <strong>Budget:</strong>
-                                    <span>
-                                        <a href="@Url.Content(item.BudgetDocumentPath)" target="_blank" style="color:#007bff; text-decoration: underline;">
-                                            View Budget
-                                        </a>
-                                    </span>
-                                }
-                            </div>
-                        </div>
-                        <div class="event-card-buttons">
-                            <form action="@Url.Action("ForwardEventToHOD", "Mentor", new { eventId = item.EventID, clubId = item.ClubID })" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-success">Post to HOD</button>
-                            </form>
-
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
-
-                                <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
-                                    @Html.AntiForgeryToken()
-                                    <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..." required></textarea>
-                                    <button type="button" class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="selectedClubId" class="form-label">Choose a club:</label>
+                    @Html.DropDownList("selectedClubId",
+                        new SelectList(ViewBag.Clubs, "ClubID", "ClubName"),
+                        "-- Select a Club --",
+                        new { @class = "form-select", id = "selectedClubId" })
                 </div>
-            }
+            </div>
         </div>
-    }
+
+        <!-- === Events area === -->
+        <div id="event-list" class="mt-5 text-center text-muted">
+            <i class="bi bi-calendar-event" style="font-size: 4rem;"></i>
+            <p class="mt-3 fs-5">Please select a club to view its pending event requests.</p>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
+    <!-- Make sure Bootstrap Icons are included in your main layout for the icon to show -->
     <script>
-        function toggleRejectBox(eventId) {
-            var rejectBox = $("#reject-box-" + eventId);
+        // Club drop‑down change handler
+        $('#selectedClubId').on('change', function () {
+            const clubId = $(this).val();
+            const token = $('input[name="__RequestVerificationToken"]').val();
 
-            if (rejectBox.is(":visible")) {
-                rejectBox.hide();
-            } else {
-                $(".reject-box").hide();
-                rejectBox.show();
+            if (!clubId) {
+                $('#event-list').html(
+                    "<div class='alert alert-info'>Please select a club to view events.</div>");
+                return;
             }
-        }
 
-        function submitRejection(eventId) {
-            const reason = $("#rejection-text-" + eventId).val().trim();
+            $.ajax({
+                url: '@Url.Action("ViewEventRequests", "Mentor")',
+                type: 'POST',
+                data: {
+                    selectedClubId: clubId,
+                    __RequestVerificationToken: token
+                },
+                success: function (res) {
+                    if (res.success) {
+                        $('#event-list').html(res.html);
 
-            if (reason === "") {
+                        // ⬇️ Inject token into every new form
+                        $('#event-list').find('form').prepend(
+                            '<input name="__RequestVerificationToken" type="hidden" value="' + token + '" />');
+                    } else {
+                        $('#event-list').html(
+                            "<div class='alert alert-danger'>" + res.html + "</div>");
+                    }
+                },
+                error: function () {
+                    $('#event-list').html(
+                        "<div class='alert alert-danger'>An error occurred while loading events.</div>");
+                }
+            });
+        });
+
+        // --- Helpers used by dynamically injected HTML ---
+        window.toggleRejectBox = function (eventId) {
+            $('.reject-box').hide();
+            $('#reject-box-' + eventId).toggle();
+        };
+
+        window.submitRejection = function (eventId) {
+            const reason = $('#rejection-text-' + eventId).val().trim();
+            const token  = $('input[name="__RequestVerificationToken"]').val();
+
+            if (!reason) {
                 alert("Please enter a rejection reason.");
                 return;
             }
@@ -425,21 +364,24 @@
                 data: {
                     eventId: eventId,
                     rejectionReason: reason,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    __RequestVerificationToken: token
                 },
-                success: function (response) {
-                    if (response.success) {
-                        alert("Rejected successfully.");
-                        location.reload();
+                success: function (res) {
+                    if (res.success) {
+                        $('#event-list').html(res.html);
+
+                        // ⬇️ Re‑inject token into refreshed list
+                        $('#event-list').find('form').prepend(
+                            '<input name="__RequestVerificationToken" type="hidden" value="' + token + '" />');
                     } else {
-                        alert(response.message || "Failed to reject.");
+                        $('#event-list').html(
+                            "<div class='alert alert-danger mt-4'>" + res.html + "</div>");
                     }
                 },
-                error: function (xhr, status, error) {
-                    console.error("Error:", error);
-                    alert("Error occurred: " + error);
+                error: function () {
+                    alert("Server error while rejecting the event.");
                 }
             });
-        }
+        };
     </script>
 }

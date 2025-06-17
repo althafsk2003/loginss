@@ -30,7 +30,7 @@
     .container {
         max-width: 1400px;
         margin: 0 auto;
-        padding: 1rem 0.5rem; /* Reduced from 2rem 1rem */
+        padding: 1rem 0.5rem;
     }
 
     /* Event Banner */
@@ -39,7 +39,7 @@
         width: 100%;
         border-radius: 20px;
         overflow: hidden;
-        margin-bottom: 1.5rem; /* Reduced from 3rem */
+        margin-bottom: 1.5rem;
         box-shadow: var(--shadow-xl);
         position: relative;
         animation: fadeInZoom 1.2s ease;
@@ -59,8 +59,8 @@
     /* Event Header */
     .event-header {
         display: flex;
-        gap: 1rem; /* Reduced from 2.5rem */
-        margin-bottom: 2rem; /* Reduced from 4rem */
+        gap: 1rem;
+        margin-bottom: 2rem;
         align-items: flex-start;
     }
 
@@ -88,7 +88,7 @@
     .event-title {
         font-size: 3.5rem;
         font-weight: 800;
-        margin-bottom: 1rem; /* Reduced from 1.5rem */
+        margin-bottom: 1rem;
         background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -104,7 +104,7 @@
         padding: 0.7rem 2rem;
         border-radius: 50px;
         font-weight: 600;
-        margin-bottom: 1rem; /* Reduced from 2rem */
+        margin-bottom: 1rem;
         box-shadow: var(--shadow-xl);
         animation: slideInLeft 1s ease;
     }
@@ -116,10 +116,10 @@
         .event-description p {
             font-size: 1.3rem;
             line-height: 2.2;
-            margin-bottom: 0.75rem; /* Reduced from 1.5rem */
+            margin-bottom: 0.75rem;
             color: #4b5563;
             background: linear-gradient(90deg, rgba(233, 108, 32, 0.1), rgba(249, 168, 37, 0.1));
-            padding: 0.5rem; /* Reduced from 1rem */
+            padding: 0.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             opacity: 0;
@@ -134,17 +134,17 @@
 
     /* Centered Winners Section */
     .winners-section {
-        margin: 2rem auto; /* Reduced from 5rem auto */
+        margin: 2rem auto;
         max-width: 1200px;
         text-align: center;
-        padding: 1.5rem 0; /* Reduced from 3rem 0 */
+        padding: 1.5rem 0;
         position: relative;
     }
 
     .section-title {
         font-size: 2.5rem;
         font-weight: 700;
-        margin-bottom: 1.5rem; /* Reduced from 3rem */
+        margin-bottom: 1.5rem;
         position: relative;
         display: inline-block;
         animation: fadeInDown 1.2s ease;
@@ -166,7 +166,7 @@
     .winners-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem; /* Reduced from 2rem */
+        gap: 1rem;
         perspective: 1000px;
         margin: 0 auto;
     }
@@ -174,7 +174,7 @@
     .winner-card {
         background: white;
         border-radius: 12px;
-        padding: 1rem; /* Reduced from 2rem */
+        padding: 1rem;
         box-shadow: var(--shadow-xl);
         transition: var(--transition);
         position: relative;
@@ -239,16 +239,16 @@
 
     /* Enhanced Auto-Scrolling Gallery */
     .gallery-section {
-        margin: 2rem 0; /* Reduced from 5rem 0 */
+        margin: 2rem 0;
         position: relative;
         overflow: hidden;
-        padding: 1.5rem 0; /* Reduced from 3rem 0 */
+        padding: 1.5rem 0;
     }
 
     .gallery-container {
         display: flex;
-        gap: 1rem; /* Reduced from 2rem */
-        padding: 0.5rem 0; /* Reduced from 1rem 0 */
+        gap: 1rem;
+        padding: 0.5rem 0;
     }
 
     .gallery-item {
@@ -399,6 +399,30 @@
         animation: scroll 60s linear infinite;
     }
 
+    /* Modal Styling for Brochure */
+    .modal-content {
+        animation: fadeInZoom 0.4s ease;
+    }
+
+    .brochure-section img:hover {
+        transform: scale(1.05);
+    }
+
+    .brochure-section iframe {
+        transition: var(--transition);
+    }
+
+    .brochure-section .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        transition: var(--transition);
+    }
+
+        .brochure-section .btn-outline-primary:hover {
+            background: var(--primary-gradient);
+            color: var(--text-light);
+        }
+
     /* Responsive */
     @@media (max-width: 1200px) {
         .event-title {
@@ -441,7 +465,7 @@
         }
 
         .winner-card {
-            padding: 1rem; /* Already reduced */
+            padding: 1rem;
         }
     }
 </style>
@@ -512,12 +536,77 @@
                 }
 
                 <!-- Read More Button -->
-                <button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
+                <button type="button" class="btn btn-outline-primary mt-2 me-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
                     Read More
                 </button>
+
+                <!-- View Brochure Button -->
+                @if (!string.IsNullOrEmpty(Model.EventBrochure))
+                {
+                    <button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#brochureModal">
+                        View Brochure
+                    </button>
+                }
             </div>
         </div>
     </div>
+
+    <!-- Brochure Modal -->
+    <div class="modal fade" id="brochureModal" tabindex="-1" aria-labelledby="brochureModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 15px; box-shadow: var(--shadow-xl);">
+                <div class="modal-header" style="border-bottom: none;">
+                    <h5 class="modal-title event-title" id="brochureModalLabel">@Model.EventName - Brochure</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <!-- Brochure Section -->
+                    <div class="brochure-section">
+                        @if (!string.IsNullOrEmpty(Model.EventBrochure))
+                        {
+                            string fileExtension = Path.GetExtension(Model.EventBrochure).ToLower();
+                            if (fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".png" || fileExtension == ".gif")
+                            {
+                                <!-- Image Brochure -->
+                                <a href="@Url.Content(Model.EventBrochure)" class="image-popup">
+                                    <img src="@Url.Content(Model.EventBrochure)" alt="Event Brochure" style="max-width: 100%; border-radius: 10px; box-shadow: var(--shadow-xl); transition: var(--transition);" class="img-fluid" />
+                                </a>
+                            }
+                            else if (fileExtension == ".pdf")
+                            {
+                                <!-- PDF Brochure -->
+                                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; box-shadow: var(--shadow-xl);">
+                                    <iframe src="@Url.Content(Model.EventBrochure)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                                </div>
+                                <a href="@Url.Content(Model.EventBrochure)" download class="btn btn-outline-primary mt-2">
+                                    <i class="bi bi-download me-2"></i>Download Brochure
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Unsupported brochure format.</p>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted">No brochure available for this event.</p>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: none;">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Read More Button -->
+    <!--<button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
+        Read More
+    </button>
+</div>
+        </div>
+    </div>-->
 
     <!-- Gallery Section with Auto-Scrolling -->
     <div class="gallery-section">
@@ -569,6 +658,77 @@
             <p class="text-muted">No winners announced yet.</p>
         }
     </div>
+
+    <!-- Description and Brochure Modal -->
+    <div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 15px; box-shadow: var(--shadow-xl);">
+                <div class="modal-header" style="border-bottom: none;">
+                    <h5 class="modal-title event-title" id="descriptionModalLabel">@Model.EventName</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1.5rem;">
+                    <!-- Description Section -->
+                    <div class="event-description mb-3">
+                        <h6 style="font-weight: 600; color: var(--text-dark); margin-bottom: 1rem;">Full Description</h6>
+                        @foreach (var line in Model.EventDescription.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            if (line.TrimEnd().EndsWith(":"))
+                            {
+                                <p class="bold-heading" style="font-weight: 600; color: var(--text-dark);">@line</p>
+                            }
+                            else if (line.Contains("&#x"))
+                            {
+                                <span class="emoji-line">@Html.Raw(line)</span>
+                            }
+                            else
+                            {
+                                <p style="color: #4b5563; line-height: 1.8;">@line</p>
+                            }
+                        }
+                    </div>
+
+                    <!-- Brochure Section -->
+                    <div class="brochure-section">
+                        <h6 style="font-weight: 600; color: var(--text-dark); margin-bottom: 1rem;">Event Brochure</h6>
+                        @if (!string.IsNullOrEmpty(Model.EventBrochure))
+                        {
+                            string fileExtension = Path.GetExtension(Model.EventBrochure).ToLower();
+                            if (fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".png" || fileExtension == ".gif")
+                            {
+                                <!-- Image Brochure -->
+                                <a href="@Url.Content(Model.EventBrochure)" class="image-popup">
+                                    <img src="@Url.Content(Model.EventBrochure)" alt="Event Brochure" style="max-width: 100%; border-radius: 10px; box-shadow: var(--shadow-xl); transition: var(--transition);" class="img-fluid" />
+                                </a>
+                            }
+                            else if (fileExtension == ".pdf")
+                            {
+                                <!-- PDF Brochure -->
+                                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px; box-shadow: var(--shadow-xl);">
+                                    <iframe src="@Url.Content(Model.EventBrochure)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                                </div>
+                                <a href="@Url.Content(Model.EventBrochure)" download class="btn btn-outline-primary mt-2">
+                                    <i class="bi bi-download me-2"></i>Download Brochure
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Unsupported brochure format.</p>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted">No brochure available for this event.</p>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: none;">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

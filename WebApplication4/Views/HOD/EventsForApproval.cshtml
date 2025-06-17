@@ -29,7 +29,7 @@ else
             {
                 <tr>
                     <td>@ev.EventName</td>
-                    <td>@ev.Club?.ClubName</td>
+                    <td>@ev.ClubID?.ClubName</td>
                     <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy")</td>
                     <td>
                         <a href="@Url.Action("ViewEventDetails", "HOD", new { id = ev.EventID })" class="btn btn-sm btn-info">
