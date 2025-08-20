@@ -38,26 +38,13 @@
             font-size: 14px;
             text-align: center;
             width: 100%;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
             position: relative;
             z-index: 1002;
         }
 
-            .top-nav.visible {
-                opacity: 1;
-                transform: translateY(0);
-                animation: pulse 2s infinite;
-            }
-
             .top-nav.fixed {
                 position: fixed;
                 top: 0;
-            }
-
-            .top-nav.fade {
-                opacity: 0;
             }
 
         /* Main Navigation */
@@ -68,17 +55,8 @@
             width: 100%;
             z-index: 1001;
             position: relative;
-            transition: all 0.3s ease;
             margin-top: 2px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .navbar.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
 
             .navbar.fixed {
                 position: fixed;
@@ -96,7 +74,6 @@
             top: 0;
             left: 0;
             transition: width 0.1s ease;
-            animation: glow 1.5s infinite alternate;
         }
 
         /* Placeholder to prevent content jump */
@@ -136,9 +113,6 @@
 
         .dropdown-menu {
             display: none;
-            opacity: 0;
-            transform: translateY(15px);
-            transition: all 0.3s ease-in-out;
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -148,9 +122,6 @@
 
         .nav-item:hover .dropdown-menu {
             display: block;
-            opacity: 1;
-            transform: translateY(0);
-            animation: slideIn 0.3s ease;
         }
 
         /* Hero Section */
@@ -166,19 +137,7 @@
             width: 100%;
             height: 72%;
             object-fit: cover;
-            transition: transform 0.5s ease;
-            opacity: 0;
-            transform: scale(0.95);
         }
-
-            .hero-video.visible {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            .hero-video:hover {
-                transform: scale(1.02);
-            }
 
         .hero-overlay {
             position: absolute;
@@ -187,13 +146,12 @@
             width: 100%;
             height: 70%;
             background: rgba(0, 0, 0, 0.5);
-            transition: opacity 0.5s ease;
         }
 
         .hero-text {
             position: absolute;
             bottom: 160px;
-            left: 32%;
+            left: 50%;
             transform: translateX(-50%);
             background: orange;
             color: white;
@@ -205,16 +163,7 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             pointer-events: none;
-            opacity: 0;
-            transform: translate(-50%, 20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .hero-text.visible {
-                opacity: 1;
-                transform: translate(-50%, 0);
-                animation: pulse 2s infinite;
-            }
 
         /* Card Grid Section */
         .card-grid {
@@ -223,27 +172,11 @@
             gap: 20px;
             padding: 40px;
             margin-bottom: 60px;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .card-grid.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
 
         .wide-image {
             grid-column: span 2;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .wide-image.visible {
-                opacity: 1;
-                transform: scale(1);
-            }
 
             .wide-image img {
                 width: 100%;
@@ -333,16 +266,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
             overflow-y: auto;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .founder-profile.visible {
-                opacity: 1;
-                transform: translateY(0);
-                animation: slideInLeft 0.5s ease;
-            }
 
         .founder-image-box {
             flex: 0 0 300px;
@@ -356,14 +280,7 @@
                 border-radius: 10px;
                 border: 4px solid #e44d26;
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
-                opacity: 0;
-                transform: scale(0.9);
             }
-
-                .founder-image-box img.visible {
-                    opacity: 1;
-                    transform: scale(1);
-                }
 
                 .founder-image-box img:hover {
                     transform: scale(1.05);
@@ -463,16 +380,7 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             margin: 0 0 60px 0;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .guide-video-section.visible {
-                opacity: 1;
-                transform: translateY(0);
-                animation: slideInRight 0.5s ease;
-            }
 
             .guide-video-section h2 {
                 font-size: 2.5rem;
@@ -527,19 +435,7 @@
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease;
-            opacity: 0;
-            transform: scale(0.9);
         }
-
-            .guide-video-container.visible {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            .guide-video-container:hover {
-                transform: scale(1.02);
-            }
 
             .guide-video-container video {
                 width: 100%;
@@ -624,7 +520,6 @@
             background: #fff;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
             font-family: 'Segoe UI', sans-serif;
-            animation: modalPop 0.4s ease;
         }
 
         .modal-title {
@@ -671,41 +566,12 @@
             border: 3px solid #f1f1f1;
             border-radius: 10px;
             max-width: 100%;
-            opacity: 0;
-            transform: scale(0.9);
         }
-
-            .image-gallery img.visible {
-                opacity: 1;
-                transform: scale(1);
-            }
 
             .image-gallery img:hover {
                 transform: scale(1.03);
                 box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             }
-
-        .animated-modal {
-            opacity: 0;
-            transform: translateY(-30px);
-            transition: all 0.4s ease-in-out;
-        }
-
-        .modal.show .animated-modal {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .modal.fade .modal-dialog {
-            transition: transform 0.4s ease, opacity 0.4s ease;
-            transform: translateY(-20px);
-            opacity: 0;
-        }
-
-        .modal.fade.show .modal-dialog {
-            transform: translateY(0);
-            opacity: 1;
-        }
 
         /* Footer */
         .footer {
@@ -715,42 +581,22 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .footer.visible {
-                opacity: 1;
-                transform: translateY(0);
-                animation: slideInUp 0.5s ease;
-            }
 
         .footer-col {
             margin-bottom: 20px;
-            transition: transform 0.3s ease;
         }
-
-            .footer-col:hover {
-                transform: translateY(-5px);
-            }
 
         .footer-content h4 {
             color: #fff;
             margin-bottom: 15px;
             font-size: 1.2rem;
-            transition: color 0.3s ease;
         }
-
-            .footer-content h4:hover {
-                color: #ffc107;
-            }
 
         .footer-content p, .footer-content a {
             font-size: 0.9rem;
             color: #ccc;
             text-decoration: none;
-            transition: color 0.3s ease;
         }
 
             .footer-content a:hover {
@@ -773,12 +619,7 @@
         .footer-col i {
             margin-right: 5px;
             color: #ffc107;
-            transition: transform 0.3s ease;
         }
-
-            .footer-col i:hover {
-                transform: scale(1.2);
-            }
 
         .route-map-container {
             position: absolute;
@@ -787,38 +628,20 @@
             z-index: 0;
             width: 65%;
             max-width: calc(100% - 40px);
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-
-            .route-map-container.visible {
-                opacity: 1;
-                transform: scale(1);
-            }
 
             .route-map-container h2 {
                 color: #ffc107;
                 text-align: left;
                 margin-bottom: 5px;
                 font-size: 1.5em;
-                transition: color 0.3s ease;
             }
-
-                .route-map-container h2:hover {
-                    color: #fff;
-                }
 
             .route-map-container iframe {
                 display: block;
                 width: 100%;
                 min-height: 250px;
                 border: 1px solid #ccc;
-                transition: transform 0.3s ease;
-            }
-
-            .route-map-container:hover iframe {
-                transform: scale(1.02);
             }
 
         /* Footer Bottom */
@@ -834,128 +657,12 @@
                 color: white;
                 font-size: 16px;
                 font-weight: 500;
-                transition: transform 0.3s ease;
             }
 
-                .footer-bottom p:hover {
-                    transform: scale(1.05);
-                }
-
-        /* Animation Keyframes */
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @@keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @@keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* Animation Keyframes for Cards and Buttons */
         @@keyframes cardPop {
             0% {
                 transform: scale(0.9);
-                opacity: 0;
-            }
-
-            70% {
-                transform: scale(1.05);
-                opacity: 1;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @@keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @@keyframes glow {
-            from {
-                box-shadow: 0 0 5px #E96C20;
-            }
-
-            to {
-                box-shadow: 0 0 15px #E96C20;
-            }
-        }
-
-        @@keyframes modalPop {
-            0% {
-                transform: scale(0.8);
                 opacity: 0;
             }
 
@@ -1180,9 +887,7 @@
     <section class="guide-video-section" id="guide-video">
         <h2>Website Navigation Guide</h2>
         <p>
-            Learn
-
-            how to navigate the website with this step-by-step video guide, covering key sections, menus, and features.
+            Learn how to navigate the website with this step-by-step video guide, covering key sections, menus, and features.
         </p>
         <div class="guide-video-container">
             <video controls class="guide-video">
@@ -1195,7 +900,7 @@
     <!-- Founder's Modal -->
     <div class="modal fade" id="founderModal" tabindex="-1" aria-labelledby="founderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content stylish-modal animated-modal">
+            <div class="modal-content stylish-modal">
                 <div class="modal-header border-0 pb-0">
                     <div>
                         <h3 class="modal-title" id="founderModalLabel">A Legacy of Vision and Leadership</h3>
@@ -1302,89 +1007,33 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Intersection Observer for Animation Trigger
+        // Intersection Observer for Animation Trigger (Cards Only)
         document.addEventListener('DOMContentLoaded', () => {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        // Animate cards individually with delay
                         if (entry.target.classList.contains('card-grid')) {
-                            const cards = entry.target.querySelectorAll('.card, .wide-image');
+                            const cards = entry.target.querySelectorAll('.card');
                             cards.forEach((card, index) => {
                                 setTimeout(() => {
                                     card.classList.add('visible');
                                 }, index * 100);
                             });
                         }
-                        // Animate footer route map
-                        if (entry.target.classList.contains('footer')) {
-                            const routeMap = document.querySelector('.route-map-container');
-                            if (routeMap) {
-                                routeMap.classList.add('visible');
-                            }
-                        }
-                        // Animate founder image
-                        if (entry.target.classList.contains('founder-profile')) {
-                            const founderImage = entry.target.querySelector('.founder-image-box img');
-                            if (founderImage) {
-                                founderImage.classList.add('visible');
-                            }
-                        }
-                        // Animate guide video container
-                        if (entry.target.classList.contains('guide-video-section')) {
-                            const videoContainer = entry.target.querySelector('.guide-video-container');
-                            if (videoContainer) {
-                                videoContainer.classList.add('visible');
-                            }
-                        }
-                        // Animate modal image
-                        if (entry.target.classList.contains('stylish-modal')) {
-                            const modalImage = entry.target.querySelector('.image-gallery img');
-                            if (modalImage) {
-                                modalImage.classList.add('visible');
-                            }
-                        }
                     } else {
-                        // Reset visibility to allow re-animation
-                        entry.target.classList.remove('visible');
                         if (entry.target.classList.contains('card-grid')) {
-                            const cards = entry.target.querySelectorAll('.card, .wide-image');
+                            const cards = entry.target.querySelectorAll('.card');
                             cards.forEach((card) => {
                                 card.classList.remove('visible');
                             });
-                        }
-                        if (entry.target.classList.contains('footer')) {
-                            const routeMap = document.querySelector('.route-map-container');
-                            if (routeMap) {
-                                routeMap.classList.remove('visible');
-                            }
-                        }
-                        if (entry.target.classList.contains('founder-profile')) {
-                            const founderImage = entry.target.querySelector('.founder-image-box img');
-                            if (founderImage) {
-                                founderImage.classList.remove('visible');
-                            }
-                        }
-                        if (entry.target.classList.contains('guide-video-section')) {
-                            const videoContainer = entry.target.querySelector('.guide-video-container');
-                            if (videoContainer) {
-                                videoContainer.classList.remove('visible');
-                            }
-                        }
-                        if (entry.target.classList.contains('stylish-modal')) {
-                            const modalImage = entry.target.querySelector('.image-gallery img');
-                            if (modalImage) {
-                                modalImage.classList.remove('visible');
-                            }
                         }
                     }
                 });
             }, { threshold: 0.1, rootMargin: '0px 0px -10% 0px' });
 
-            // Observe elements
-            const elements = document.querySelectorAll('.top-nav, .navbar, .hero-text, .hero-video, .card-grid, .founder-profile, .guide-video-section, .footer, .stylish-modal');
-            elements.forEach(element => observer.observe(element));
+            // Observe card grid
+            const cardGrid = document.querySelector('.card-grid');
+            if (cardGrid) observer.observe(cardGrid);
 
             // Handle scroll events for fixed nav
             const topNav = document.querySelector('.top-nav');
@@ -1427,13 +1076,6 @@
                     top: targetPosition,
                     behavior: 'smooth'
                 });
-            });
-
-            // Ensure modal animations on show
-            const founderModal = document.querySelector('#founderModal');
-            founderModal.addEventListener('show.bs.modal', () => {
-                const modalContent = founderModal.querySelector('.stylish-modal');
-                observer.observe(modalContent);
             });
         });
 

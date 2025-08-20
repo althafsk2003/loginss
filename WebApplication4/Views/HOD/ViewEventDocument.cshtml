@@ -1,0 +1,26 @@
+﻿@{
+    Layout = "~/Views/Shared/_HodLayout.cshtml";
+    ViewBag.Title = "View Event Document";
+    var documentUrl = Url.Content(ViewBag.DocumentPath as string);
+}
+
+<h3 class="mb-3">@ViewBag.EventName - Event Document</h3>
+
+<div class="mb-3">
+    <button onclick="printIframe()" class="btn btn-primary me-2">🖨️ Print</button>
+@*    <a href="@documentUrl" download class="btn btn-success">⬇️ Download</a>
+*@</div>
+    
+<iframe id="docFrame"
+        src="@documentUrl"
+        style="width:100%; height:80vh; border:1px solid #ccc;"></iframe>
+
+@section Scripts {
+    <script>
+        function printIframe() {
+            var frame = document.getElementById("docFrame");
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+        }
+    </script>
+}

@@ -173,17 +173,20 @@
     });
 </script>
 
-<div class="pagination" style="margin-top: 20px;">
-    <div class="pagination-container">
-        <div class="pagination-info text-center mb-2">
+<div class="mt-4">
+    <div class="text-center mb-2">
+        <span class="text-muted">
             Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
-        </div>
+        </span>
+    </div>
+
+    <nav>
         <ul class="pagination justify-content-center">
             @for (int i = 1; i <= ViewBag.TotalPages; i++)
             {
                 if (i == ViewBag.CurrentPage)
                 {
-                    <li class="page-item active">
+                    <li class="page-item active" aria-current="page">
                         <span class="page-link">@i</span>
                     </li>
                 }
@@ -195,26 +198,27 @@
                 }
             }
         </ul>
-    </div>
+    </nav>
 </div>
 
 
 
+
 <style>
-    /* Table Styling */
     .club-table {
         width: 100%;
         background-color: #fff;
         border-collapse: collapse;
-        border-radius: 8px;
+        border-radius: 6px;
         overflow: hidden;
-        margin-top: 20px;
+        margin-top: 10px;
+        font-size: 14px;
     }
 
         .club-table th,
         .club-table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
             text-align: left;
         }
 
@@ -225,14 +229,14 @@
         }
 
         .club-table td {
-            background-color: #fafafa;
+            background-color: #f8f8f8;
         }
 
-    /* Buttons */
     .btn-filter {
-        margin: 10px 5px;
-        padding: 8px 16px;
-        border-radius: 5px;
+        margin: 6px 4px;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
         font-weight: 500;
         color: white;
         border: none;
@@ -270,114 +274,98 @@
             background-color: #0056b3;
         }
 
-    /* Pagination Styling */
     .pagination-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 30px 0 10px;
-        width: 100%;
+        margin: 20px 0 5px;
     }
 
     .pagination-info {
-        font-size: 15px;
+        font-size: 13px;
         color: #6c757d;
-        margin-bottom: 8px;
+        margin-bottom: 5px;
     }
 
     .pagination {
-        display: flex;
-        gap: 8px;
-        padding: 0;
-        list-style: none;
-        justify-content: center;
+        gap: 6px;
         flex-wrap: wrap;
     }
 
-    .page-item {
-        margin: 0;
-    }
-
     .page-link {
-        padding: 10px 14px;
-        border-radius: 50%;
+        padding: 8px 10px;
+        border-radius: 4px;
         background-color: #e0e0e0;
         color: black;
+        font-size: 13px;
         text-decoration: none;
-        font-weight: 600;
-        transition: background-color 0.3s, color 0.3s;
     }
 
-        .page-link:hover {
+        .page-link:hover,
+        .page-item.active .page-link {
             background-color: #007bff;
             color: white;
         }
 
-    .page-item.active .page-link {
-        background-color: #007bff;
-        color: white;
+    .status-pending,
+    .status-approved,
+    .status-rejected {
+        padding: 3px 8px;
+        font-size: 13px;
+        border-radius: 4px;
+        font-weight: 500;
     }
 
-    /* Badge Styles */
     .status-pending {
         background-color: #ffc107;
         color: black;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
     }
 
     .status-approved {
         background-color: #28a745;
         color: white;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
     }
 
     .status-rejected {
         background-color: #dc3545;
         color: white;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
     }
 
     .reason-col {
         display: none;
     }
 
-    /* Responsive Tweaks */
-    @@media (max-width: 768px) {
-        .btn-filter {
-            padding: 6px 12px;
-            font-size: 14px;
-        }
-
-        .pagination {
-            gap: 4px;
-        }
-
-        .page-link {
-            padding: 8px 10px;
-        }
-    }
-
-    .short-desc,
-    .full-desc {
-        display: inline;
-    }
-
     .read-more-toggle {
+        font-size: 13px;
+        margin-left: 3px;
         color: #007bff;
+        text-decoration: underline;
         cursor: pointer;
-        text-decoration: auto;
-        margin-left: 5px;
-        font-size: 0.9em;
     }
 
     .d-none {
         display: none;
+    }
+
+    @@media (max-width: 768px) {
+        .club-table th,
+        .club-table td {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .btn-filter {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .page-link {
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+
+        .status-pending,
+        .status-approved,
+        .status-rejected {
+            font-size: 12px;
+            padding: 2px 6px;
+        }
     }
 </style>

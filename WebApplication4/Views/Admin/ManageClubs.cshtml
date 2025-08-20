@@ -26,11 +26,21 @@
                     {
                         <tr>
                             <td>@club.ClubName</td>
-                            <td>@club.Description</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(club.Description) && club.Description.Length > 10)
+                                {
+                                    <span class="short-text">@club.Description.Substring(0, 10)...</span>
+                                    <span class="full-text d-none">@club.Description</span>
+                                    <a href="javascript:void(0);" class="see-more" onclick="toggleDescription(this)">See More</a>
+                                }
+                                else
+                                {
+                                    @club.Description
+                                }
+                            </td>
                             <td>@club.DEPARTMENT.DepartmentName</td>
                             <td>@club.ApprovalStatusTable.Status</td>
                             <td>
-                                @* Activate and Deactivate buttons *@
                                 @if (club.IsActive == true)
                                 {
                                     <a href="@Url.Action("DeactivateClub", "Admin", new { id = club.ClubID })" class="btn btn-warning">Deactivate</a>
@@ -46,12 +56,11 @@
             </table>
         </div>
 
-        @* Pagination Links with Page Numbers *@
+        <!-- Pagination -->
         <div class="pagination-container">
             <div class="pagination-info mb-2">
                 Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
             </div>
-
             <ul class="pagination">
                 @for (var i = 1; i <= ViewBag.TotalPages; i++)
                 {
@@ -67,6 +76,25 @@
         <p class="text-center">No clubs found to manage.</p>
     }
 </div>
+
+<!-- ✅ JS for See More / See Less -->
+<script>
+    function toggleDescription(link) {
+        var row = link.closest("td");
+        var shortText = row.querySelector(".short-text");
+        var fullText = row.querySelector(".full-text");
+
+        if (fullText.classList.contains("d-none")) {
+            shortText.classList.add("d-none");
+            fullText.classList.remove("d-none");
+            link.textContent = "See Less";
+        } else {
+            shortText.classList.remove("d-none");
+            fullText.classList.add("d-none");
+            link.textContent = "See More";
+        }
+    }
+</script>
 
 <!-- ✅ CSS Styling -->
 <style>
@@ -89,12 +117,16 @@
             padding: 10px;
         }
 
-    .alert-success {
-        font-size: 16px;
-        font-weight: bold;
-        color: green;
-        text-align: center;
+    .see-more {
+        color: #007bff;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 5px;
     }
+
+        .see-more:hover {
+            text-decoration: underline;
+        }
 
     .btn {
         margin: 5px;

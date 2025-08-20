@@ -118,6 +118,7 @@
         @using (Html.BeginForm("RegisterClub", "Mentor", FormMethod.Post, new { @class = "needs-validation", novalidate = "true", enctype = "multipart/form-data", id = "clubForm" }))
         {
             <div class="row g-3">
+                <!-- Left Column -->
                 <div class="col-md-6">
                     <div class="mb-2">
                         <label for="ClubName" class="form-label">Club Name</label>
@@ -133,30 +134,30 @@
 
                     <div class="mb-2">
                         <label for="Description" class="form-label">Description</label>
-                        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 2, required = "required", maxlength = "500", id = "Description" })
-                        <div class="invalid-feedback">Description is required (max 500 characters).</div>
+                        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, required = "required", maxlength = "5000", id = "Description" })
+                        <div class="invalid-feedback">Description is required (max 5000 characters).</div>
                     </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
 
                     <div class="mb-2">
                         <label for="LogoImage" class="form-label">Club Logo</label>
                         <input type="file" name="LogoImage" id="LogoImage" class="form-control" accept="image/jpeg,image/png,image/gif" required="required" />
                         <div class="invalid-feedback" id="logoImageError">Club Logo is required.</div>
                     </div>
-                </div>
+                    @*                    <div class="mb-2">
+            <label for="TotalClubCommitteeSeats" class="form-label">Total Seats</label>
+            @Html.TextBoxFor(m => m.TotalClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "1", max = "100", id = "TotalClubCommitteeSeats" })
+            <div class="invalid-feedback">Total Seats must be between 1 and 100.</div>
+        </div>
 
-                <div class="col-md-6">
-                    <div class="mb-2">
-                        <label for="TotalClubCommitteeSeats" class="form-label">Total Seats</label>
-                        @Html.TextBoxFor(m => m.TotalClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "1", max = "100", id = "TotalClubCommitteeSeats" })
-                        <div class="invalid-feedback">Total Seats must be between 1 and 100.</div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label for="AvailableClubCommitteeSeats" class="form-label">Available Seats</label>
-                        @Html.TextBoxFor(m => m.AvailableClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "0", max = "100", id = "AvailableClubCommitteeSeats" })
-                        <div class="invalid-feedback" id="availableSeatsError">Available Seats must be between 0 and 100.</div>
-                    </div>
-
+        <div class="mb-2">
+            <label for="AvailableClubCommitteeSeats" class="form-label">Available Seats</label>
+            @Html.TextBoxFor(m => m.AvailableClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "0", max = "100", id = "AvailableClubCommitteeSeats" })
+            <div class="invalid-feedback" id="availableSeatsError">Available Seats must be between 0 and 100.</div>
+        </div>*@
                     <div class="mb-2">
                         <label class="form-label">Department</label>
                         <input type="text" class="form-control" value="@ViewBag.DepartmentName" readonly />
@@ -172,6 +173,7 @@
         }
     </div>
 </div>
+
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -205,7 +207,7 @@
                 } else if (id === "Abbreviation") {
                     return validateTextInput(field, 10, "Abbreviation");
                 } else if (id === "Description") {
-                    return validateTextInput(field, 500, "Description");
+                    return validateTextInput(field, 5000, "Description");
                 }
                 return true;
             }

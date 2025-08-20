@@ -28,11 +28,13 @@ namespace WebApplication4.Models
         public Nullable<System.DateTime> RegisteredAt { get; set; }
         public Nullable<int> DepartmentID { get; set; }
         public Nullable<int> UniversityID { get; set; }
+        public Nullable<int> SubDepartmentID { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual CLUB CLUB { get; set; }
         public virtual USER USER { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
         public virtual UNIVERSITY UNIVERSITY { get; set; }
+        public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
     }
 }

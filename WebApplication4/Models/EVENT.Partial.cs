@@ -19,5 +19,6 @@ namespace WebApplication4.Models
 
         [NotMapped]
         public string OrganizerName;
+
     }
 }

@@ -1,0 +1,365 @@
+﻿@model List<WebApplication4.Models.CLUB>
+
+@{
+    Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
+    ViewBag.Title = "Club Status";
+}
+
+<style>
+    .club-table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+        .club-table th, .club-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .club-table th {
+            background: #004d40;
+            color: white;
+        }
+
+    .btn-filter {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    /* Status Badge Colors */
+    .status-pending {
+        background: #ffc107;
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .status-approved {
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .status-rejected {
+        background: #dc3545;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .reason-col {
+        display: none;
+    }
+    /* Hide rejection reason by default */
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Club Status</h2>
+
+    <!-- ✅ Filter Buttons -->
+    <div class="text-center">
+        <a href="@Url.Action("ClubStatus", new { status = 1 })" class="btn btn-warning btn-filter">Pending Requests</a>
+        <a href="@Url.Action("ClubStatus", new { status = 2 })" class="btn btn-success btn-filter">Approved Requests</a>
+        <a href="@Url.Action("ClubStatus", new { status = 3 })" class="btn btn-danger btn-filter">Rejected Requests</a>
+        <a href="@Url.Action("ClubStatus", new { status = (int?)null })" class="btn btn-primary btn-filter">View All Requests</a>
+    </div>
+
+    <!-- ✅ Club Status Table -->
+    <table class="club-table">
+        <thead>
+            <tr>
+                <th>Club Name</th>
+                <th>Description</th>
+                <th>Mentor Name</th>
+                <th>University</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th class="reason-col">Rejection Reason</th> <!-- Hidden for non-rejected -->
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
+            }
+
+            @foreach (var club in Model)
+            {
+                var mentorID = (int?)club.MentorID;
+                var notification = notifications?.FirstOrDefault(n => n.LoginID == mentorID);
+
+                <tr class="club-row" data-status="@club.ApprovalStatusID">
+                    <td>@club.ClubName</td>
+                    <td>
+                        @{
+                            var desc = club.Description ?? "";
+                            var shortDesc = desc.Length > 5 ? desc.Substring(0, 5) + "..." : desc;
+                        }
+
+                        <span class="short-desc">@shortDesc</span>
+                        <span class="full-desc d-none">@desc</span>
+
+                        @if (desc.Length > 5)
+                        {
+                            <a href="javascript:void(0);" class="toggle-desc text-primary ms-2">Show more</a>
+                        }
+                    </td>
+                    <td>@club.MentorName</td>
+                    <td>@club.DEPARTMENT.UNIVERSITY.UniversityNAME</td>
+                    <td>@club.DEPARTMENT.DepartmentName</td>
+                    <td>
+                        @if (club.ApprovalStatusID == 1)
+                        {
+                            <span class="status-pending">Pending</span>
+                        }
+                        else if (club.ApprovalStatusID == 2)
+                        {
+                            <span class="status-approved">Approved</span>
+                        }
+                        else if (club.ApprovalStatusID == 3)
+                        {
+                            <span class="status-rejected">Rejected</span>
+                        }
+                    </td>
+                    <td class="reason-col">
+                        @if (club.ApprovalStatusID == 3 && notification != null)
+                        {
+                            @notification.Message.Replace($"Your club '{club.ClubName}' was rejected. Reason: ", "")
+                        }
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).on("click", ".toggle-desc", function () {
+        var $this = $(this);
+        var $row = $this.closest("td");
+
+        $row.find(".short-desc, .full-desc").toggleClass("d-none");
+
+        if ($this.text() === "Show more") {
+            $this.text("Show less");
+        } else {
+            $this.text("Show more");
+        }
+    });
+</script>
+
+
+<!-- ✅ JavaScript for Filtering -->
+<script>
+    function filterTable(status) {
+        $(".club-row").hide();
+        $(".reason-col").hide(); // Hide reason column by default
+
+        if (status === "pending") {
+            $(".club-row[data-status='1']").show();
+        } else if (status === "approved") {
+            $(".club-row[data-status='2']").show();
+        } else if (status === "rejected") {
+            $(".club-row[data-status='3']").show();
+            $(".reason-col").show(); // Show rejection reason
+        } else {
+            $(".club-row").show();
+            $(".reason-col").show();
+        }
+    }
+</script>
+
+<div class="pagination" style="margin-top: 20px;">
+    <div class="pagination-container">
+        <div class="pagination-info text-center mb-2">
+            Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
+        </div>
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                if (i == ViewBag.CurrentPage)
+                {
+                    <li class="page-item active">
+                        <span class="page-link">@i</span>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="@Url.Action("ClubStatus", new { page = i, status = ViewBag.CurrentStatus })">@i</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>
+
+
+
+<style>
+    /* Table Styling */
+    .club-table {
+        width: 100%;
+        background-color: #fff;
+        border-collapse: collapse;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+        .club-table th,
+        .club-table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .club-table th {
+            background-color: #004d40;
+            color: white;
+            font-weight: 600;
+        }
+
+        .club-table td {
+            background-color: #fafafa;
+        }
+
+    /* Buttons */
+    .btn-filter {
+        margin: 10px 5px;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: 500;
+        color: white;
+        border: none;
+    }
+
+    .btn-warning {
+        background-color: #f39c12;
+    }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+    .btn-success {
+        background-color: #28a745;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    /* Pagination Styling */
+    .pagination-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 30px 0 10px;
+        width: 100%;
+    }
+
+    .pagination-info {
+        font-size: 15px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 8px;
+        padding: 0;
+        list-style: none;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .page-item {
+        margin: 0;
+    }
+
+    .page-link {
+        padding: 10px 14px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: black;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+        .page-link:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+    .page-item.active .page-link {
+        background-color: #007bff;
+        color: white;
+    }
+
+    /* Badge Styles */
+    .status-pending {
+        background-color: #ffc107;
+        color: black;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .status-approved {
+        background-color: #28a745;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .status-rejected {
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .reason-col {
+        display: none;
+    }
+
+    /* Responsive Tweaks */
+    @@media (max-width: 768px) {
+        .btn-filter {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .pagination {
+            gap: 4px;
+        }
+
+        .page-link {
+            padding: 8px 10px;
+        }
+    }
+</style>

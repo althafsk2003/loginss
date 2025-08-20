@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json
+@Html.AntiForgeryToken()
 @{
     Layout = "~/Views/Shared/_MentorLayout.cshtml";
     ViewBag.Title = "Mentor Dashboard";
@@ -11,32 +12,84 @@
     <div class="row">
         <!-- Left Column: Mentor Info -->
         <div class="col-lg-4 col-md-12 mb-4">
-            <!-- Mentor Info Card -->
             <div class="card shadow-lg border-0 hover-card h-100 mentor-card">
-                <div class="card-body text-center position-relative">
-                    <!-- Bell Button -->
-                    <button class="btn btn-icon position-absolute top-0 end-0 m-2" type="button" id="notificationsButton" data-bs-toggle="modal" data-bs-target="#notificationsModal">
-                        <i class="fas fa-bell fa-lg text-primary"></i>
-                        @{
-                            var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
-                            if (notifications != null && notifications.Count > 0)
+                <div class="card-body position-relative">
+                    <!-- Notification Bell -->
+                    <div class="notification-bell">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                            <i class="fas fa-bell"></i>
+                            @if (ViewBag.Notifications != null && (ViewBag.Notifications as List<WebApplication4.Models.Notification>).Any())
                             {
-                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-pill">@notifications.Count</span>
+                                <span id="notificationCount" class="notification-count">
+                                    @((ViewBag.Notifications as List<WebApplication4.Models.Notification>).Count)
+                                </span>
                             }
-                        }
-                    </button>
-                    <!-- Avatar -->
+                        </a>
+                    </div>
+
+                    <!-- Avatar and Mentor Info -->
                     <div class="avatar-circle mx-auto mb-3">
                         <i class="fas fa-user fa-2x text-white"></i>
                     </div>
                     <h4 class="card-title text-primary mb-2">@ViewBag.MentorFullName</h4>
                     <div class="text-left">
-                        <p class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email:</strong> @ViewBag.Mentor.Email</p>
-                        <p class="mb-2"><i class="fas fa-university me-2 text-primary"></i><strong>University:</strong> @ViewBag.University.UniversityNAME</p>
-                        <p class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i><strong>Location:</strong> @ViewBag.University.Location</p>
-                        <p class="mb-2"><i class="fas fa-building me-2 text-primary"></i><strong>Department:</strong> @ViewBag.Department.DepartmentName</p>
-                        <p class="mb-2"><i class="fas fa-users me-2 text-primary"></i><strong>Total Clubs:</strong> @ViewBag.ClubsCount</p>
-                        <p class="mb-2"><i class="fas fa-calendar-check me-2 text-primary"></i><strong>Total Events:</strong> @ViewBag.EventsCount</p>
+                        <p class="mb-2">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <strong>Email:</strong> @ViewBag.Mentor.Email
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-university me-2 text-primary"></i>
+                            <strong>University:</strong> @ViewBag.UniversityName
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(ViewBag.SubDepartmentName))
+                        {
+                            <p class="mb-2">
+                                <i class="fas fa-sitemap me-2 text-primary"></i>
+                                <strong>Sub-Department:</strong> @ViewBag.SubDepartmentName
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(ViewBag.DepartmentName))
+                        {
+                            <p class="mb-2">
+                                <i class="fas fa-building me-2 text-primary"></i>
+                                <strong>Department:</strong> @ViewBag.DepartmentName
+                            </p>
+                        }
+
+                        @if (ViewBag.SubHOD != null)
+                        {
+                            <p class="mb-2">
+                                <i class="fas fa-user-tie me-2 text-primary"></i>
+                                <strong>Sub-HOD:</strong> @ViewBag.SubHOD.FirstName @ViewBag.SubHOD.LastName
+                            </p>
+                        }
+
+                        @if (ViewBag.HOD != null)
+                        {
+                            <p class="mb-2">
+                                <i class="fas fa-user-tie me-2 text-primary"></i>
+                                <strong>HOD:</strong> @ViewBag.HOD.FirstName @ViewBag.HOD.LastName
+                            </p>
+                        }
+
+                        @if (ViewBag.Director != null)
+                        {
+                            <p class="mb-2">
+                                <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
+                                <strong>Director:</strong> @ViewBag.Director.FirstName @ViewBag.Director.LastName
+                            </p>
+                        }
+
+                        <p class="mb-2">
+                            <i class="fas fa-users me-2 text-primary"></i>
+                            <strong>Total Clubs:</strong> @ViewBag.ClubsCount
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-calendar-check me-2 text-primary"></i>
+                            <strong>Total Events:</strong> @ViewBag.EventsCount
+                        </p>
                     </div>
                 </div>
             </div>
@@ -54,49 +107,79 @@
     </div>
 </div>
 
-<!-- Notifications Modal -->
-<div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-end">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
+                <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @{
-                    if (notifications != null && notifications.Count > 0)
+                @if (ViewBag.Notifications != null && (ViewBag.Notifications as List<WebApplication4.Models.Notification>).Any())
+                {
+                    foreach (var note in ViewBag.Notifications as List<WebApplication4.Models.Notification>)
                     {
-                        <ul class="list-unstyled" id="notificationList">
-                            @foreach (var notification in notifications)
-                            {
-                                <li class="notification-item mb-3" data-notification-id="@notification.NotificationID">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>@notification.Message</span>
-                                        <small class="text-muted">@(notification.StartDate?.ToString("MMM dd, yyyy") ?? "N/A")</small>
-                                    </div>
-                                    <hr class="dropdown-divider my-2">
-                                </li>
-                            }
-                        </ul>
-                        <div class="text-center">
-                            <form id="clearNotificationsForm" action="@Url.Action("ClearAllNotifications", "Mentor")" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="text-danger text-decoration-none border-0 bg-transparent">Clear All Notifications</button>
-                            </form>
+                        <div class="alert alert-light border d-flex justify-content-between align-items-start mb-2" id="notification-@note.NotificationID">
+                            <div class="flex-grow-1">
+                                <strong>@note.Message</strong><br />
+                                <button class="btn btn-sm btn-success" onclick="markNotificationAsRead(@note.NotificationID, this)">Mark as Read</button>
+                            </div>
                         </div>
                     }
-                    else
-                    {
-                        <p class="text-center text-muted" id="notificationList">No notifications available.</p>
-                    }
                 }
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                else
+                {
+                    <p class="text-muted">No new notifications</p>
+                }
             </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    function markNotificationAsRead(notificationId) {
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url: '/Mentor/MarkNotificationAsRead',
+            type: 'POST',
+            data: {
+                notificationId: notificationId,
+                __RequestVerificationToken: token
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Remove the notification UI block
+                    $("#notification-" + notificationId).remove();
+
+                    // Update notification count
+                    var countElem = $("#notificationCount");
+                    var count = parseInt(countElem.text());
+                    if (!isNaN(count) && count > 0) {
+                        countElem.text(count - 1);
+                        if (count - 1 === 0) {
+                            countElem.hide(); // Hide badge if no notifications left
+                        }
+                    }
+
+                    // If all notifications are read
+                    if ($(".alert").length === 0) {
+                        $(".modal-body").html('<p class="text-muted">No new notifications</p>');
+                    }
+                } else {
+                    alert("Failed to mark notification as read.");
+                }
+            },
+            error: function () {
+                alert("Error processing the request.");
+            }
+        });
+    }
+</script>
+
+
 
 @section Styles {
     <style>
@@ -122,10 +205,10 @@
             transition: transform 0.4s ease, box-shadow 0.4s ease;
         }
 
-        .hover-card:hover {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 0 12px 24px var(--shadow-color) !important;
-        }
+            .hover-card:hover {
+                transform: translateY(-8px) scale(1.03);
+                box-shadow: 0 12px 24px var(--shadow-color) !important;
+            }
 
         .avatar-circle {
             width: 80px;
@@ -146,95 +229,46 @@
             color: var(--primary-gradient-start);
         }
 
-        .card-body {
-            padding: 2.5rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-        }
-
         .card-body p {
             font-size: 0.95rem;
             color: var(--text-secondary);
             line-height: 1.6;
-            transition: color 0.3s ease;
         }
 
-        .card-body p:hover {
-            color: var(--text-primary);
-        }
-
-        .card-body p strong {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .btn-icon {
-            background: transparent;
-            border: none;
-            padding: 0.5rem;
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-
-        .btn-icon:hover {
-            transform: scale(1.2);
-            color: var(--primary-gradient-end);
-        }
-
-        .badge.bg-danger {
-            background-color: var(--accent-color) !important;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .badge.bg-danger:hover {
-            transform: scale(1);
-        }
-
-        .notification-item {
-            transition: background-color 0.3s ease;
-        }
-
-        .notification-item:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .modal-content {
-            border-radius: 10px;
-            box-shadow: 0 6px 16px var(--shadow-color);
-        }
+            .card-body p strong {
+                color: var(--text-primary);
+                font-weight: 600;
+            }
 
         .chart-card {
             background: linear-gradient(145deg, #ffffff, var(--secondary-color));
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
         }
 
-        .chart-card h4 {
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 1.6rem;
-            letter-spacing: 0.5px;
-            position: relative;
-        }
+            .chart-card h4 {
+                font-weight: 700;
+                color: var(--text-primary);
+                font-size: 1.6rem;
+                letter-spacing: 0.5px;
+                position: relative;
+            }
 
-        .chart-card h4::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            border-radius: 2px;
-        }
+                .chart-card h4::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 50px;
+                    height: 3px;
+                    background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
+                    border-radius: 2px;
+                }
 
         .chart-container {
-            position: relative;
             width: 100%;
             height: 450px;
-            overflow: hidden;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.8);
         }
@@ -242,36 +276,50 @@
         #clubEventChart {
             width: 100% !important;
             height: 450px !important;
-            display: block !important;
+        }
+
+        .notification-bell {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+            transition: transform 0.2s ease;
+        }
+
+            .notification-bell:hover {
+                transform: scale(1.15);
+                color: #dc3545;
+            }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 50%;
         }
 
         @@media (max-width: 991px) {
-            .col-lg-4, .col-lg-8 {
-                margin-bottom: 2rem;
-            }
-
             .avatar-circle {
                 width: 65px;
                 height: 65px;
             }
 
-            .avatar-circle i {
-                font-size: 1.8rem;
-            }
-
-            .card-body {
-                padding: 1.8rem;
-            }
+                .avatar-circle i {
+                    font-size: 1.8rem;
+                }
 
             .card-title {
                 font-size: 1.3rem;
             }
 
-            .btn-icon {
-                padding: 0.4rem;
-            }
-
-            .chart-container, #clubEventChart {
+            .chart-container,
+            #clubEventChart {
                 height: 320px;
             }
 
@@ -281,235 +329,82 @@
         }
     </style>
 }
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
-        // Chart.js local fallback
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js not loaded from CDN. Attempting local fallback.');
-            document.write('<script src="/Scripts/chart.umd.min.js"><\/script>');
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
-            // Debug notifications button
-            const notificationsButton = document.getElementById('notificationsButton');
-            if (notificationsButton) {
-                notificationsButton.addEventListener('click', function () {
-                    console.log('Notifications button clicked');
-                    const modal = document.getElementById('notificationsModal');
-                    if (modal) {
-                        console.log('Modal found in DOM');
-                    } else {
-                        console.error('Modal #notificationsModal not found in DOM');
-                    }
-                });
-            } else {
-                console.error('Notifications button #notificationsButton not found in DOM');
-            }
-
-            // Handle clear notifications form submission
-            const clearForm = document.getElementById('clearNotificationsForm');
-            if (clearForm) {
-                clearForm.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    console.log('Clear Notifications form submitted');
-                    fetch(clearForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        }
-                    })
-                    .then(response => {
-                        console.log('Response status:', response.status);
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}...`);
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            console.log('Notifications cleared successfully');
-                            // Update UI
-                            const notificationList = document.getElementById('notificationList');
-                            notificationList.innerHTML = '<p class="text-center text-muted">No notifications available.</p>';
-                            const badge = document.querySelector('.badge.bg-danger');
-                            if (badge) badge.remove();
-                        } else {
-                            console.error('Failed to clear notifications:', data.message);
-                            alert('Error clearing notifications: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error clearing notifications:', error);
-                        alert('Error clearing notifications. Check console for details.');
-                    });
-                });
-            }
-
-            // Debug data for chart
             const clubLabelsRaw = '@Html.Raw(JsonConvert.SerializeObject(clubNames))';
             const eventDataRaw = '@Html.Raw(JsonConvert.SerializeObject(eventCounts))';
-            console.log('Raw Club Labels:', clubLabelsRaw);
-            console.log('Raw Event Data:', eventDataRaw);
 
-            let clubLabels, eventData;
+            let clubLabels = [], eventData = [];
+
             try {
                 clubLabels = JSON.parse(clubLabelsRaw);
                 eventData = JSON.parse(eventDataRaw);
             } catch (e) {
                 console.error('JSON Parse Error:', e.message);
+            }
+
+            if (!Array.isArray(clubLabels) || !Array.isArray(eventData) || clubLabels.length !== eventData.length) {
                 clubLabels = ['No Clubs'];
                 eventData = [0];
             }
 
-            console.log('Parsed Club Labels:', clubLabels, 'Type:', typeof clubLabels);
-            console.log('Parsed Event Data:', eventData, 'Type:', typeof eventData);
-            console.log('Club Labels Length:', clubLabels.length, 'Event Data Length:', eventData.length);
-
-            // Validate data
-            let validLabels = Array.isArray(clubLabels) && clubLabels.length > 0 ? clubLabels : ['No Clubs'];
-            let validData = Array.isArray(eventData) && eventData.length > 0 && eventData.every(v => v != null && !isNaN(v) && v >= 0) ? eventData : [0];
-
-            if (validLabels.length !== validData.length) {
-                console.warn('Data mismatch: Labels and data lengths differ. Adjusting to minimum length.');
-                const minLength = Math.min(validLabels.length, validData.length);
-                validLabels = validLabels.slice(0, minLength);
-                validData = validData.slice(0, minLength);
-                console.log('Adjusted Labels:', validLabels);
-                console.log('Adjusted Data:', validData);
-            }
-
             const ctx = document.getElementById('clubEventChart');
             if (!ctx) {
-                console.error('Canvas element #clubEventChart not found in DOM.');
-                alert('Error: Chart canvas not found. Please check the page structure.');
+                console.error('Chart canvas not found.');
                 return;
             }
 
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: validLabels,
-                        datasets: [{
-                            label: 'All Events',
-                            data: validData,
-                            backgroundColor: 'rgba(74, 0, 224, 0.6)',
-                            borderColor: 'rgba(74, 0, 224, 1)',
-                            borderWidth: 1,
-                            hoverBackgroundColor: 'rgba(142, 45, 226, 0.8)',
-                            hoverBorderColor: 'rgba(142, 45, 226, 1)'
-                        }]
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: clubLabels,
+                    datasets: [{
+                        label: 'All Events',
+                        data: eventData,
+                        backgroundColor: 'rgba(74, 0, 224, 0.6)',
+                        borderColor: 'rgba(74, 0, 224, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(142, 45, 226, 0.8)',
+                        hoverBorderColor: 'rgba(142, 45, 226, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutCubic'
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 1200,
-                            easing: 'easeInOutCubic'
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
                         },
-                        plugins: {
-                            legend: {
+                        tooltip: {
+                            callbacks: {
+                                label: context => `${context.label}: ${context.raw} events`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
                                 display: true,
-                                position: 'top',
-                                labels: {
-                                    font: {
-                                        size: 13,
-                                        weight: 'bold'
-                                    },
-                                    color: '#2d2d2d'
-                                }
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(74, 0, 224, 0.9)',
-                                titleFont: { size: 14, weight: 'bold' },
-                                bodyFont: { size: 12 },
-                                callbacks: {
-                                    label: function(context) {
-                                        return `${context.label}: ${context.raw} events`;
-                                    }
-                                }
+                                text: 'Event Count'
                             }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Event Count',
-                                    font: { size: 14, weight: 'bold' },
-                                    color: '#2d2d2d'
-                                },
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.05)',
-                                    borderColor: '#2d2d2d'
-                                },
-                                ticks: {
-                                    color: '#2d2d2d',
-                                    font: { size: 12 }
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Clubs',
-                                    font: { size: 14, weight: 'bold' },
-                                    color: '#2d2d2d'
-                                },
-                                grid: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#2d2d2d',
-                                    font: { size: 12 }
-                                }
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Clubs'
                             }
                         }
                     }
-                });
-                console.log('Chart initialized successfully.');
-            } catch (error) {
-                console.error('Error initializing chart:', error.message, error.stack);
-                alert('Error rendering chart. Check console for details.');
-            }
-
-            // Mark Notifications as Read (unchanged)
-            const notificationsModal = document.getElementById('notificationsModal');
-            if (notificationsModal) {
-                console.log('Notifications modal found on page load');
-                notificationsModal.addEventListener('shown.bs.modal', function () {
-                    console.log('Notifications modal shown');
-                    const notificationItems = document.querySelectorAll('.notification-item');
-                    notificationItems.forEach(item => {
-                        const notificationId = item.getAttribute('data-notification-id');
-                        if (notificationId) {
-                            fetch('@Url.Action("MarkNotificationAsRead", "Mentor")', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                                },
-                                body: JSON.stringify({ notificationId: parseInt(notificationId) })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    console.log(`Notification ${notificationId} marked as read.`);
-                                } else {
-                                    console.error(`Failed to mark notification ${notificationId} as read: ${data.message}`);
-                                }
-                            })
-                            .catch(error => console.error('Error marking notification as read:', error));
-                        }
-                    });
-                });
-            } else {
-                console.error('Notifications modal #notificationsModal not found on page load');
-            }
+                }
+            });
         });
     </script>
 }

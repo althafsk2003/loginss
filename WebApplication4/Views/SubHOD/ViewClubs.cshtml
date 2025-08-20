@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "View Clubs";
+    Layout = "~/Views/Shared/_SubHODLayout.cshtml";
+}
+
+<style>
+    /* Filter button styles */
+    .btn-group .btn {
+        border-radius: 20px;
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btn-group .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
+    /* Table scroll styling */
+    .table-scroll {
+        max-height: 280px;
+        overflow-y: auto;
+        border-radius: 8px;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sticky table header with custom color */
+    .table thead {
+        position: sticky;
+        top: 0;
+        background: linear-gradient(90deg, #0d6efd, #0a58ca);
+        color: white;
+        z-index: 1;
+    }
+
+        .table thead th {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+    /* Row hover effect */
+    .table tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.08);
+        cursor: pointer;
+    }
+
+    /* Badge tweaks */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4em 0.6em;
+    }
+</style>
+
+
+<div class="container mt-4">
+    <h2 class="mb-3 fw-bold">📋 View Clubs</h2>
+
+    <!-- Filter buttons -->
+    <div class="btn-group mb-4" role="group">
+        <button id="btnAll" class="btn btn-outline-secondary">All Clubs (0)</button>
+        <button id="btnActive" class="btn btn-outline-success">Active (0)</button>
+        <button id="btnInactive" class="btn btn-outline-danger">Inactive (0)</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive table-scroll">
+        <table class="table table-bordered table-striped mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Club Name</th>
+                    <th>Department</th>
+                    <th>Sub Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="clubTableBody">
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        let allClubs = [];
+
+        $(document).ready(function () {
+            loadClubs();
+
+            $("#btnAll").click(function () { renderClubs("all"); toggleActiveButton(this); });
+            $("#btnActive").click(function () { renderClubs("active"); toggleActiveButton(this); });
+            $("#btnInactive").click(function () { renderClubs("inactive"); toggleActiveButton(this); });
+        });
+
+        function toggleActiveButton(button) {
+            $(".btn-group .btn").removeClass("active");
+            $(button).addClass("active");
+        }
+
+        function loadClubs() {
+            $.getJSON("@Url.Action("GettClubs", "SubHOD")", function (data) {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                allClubs = data.Clubs;
+
+                $("#btnAll").text(`All Clubs (${data.TotalClubs})`);
+                $("#btnActive").text(`Active (${data.ActiveClubs})`);
+                $("#btnInactive").text(`Inactive (${data.InactiveClubs})`);
+
+                renderClubs("all");
+                toggleActiveButton($("#btnAll"));
+            });
+        }
+
+        function renderClubs(filter) {
+            let filtered = [];
+            if (filter === "active") {
+                filtered = allClubs.filter(c => c.IsActive === true);
+            } else if (filter === "inactive") {
+                filtered = allClubs.filter(c => c.IsActive === false);
+            } else {
+                filtered = allClubs;
+            }
+
+            const tbody = $("#clubTableBody");
+            tbody.empty();
+
+            if (filtered.length === 0) {
+                tbody.append(`<tr><td colspan="4" class="text-center text-muted">No clubs found</td></tr>`);
+                return;
+            }
+
+            filtered.forEach(club => {
+                tbody.append(`
+                    <tr>
+                        <td class="fw-semibold">${club.ClubName}</td>
+                        <td>${club.DepartmentName}</td>
+                        <td>${club.SubDepartmentName}</td>
+                        <td>
+                            ${club.IsActive
+                                ? `<span class="badge bg-success">Active</span>`
+                                : `<span class="badge bg-danger">Inactive</span>`}
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+    </script>
+}

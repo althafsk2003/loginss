@@ -21,6 +21,7 @@ namespace WebApplication4.Models
             this.CLUBS = new HashSet<CLUB>();
             this.Logins = new HashSet<Login>();
             this.USERs = new HashSet<USER>();
+            this.SUBDEPARTMENTs = new HashSet<SUBDEPARTMENT>();
         }
     
         public int DepartmentID { get; set; }
@@ -31,6 +32,9 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public Nullable<System.DateTime> IsActiveDate { get; set; }
         public string HOD_Email { get; set; }
+        public string DirectorName { get; set; }
+        public string DirectorEmail { get; set; }
+        public Nullable<bool> IsDirectorDepartment { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
@@ -41,5 +45,7 @@ namespace WebApplication4.Models
         public virtual ICollection<Login> Logins { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<USER> USERs { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<SUBDEPARTMENT> SUBDEPARTMENTs { get; set; }
     }
 }

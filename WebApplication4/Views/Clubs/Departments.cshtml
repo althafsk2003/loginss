@@ -18,7 +18,10 @@
                     </div>
                     <div class="col-md-6 text-column">
                         <h3>@department.DepartmentName</h3>
-                        <p><b>Head of the school:</b> @department.HOD</p>
+                        <p>
+                            <b>Head of the school:</b>
+                            @(string.IsNullOrWhiteSpace(department.DirectorName) ? department.HOD : department.DirectorName)
+                        </p>
                         <p>
                             @switch (department.DepartmentName)
                             {
@@ -41,28 +44,31 @@
                 }
                 else
                 {
-                    <div class="col-md-6 text-column">
-                        <h3>@department.DepartmentName</h3>
-                        <p><b>Head of the school:</b> @department.HOD</p>
-                        <p>
-                            @switch (department.DepartmentName)
-                            {
-                                case "ICFAI School Of Architecture":
-                                    @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
-                                    break;
-                                case "ICFAI Law School":
-                                    @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
-                                    break;
-                                case "ICFAI School Of Social Sciences":
-                                    @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
-                                    break;
-                                default:
-                                    @:Learn more about the exciting programs and research opportunities offered by this department.
-                                    break;
-                            }
-                        </p>
-                        <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
-                    </div>
+            <div class="col-md-6 text-column">
+                <h3>@department.DepartmentName</h3>
+                <p>
+                    <b>Head of the school:</b>
+                    @(string.IsNullOrWhiteSpace(department.DirectorName) ? department.HOD : department.DirectorName)
+                </p>
+                <p>
+                    @switch (department.DepartmentName)
+                    {
+                        case "ICFAI School Of Architecture":
+                            @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
+                            break;
+                        case "ICFAI Law School":
+                            @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
+                            break;
+                        case "ICFAI School Of Social Sciences":
+                            @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
+                            break;
+                        default:
+                            @:Learn more about the exciting programs and research opportunities offered by this department.
+                            break;
+                    }
+                </p>
+                <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
+            </div>
                     <div class="col-md-6 image-column">
                         <img src="~/wwwroot/Images/@(department.DepartmentName.Replace(" ", "")).jpg" alt="@department.DepartmentName" class="img-fluid department-image" />
                     </div>

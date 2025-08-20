@@ -18,7 +18,8 @@
     <thead>
         <tr>
             <th>School Name</th>
-            <th>HOD</th>
+            <th>Director</th>
+            <th>SCC</th>
             <th>Status</th>
             <th>Action</th>
         </tr>
@@ -28,7 +29,8 @@
         {
             <tr>
                 <td>@dept.DepartmentName</td>
-                <td>@dept.HOD</td>
+                <td>@(string.IsNullOrEmpty(dept.DirectorName) ? "-" : dept.DirectorName)</td>
+                <td>@(string.IsNullOrEmpty(dept.HOD) ? "-" : dept.HOD)</td>
                 <td>
                     @if (dept.IsActive == true)
                     {

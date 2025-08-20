@@ -2,17 +2,22 @@
 using SendGrid.Helpers.Mail;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApplication4.Models;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using System.Dynamic;
 using System.Data.Entity;
 using System.Collections.Generic;
 using PagedList;
 using Org.BouncyCastle.Crypto.Generators;
 using System.Drawing;
+using System.Drawing.Imaging; 
+
 
 
 
@@ -33,23 +38,24 @@ namespace WebApplication4.Controllers
             return View();
         }
 
-        // POST: Handle Login
         [HttpPost]
-
-        // POST: Handle Login
-
-    
-        public ActionResult Login(LoginViewModel model)
+        public ActionResult Login(LoginViewModel model, string CaptchaInput)
         {
+            // Validate CAPTCHA
+            string captchaStored = Session["Captcha"] as string;
+            if (captchaStored == null || CaptchaInput == null || !captchaStored.Equals(CaptchaInput, StringComparison.OrdinalIgnoreCase))
+            {
+                ViewBag.Message = "Invalid CAPTCHA. Please try again.";
+                return View(model);
+            }
+
             if (ModelState.IsValid)
             {
-                // Check credentials in Logins table
-                var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username
-                && u.PasswordHash == model.Password);
+                var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username && u.PasswordHash == model.Password);
 
                 if (user != null)
                 {
-                    // Store user session data
+                    // Store basic session info
                     Session["UserID"] = user.LoginID;
                     Session["UserRole"] = user.Role;
                     Session["UserEmail"] = user.Email;
@@ -61,17 +67,12 @@ namespace WebApplication4.Controllers
                     }
                     else if (user.Role == "UniversityAdministrator")
                     {
-                        // Fetch assigned university
                         var university = _db.UNIVERSITies.FirstOrDefault(u => u.Email == user.Email);
-
                         if (university != null)
                         {
-                            // Store university details in session
                             Session["UniversityID"] = university.UniversityID;
                             Session["UniversityName"] = university.UniversityNAME;
                             Session["UniversityLocation"] = university.Location;
-
-                            // Redirect to University Admin Dashboard
                             return RedirectToAction("Index", "UniversityAdmin");
                         }
                         else
@@ -79,25 +80,19 @@ namespace WebApplication4.Controllers
                             ViewBag.Message = "No university assigned to this administrator.";
                         }
                     }
-
                     else if (user.Role == "HOD")
                     {
-                        // Fetch the department where this HOD email is assigned
                         var department = _db.DEPARTMENTs.FirstOrDefault(d => d.HOD_Email == user.Email);
                         Session["UserRole"] = "HOD";
 
                         if (department != null)
                         {
-                            // Fetch the university details related to this department
                             var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
-
-                            // Store relevant info in session
                             Session["DepartmentID"] = department.DepartmentID;
                             Session["DepartmentName"] = department.DepartmentName;
                             Session["UniversityID"] = university?.UniversityID;
                             Session["UniversityName"] = university?.UniversityNAME;
 
-                            // Redirect to HOD Dashboard
                             return RedirectToAction("Index", "HOD");
                         }
                         else
@@ -105,29 +100,63 @@ namespace WebApplication4.Controllers
                             ViewBag.Message = "No department assigned to this HOD.";
                         }
                     }
-
                     else if (user.Role == "Mentor")
                     {
-                        // Store the mentor's university ID in the session
                         Session["UniversityID"] = user.UniversityID;
-
-                        // Optionally, you can store other details like the mentor's ID or role
                         Session["UserID"] = user.LoginID;
-                        // This should be in your login controller
-                        //Session["MentorID"] = loggedInMentor.MentorID;
-
                         Session["UserRole"] = user.Role;
-
                         Session["UserEmail"] = user.Email;
-
-
                         return RedirectToAction("Index", "Mentor");
-
                     }
-                    else if(user.Role== "Club Admin")
+                    else if (user.Role == "Club Admin")
                     {
                         Session["UserID"] = user.LoginID;
+                        Session["UserEmail"] = user.Email;
                         return RedirectToAction("Index", "ClubAdmin");
+                    }
+                    else if (user.Role == "Director")
+                    {
+                        var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DirectorEmail == user.Email);
+                        if (department != null)
+                        {
+                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
+
+                            Session["UserRole"] = "Director";
+                            Session["DepartmentID"] = department.DepartmentID;
+                            Session["DepartmentName"] = department.DepartmentName;
+                            Session["UniversityID"] = university?.UniversityID;
+                            Session["UniversityName"] = university?.UniversityNAME;
+
+                            return RedirectToAction("Index", "Director");
+                        }
+                        else
+                        {
+                            ViewBag.Message = "No department assigned to this Director.";
+                        }
+                    }
+                    else if (user.Role == "SUBHOD")
+                    {
+                        var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.HOD_Email == user.Email);
+                        if (subDept != null)
+                        {
+                            var mainDept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == subDept.DepartmentID);
+                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == mainDept.Universityid);
+
+                            Session["UserRole"] = "SubHOD";
+                            Session["SubHOD_LoginID"] = user.LoginID; // ✅ REQUIRED
+                            Session["SubDepartmentID"] = subDept.SubDepartmentID;
+                            Session["SubDepartmentName"] = subDept.SubDepartmentName;
+                            Session["DepartmentID"] = mainDept?.DepartmentID;
+                            Session["DepartmentName"] = mainDept?.DepartmentName;
+                            Session["UniversityID"] = university?.UniversityID;
+                            Session["UniversityName"] = university?.UniversityNAME;
+
+                            return RedirectToAction("Index", "SubHOD");
+                        }
+                        else
+                        {
+                            ViewBag.Message = "No sub-department assigned to this Sub HOD.";
+                        }
                     }
                     else
                     {
@@ -139,9 +168,9 @@ namespace WebApplication4.Controllers
                     ViewBag.Message = "Invalid email or password.";
                 }
             }
+
             return View(model);
         }
-
 
         // Logout Action
         public ActionResult Logout()
@@ -1511,7 +1540,7 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
             _db.SaveChanges();
 
             TempData["SuccessMessage"] = "Password changed successfully!";
-            return RedirectToAction("Index", "Admin"); // Updated to point to dashboard
+            return RedirectToAction("ChangePassword", "Admin"); // Updated to point to dashboard
         }
 
 
@@ -1555,7 +1584,13 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
 
 
         [HttpGet]
-        public JsonResult GetClubEventReport(DateTime startDate, DateTime endDate)
+        public ActionResult EventReport()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetFormalEventReport(DateTime startDate, DateTime endDate)
         {
             try
             {
@@ -1566,24 +1601,205 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
                         e.EventStatus == "Concluded")
                     .Select(e => new
                     {
-                        EventTitle = e.EventName,
-                        Description = e.EventDescription,
-                        PosterUrl = e.EventPoster,
-                        BrochureUrl = e.EventBrochure,
-                        Photos = e.EventPhotos.Select(p => p.PhotoPath).ToList(),
-                        Winners = e.EventWinners.Select(w => w.WinnerName).ToList()
+                        EventId = e.EventID,
+                        EventName = e.EventName,
+                        StartDate = e.EventStartDateAndTime,
+                        EndDate = e.EventEndDateAndTime,
+                        Venue = e.Venue,
+                        Budget = e.EventBudget,
+                        ApprovedBudget = e.ApprovedAmount,
+                        ProposalDocument = e.BudgetDocumentPath,
+                        ApprovedDocument = e.EventFormPath,
+
+                        // Pull related data from event photos and winners
+                        EventPhotos = _db.EventPhotos
+                            .Where(p => p.EventId == e.EventID)
+                            .Select(p => p.PhotoPath)
+                            .ToList(),
+
+                        Winners = _db.EventWinners
+                            .Where(w => w.EventId == e.EventID)
+                            .Select(w => new
+                            {
+                                w.WinnerName,
+                                w.Prize
+                            })
+                            .ToList()
                     })
                     .ToList();
 
-                return Json(new { data = events }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, data = events }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
 
+
+        [HttpGet]
+        public ActionResult DownloadAllEventDocuments(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var events = _db.EVENTS
+                    .Where(e => e.EventStartDateAndTime >= startDate &&
+                                e.EventEndDateAndTime <= endDate &&
+                                e.EventStatus == "Concluded")
+                    .ToList();
+
+                var zipStream = new MemoryStream();
+                using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var e in events)
+                    {
+                        var pdfStream = new MemoryStream();
+                        var doc = new Document();
+                        PdfWriter.GetInstance(doc, pdfStream);
+                        doc.Open();
+
+                        // 1. Event Info
+                        doc.Add(new Paragraph($"Event Name: {e.EventName}"));
+                        doc.Add(new Paragraph($"Start Date: {e.EventStartDateAndTime}"));
+                        doc.Add(new Paragraph($"End Date: {e.EventEndDateAndTime}"));
+                        doc.Add(new Paragraph(" "));
+
+                        // 2. Winners
+                        var winners = _db.EventWinners.Where(w => w.EventId == e.EventID).ToList();
+                        if (winners.Any())
+                        {
+                            doc.Add(new Paragraph("Winners:"));
+
+                            PdfPTable table = new PdfPTable(2); // Position and Name
+                            table.AddCell("Position");
+                            table.AddCell("Name");
+
+                            foreach (var w in winners)
+                            {
+                                table.AddCell(w.Prize); // Show Prize as Position (e.g., "First", "Second")
+                                table.AddCell(w.WinnerName);
+                            }
+
+                            doc.Add(table);
+                            doc.Add(new Paragraph(" "));
+                        }
+
+
+                        // 3. Photos
+                        var photos = _db.EventPhotos.Where(p => p.EventId == e.EventID).ToList();
+                        if (photos.Any())
+                        {
+                            doc.Add(new Paragraph("Photos:"));
+                            PdfPTable photoTable = new PdfPTable(3); // 3 images per row
+                            photoTable.WidthPercentage = 100f;
+                            photoTable.DefaultCell.Border = iTextSharp.text.Rectangle.NO_BORDER;
+
+                            foreach (var photo in photos)
+                            {
+                                var path = Server.MapPath(photo.PhotoPath);
+                                if (System.IO.File.Exists(path))
+                                {
+                                    iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(path);
+                                    img.ScaleToFit(150f, 100f);
+                                    PdfPCell cell = new PdfPCell(img);
+                                    cell.Border = iTextSharp.text.Rectangle.NO_BORDER;
+                                    cell.Padding = 5f;
+                                    photoTable.AddCell(cell);
+                                }
+                            }
+
+                            // Fill remaining empty cells if photos are not divisible by 3
+                            int remainder = photos.Count % 3;
+                            if (remainder > 0)
+                            {
+                                for (int i = 0; i < 3 - remainder; i++)
+                                {
+                                    PdfPCell emptyCell = new PdfPCell();
+                                    emptyCell.Border = iTextSharp.text.Rectangle.NO_BORDER;
+                                    photoTable.AddCell(emptyCell);
+                                }
+                            }
+
+                            doc.Add(photoTable);
+
+
+                        }
+
+                        // 4. Approved Document
+                        if (!string.IsNullOrEmpty(e.EventFormPath))
+                        {
+                            var approvedPath = Server.MapPath(e.EventFormPath);
+                            if (System.IO.File.Exists(approvedPath))
+                            {
+                                doc.NewPage();
+                                doc.Add(new Paragraph("Approved Document: See attached file."));
+                                archive.CreateEntryFromFile(approvedPath, $"{e.EventName}_{e.EventStartDateAndTime:yyyyMMdd}/ApprovedDocument_{Path.GetFileName(approvedPath)}");
+                            }
+                        }
+
+                        doc.Close();
+
+                        // ✅ Use byte array to avoid closed stream issue
+                        byte[] pdfBytes = pdfStream.ToArray();
+                        var entry = archive.CreateEntry($"{e.EventName}_{e.EventStartDateAndTime:yyyyMMdd}/EventReport.pdf");
+                        using (var entryStream = entry.Open())
+                        {
+                            entryStream.Write(pdfBytes, 0, pdfBytes.Length);
+                        }
+                    }
+                }
+
+                zipStream.Position = 0;
+                return File(zipStream, "application/zip", "EventReports.zip");
+            }
+            catch (Exception ex)
+            {
+                return new HttpStatusCodeResult(500, "Error: " + ex.Message);
+            }
+        }
+
+
+        public ActionResult CaptchaImage()
+        {
+            string captchaText = GenerateCaptchaText(5);
+            Session["Captcha"] = captchaText;
+
+            byte[] imageBytes = GenerateCaptchaImage(captchaText);
+            return File(imageBytes, "image/png");
+        }
+
+        private string GenerateCaptchaText(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private byte[] GenerateCaptchaImage(string captchaText)
+        {
+            using (var bitmap = new Bitmap(130, 40))
+            using (var g = Graphics.FromImage(bitmap))
+            using (var font = new System.Drawing.Font("Arial", 20, FontStyle.Bold)) // ✅ Fix for ambiguity
+            {
+                g.Clear(Color.White);
+                g.DrawString(captchaText, font, Brushes.Black, new PointF(10, 5));
+
+                var pen = new Pen(Color.Gray);
+                var rand = new Random();
+                for (int i = 0; i < 4; i++)
+                {
+                    g.DrawLine(pen, rand.Next(0, 130), rand.Next(0, 40), rand.Next(0, 130), rand.Next(0, 40));
+                }
+
+                using (var ms = new MemoryStream())
+                {
+                    bitmap.Save(ms, ImageFormat.Png); // ✅ Requires using System.Drawing.Imaging;
+                    return ms.ToArray();
+                }
+            }
+        }
 
 
 

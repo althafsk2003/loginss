@@ -40,9 +40,11 @@ namespace WebApplication4.Models
         public string PhotoPath { get; set; }
         public string District { get; set; }
         public Nullable<int> DepartmentID { get; set; }
+        public Nullable<int> SubDepartmentID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
+        public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
     }
 }

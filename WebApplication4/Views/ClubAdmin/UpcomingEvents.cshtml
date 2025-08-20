@@ -2,48 +2,55 @@
 
 @{
     ViewBag.Title = "Upcoming Events";
-    Layout = "~/Views/Shared/_ClubadminLayout.cshtml"; // Adjust if needed
+    Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
 }
 
 <div class="container mt-4">
     <h2 class="mb-4">📅 Upcoming Events</h2>
 
-    <div class="card mb-5">
+    <!-- Buttons to toggle between sections -->
+    <div class="btn-group mb-4" role="group" aria-label="Event Filters">
+        <button type="button" class="btn btn-primary" id="btnUpcoming">Upcoming</button>
+        <button type="button" class="btn btn-secondary" id="btnPosted">Posted</button>
+    </div>
+
+    <!-- Section 1: Approved but Not Yet Posted Events -->
+    <div class="card mb-5" id="sectionUpcoming">
         <div class="card-header bg-warning text-dark">
-            Section 1: Approved but Not Yet Posted Events
+            Approved but Not Yet Posted Events
         </div>
         <div class="card-body">
             @if (Model.ApprovedNotPostedEvents != null && Model.ApprovedNotPostedEvents.Any())
             {
-                <table class="table table-striped table-fixed">
-                    <thead>
-                        <tr>
-                            <th>Event Name</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ev in Model.ApprovedNotPostedEvents)
-                        {
+                <div class="table-wrapper">
+                    <table class="table table-striped table-fixed">
+                        <thead>
                             <tr>
-                                <td>@ev.EventName</td>
-                                <td>@ev.EventDescription</td>
-                                <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
-                                <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
-                                <td>
-                                    <a href="@Url.Action("PostEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-success btn-sm post-button">
-
-                                        ✅ Post to Website
-                                    </a>
-                                </td>
+                                <th>Event Name</th>
+                                <th>Description</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
                             </tr>
-
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var ev in Model.ApprovedNotPostedEvents)
+                            {
+                                <tr>
+                                    <td><div class="ellipsis-hover" title="@ev.EventName">@ev.EventName</div></td>
+                                    <td><div class="ellipsis-hover" title="@ev.EventDescription">@ev.EventDescription</div></td>
+                                    <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                    <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                    <td>
+                                        <a href="@Url.Action("PostEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-success btn-sm post-button">
+                                            ✅ Post to Website
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
             else
             {
@@ -52,42 +59,41 @@
         </div>
     </div>
 
-    <div class="card">
+    <!-- Section 2: Posted Upcoming Events -->
+    <div class="card" id="sectionPosted">
         <div class="card-header bg-info text-white">
-            Section 2: Posted Upcoming Events
+            Posted Upcoming Events
         </div>
         <div class="card-body">
             @if (Model.PostedUpcomingEvents != null && Model.PostedUpcomingEvents.Any())
             {
-                <table class="table table-hover table-fixed">
-                    <thead>
-                        <tr>
-                            <th>Event Name</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ev in Model.PostedUpcomingEvents)
-                        {
+                <div class="table-wrapper">
+                    <table class="table table-hover table-fixed">
+                        <thead>
                             <tr>
-                                <td>@ev.EventName</td>
-                                <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
-                                <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
-                                <td>
-                                    <a href="@Url.Action("EditEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-warning btn-sm">
-                                        ✏️ Edit
-                                    </a>
-                                    @*<a href="@Url.Action("MarkAsConcluded", "ClubAdmin", new { id = ev.EventID })" class="btn btn-secondary btn-sm">
-                                        📅 Mark as Concluded
-                                    </a>*@
-                                </td>
+                                <th>Event Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
                             </tr>
-
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var ev in Model.PostedUpcomingEvents)
+                            {
+                                <tr>
+                                    <td><div class="ellipsis-hover" title="@ev.EventName">@ev.EventName</div></td>
+                                    <td>@ev.EventStartDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                    <td>@ev.EventEndDateAndTime.ToString("dd MMM yyyy hh:mm tt")</td>
+                                    <td>
+                                        <a href="@Url.Action("EditEvent", "ClubAdmin", new { eventId = ev.EventID })" class="btn btn-warning btn-sm">
+                                            ✏️ Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
             else
             {
@@ -111,15 +117,12 @@
 
         .table-fixed th:nth-child(1),
         .table-fixed td:nth-child(1) {
-            width: 15%;
+            width: 20%;
         }
 
         .table-fixed th:nth-child(2),
         .table-fixed td:nth-child(2) {
             width: 40%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
         .table-fixed th:nth-child(3),
@@ -131,6 +134,86 @@
 
         .table-fixed th:nth-child(5),
         .table-fixed td:nth-child(5) {
-            width: 15%;
+            width: 10%;
+        }
+
+    /* Scrollable table body */
+    .table-wrapper {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .table-fixed thead th {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        z-index: 1;
+    }
+
+    /* Hide Posted section by default */
+    #sectionPosted {
+        display: none;
+    }
+
+    /* Button styling */
+    .btn-group .btn {
+        margin-right: 10px;
+    }
+
+    .btn-primary, .btn-secondary {
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary.active, .btn-secondary.active {
+            background-color: #0056b3 !important;
+            color: white;
+        }
+
+    /* Hover-to-expand for event name & description */
+    .ellipsis-hover {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        max-width: 100%;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .ellipsis-hover:hover {
+            white-space: normal;
+            overflow: visible;
+            background-color: #f8f9fa;
+            z-index: 100;
+            position: absolute;
+            width: max-content;
+            max-width: 500px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
         }
 </style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#sectionUpcoming').show();
+            $('#btnUpcoming').addClass('active');
+
+            $('#btnUpcoming').click(function () {
+                $('#sectionUpcoming').show();
+                $('#sectionPosted').hide();
+                $('#btnUpcoming').addClass('active');
+                $('#btnPosted').removeClass('active');
+            });
+
+            $('#btnPosted').click(function () {
+                $('#sectionPosted').show();
+                $('#sectionUpcoming').hide();
+                $('#btnPosted').addClass('active');
+                $('#btnUpcoming').removeClass('active');
+            });
+        });
+    </script>
+}

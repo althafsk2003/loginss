@@ -36,7 +36,8 @@
         <tr>
             <th>University Name</th>
             <th>Department Name</th>
-            <th>HOD</th>
+            <th>SCC</th>
+            <th>Director</th>   @* ✅ New Column *@
             <th>Status</th>
             <th>Actions</th>
         </tr>
@@ -47,7 +48,19 @@
             <tr>
                 <td>@department.UNIVERSITY.UniversityNAME</td>
                 <td>@department.DepartmentName</td>
-                <td>@department.HOD</td>
+
+                <!-- ✅ Show HOD only if no Director -->
+                <td>
+                    @(string.IsNullOrEmpty(department.DirectorName)
+                        ? (string.IsNullOrEmpty(department.HOD) ? "NILL" : department.HOD)
+                        : "NILL")
+                </td>
+
+                <!-- ✅ Show Director if available -->
+                <td>
+                    @(string.IsNullOrEmpty(department.DirectorName) ? "NILL" : department.DirectorName)
+                </td>
+
                 <td>
                     @if (department.IsActive == true)
                     {
@@ -58,11 +71,11 @@
                         <span class="badge badge-danger">Deactivated</span>
                     }
                 </td>
+
                 <td>
                     @if (department.IsActive == true)
                     {
                         <div class="d-flex flex-wrap gap-2">
-                            <!-- ✅ Edit Button (only for active departments) -->
                             <button type="button"
                                     class="btn btn-primary btn-sm edit-department-btn"
                                     data-id="@department.DepartmentID"
@@ -72,7 +85,6 @@
                                 <i class="fas fa-edit"></i> Edit
                             </button>
 
-                            <!-- ✅ Deactivate Button -->
                             <form method="post" action="@Url.Action("DeactivateDepartment", "Admin")" class="ml-2">
                                 <input type="hidden" name="departmentId" value="@department.DepartmentID" />
                                 <button type="submit" class="btn btn-warning btn-sm"
@@ -84,7 +96,6 @@
                     }
                     else
                     {
-                        <!-- ✅ Activate Button (if the department is inactive) -->
                         <form method="post" action="@Url.Action("ActivateDepartment", "Admin")">
                             <input type="hidden" name="departmentId" value="@department.DepartmentID" />
                             <button type="submit" class="btn btn-success btn-sm"
@@ -98,6 +109,7 @@
         }
     </tbody>
 </table>
+
 
 <!-- ✅ Pagination -->
 <div class="pagination-container text-center mt-3">

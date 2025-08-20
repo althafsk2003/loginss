@@ -1,0 +1,131 @@
+﻿@{
+    ViewBag.Title = "Event Report";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <h3 class="mb-4">Event Report by Date Range</h3>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" class="form-control" />
+        </div>
+        <div class="col-md-4">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" class="form-control" />
+        </div>
+        <div class="col-md-4 mt-4">
+            <button id="getReportBtn" class="btn btn-primary w-100">Get Report</button>
+        </div>
+    </div>
+
+    <!-- Download Button -->
+    <div class="text-end mb-3">
+        <button id="downloadAllBtn" class="btn btn-success" style="display: none;">Download All Documents</button>
+    </div>
+
+    <div id="reportContainer" class="mt-4"></div>
+</div>
+
+<style>
+    .event-photo-wrapper {
+        width: 180px;
+    }
+
+    .event-photo {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $("#getReportBtn").click(function () {
+            const startDate = $("#startDate").val();
+            const endDate = $("#endDate").val();
+
+            if (!startDate || !endDate) {
+                alert("Please select both start and end dates.");
+                return;
+            }
+
+            $("#reportContainer").html('<div class="text-info text-center"><i class="fas fa-spinner fa-spin"></i> Loading report...</div>');
+
+            $.get("@Url.Action("GetFormalEventReport", "Admin")", { startDate, endDate }, function (response) {
+                if (!response.success) {
+                    $("#reportContainer").html('<div class="alert alert-danger">Error: ' + response.message + '</div>');
+                    return;
+                }
+
+                const events = response.data;
+                if (!events.length) {
+                    $("#reportContainer").html('<div class="alert alert-warning">No events found in this range.</div>');
+                    $("#downloadAllBtn").hide();
+                    return;
+                }
+
+                let html = "";
+                events.forEach((e, index) => {
+                    let photosHtml = "";
+                    if (e.EventPhotos && e.EventPhotos.length > 0) {
+                        photosHtml = `
+                            <div class="mb-3">
+                                <strong>Event Photos:</strong>
+                                <div class="d-flex flex-wrap gap-3">
+                        `;
+                        e.EventPhotos.forEach(photo => {
+                            photosHtml += `
+                                <div class="event-photo-wrapper">
+                                    <a href="${photo}" target="_blank">
+                                        <img src="${photo}" class="event-photo" />
+                                    </a>
+                                </div>
+                            `;
+                        });
+                        photosHtml += '</div></div>';
+                    }
+
+                    let winnersHtml = "";
+                    if (e.Winners && e.Winners.length > 0) {
+                        winnersHtml = `<div class="mb-3"><strong>Winners:</strong><ul class="list-group">`;
+                        e.Winners.forEach(w => {
+                            winnersHtml += `<li class="list-group-item">${w.WinnerName} (${w.Prize})</li>`;
+                        });
+                        winnersHtml += `</ul></div>`;
+                    }
+
+                    html += `
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <strong>Event ${index + 1}: ${e.EventName}</strong>
+                            </div>
+                           <div class="card-body">
+    <p><strong>Start Date:</strong> ${new Date(e.StartDate).toLocaleString()}</p>
+    <p><strong>End Date:</strong> ${new Date(e.EndDate).toLocaleString()}</p>
+    <p><strong>Venue:</strong> ${e.Venue}</p>
+    <p><strong>Proposed Budget:</strong> ₹${!isNaN(parseFloat(e.Budget)) ? parseFloat(e.Budget).toFixed(2) : "N/A"}</p>
+    <p><strong>Approved Budget:</strong> ₹${!isNaN(parseFloat(e.ApprovedBudget)) ? parseFloat(e.ApprovedBudget).toFixed(2) : "N/A"}</p>
+    ${e.ApprovedDocument ? `<p><strong>Approved Document:</strong> <a href="${e.ApprovedDocument}" target="_blank">Download</a></p>` : ""}
+    ${photosHtml}
+    ${winnersHtml}
+</div>
+                        </div>
+                    `;
+                });
+
+                $("#reportContainer").html(html);
+                $("#downloadAllBtn").show();
+            });
+        });
+
+        $("#downloadAllBtn").click(function () {
+            const startDate = $("#startDate").val();
+            const endDate = $("#endDate").val();
+            const downloadUrl = `@Url.Action("DownloadAllEventDocuments", "Admin")?startDate=${startDate}&endDate=${endDate}`;
+            window.location.href = downloadUrl;
+        });
+    </script>
+}

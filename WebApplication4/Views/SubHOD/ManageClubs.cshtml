@@ -1,0 +1,118 @@
+﻿@{
+    ViewBag.Title = "Manage Clubs";
+    Layout = "~/Views/Shared/_SubHODLayout.cshtml";
+}
+
+<!-- Tailwind CSS CDN for styling -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<div class="container mx-auto p-6 bg-gray-50 .min-h-screen {min-height: 88vh;}">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Clubs</h2>
+
+    <div class="shadow-lg rounded-lg overflow-hidden border border-gray-200">
+        <div class="max-h-96 overflow-y-auto">
+            <table class="w-full table-auto text-sm text-gray-700" id="clubsTable">
+                <thead class="bg-gray-800 text-white sticky top-0 z-10">
+                    <tr>
+                        <th class="py-3 px-4 text-left font-semibold">Club Name</th>
+                        <th class="py-3 px-4 text-left font-semibold">Department</th>
+                        <th class="py-3 px-4 text-left font-semibold">Sub Department</th>
+                        <th class="py-3 px-4 text-left font-semibold">Status</th>
+                        <th class="py-3 px-4 text-left font-semibold">Toggle</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Data will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4 flex space-x-2 text-gray-600 font-la">
+        <span><strong>Total Clubs:</strong> <span id="totalClubs" class="text-indigo-600">0</span></span>
+        <span><strong>Active:</strong> <span id="activeClubs" class="text-green-600">0</span></span>
+        <span><strong>Inactive:</strong> <span id="inactiveClubs" class="text-red-600">0</span></span>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Custom hover effect for table rows */
+        #clubsTable tbody tr:hover {
+            background-color: #f3f4f6;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        /* Custom scrollbar styling */
+        .max-h-96::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .max-h-96::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .max-h-96::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 4px;
+        }
+
+            .max-h-96::-webkit-scrollbar-thumb:hover {
+                background: #4b5563;
+            }
+
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function loadClubs() {
+            $.getJSON('@Url.Action("GetClubs", "SubHOD")', function (data) {
+                let tbody = $("#clubsTable tbody");
+                tbody.empty();
+
+                $("#totalClubs").text(data.TotalClubs);
+                $("#activeClubs").text(data.ActiveClubs);
+                $("#inactiveClubs").text(data.InactiveClubs);
+
+                data.Clubs.forEach(function (club) {
+                    let statusText = club.IsActive ? "Active" : "Inactive";
+                    let toggleBtnClass = club.IsActive ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600";
+                    let toggleBtnText = club.IsActive ? "Deactivate" : "Activate";
+
+                    let row = `
+                        <tr class="cursor-pointer">
+                            <td class="py-3 px-4">${club.ClubName}</td>
+                            <td class="py-3 px-4">${club.DepartmentName}</td>
+                            <td class="py-3 px-4">${club.SubDepartmentName}</td>
+                            <td class="py-3 px-4">${statusText}</td>
+                            <td class="py-3 px-4">
+                                <button class="btn ${toggleBtnClass} text-white px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 toggle-btn"
+                                        data-id="${club.ClubID}"
+                                        data-status="${club.IsActive}">
+                                    ${toggleBtnText}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            });
+        }
+
+        $(document).on("click", ".toggle-btn", function () {
+            let clubId = $(this).data("id");
+            let currentStatus = $(this).data("status");
+
+            $.post('@Url.Action("ToggleClubStatus", "SubHOD")', { clubId: clubId }, function () {
+                loadClubs();
+            });
+        });
+
+        $(document).ready(function () {
+            loadClubs();
+            setInterval(loadClubs, 10000); // Auto-refresh every 10 seconds
+        });
+    </script>
+}

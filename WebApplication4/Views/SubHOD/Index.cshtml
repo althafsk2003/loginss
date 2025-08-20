@@ -1,0 +1,208 @@
+﻿@model List<WebApplication4.Models.SUBDEPARTMENT>
+
+@{
+    ViewBag.Title = "Sub-HOD Dashboard";
+    Layout = "~/Views/Shared/_SubHODLayout.cshtml";
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f9fafb;
+            min-height: 10vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .profile-card, .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+            .profile-card:hover, .stats-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .chart-container {
+            max-width: 150px;
+            margin: 0 auto;
+        }
+
+        .nav-button {
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+            .nav-button:hover {
+                transform: scale(1.05);
+            }
+
+        .profile-card .bell-icon {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            color: #3b82f6;
+            font-size: 1.5rem;
+        }
+
+        .prof-prefix {
+            color: #ff0000; /* Unique purple color for Prof. */
+        }
+
+        .profile-info p {
+            margin-bottom: 0.5rem;
+        }
+
+        .sub-department-list {
+            display: inline;
+            margin: 0;
+        }
+
+            .sub-department-list li {
+                display: inline-block;
+                background: #e5e7eb;
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                margin-right: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+        .profile-card {
+            padding: 1.95rem; /* Reduced padding */
+            max-width: 450px; /* Reduced width */
+            min-height: 200px; /* Reduced height */
+        }
+
+            .profile-card h2 {
+                font-size: 1.75rem;
+                margin-bottom: 0.75rem;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Mentor Chart
+    const mentorCtx = document.getElementById('mentorChart').getContext('2d');
+    new Chart(mentorCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Deactivated'],
+            datasets: [{
+                data: [
+                    parseInt('@ViewBag.ActiveMentors') || 0,
+                    parseInt('@ViewBag.DeactivatedMentors') || 0
+                ],
+                backgroundColor: ['#22c55e', '#ef4444'], // green & red
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: {
+                    display: true,
+                    text: `Mentor Status (Total: ${parseInt('@ViewBag.TotalMentors') || 0})`
+                }
+            }
+        }
+    });
+
+    // Club Chart
+    const clubCtx = document.getElementById('clubChart').getContext('2d');
+    new Chart(clubCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Deactivated'],
+            datasets: [{
+                data: [
+                    parseInt('@ViewBag.ActiveClubs') || 0,
+                    parseInt('@ViewBag.DeactivatedClubs') || 0
+                ],
+                backgroundColor: ['#22c55e', '#ef4444'], // green & red
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: {
+                    display: true,
+                    text: `Club Status (Total: ${parseInt('@ViewBag.TotalClubs') || 0})`
+                }
+            }
+        }
+    });
+});
+
+    </script>
+}
+
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">
+        Welcome, <span class="prof-prefix"></span> @ViewBag.SubHODName!
+    </h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-r-lg">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-r-lg">
+            @ViewBag.Message
+        </div>
+    }
+
+    <div class="max-w-5xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Graphs and Navigation Buttons -->
+        <div class="bg-white rounded-xl shadow-md p-6 stats-card">
+            <h5 class="text-xl font-semibold text-blue-700 mb-4">Status Overview</h5>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 shadow">
+                    <h6 class="text-md font-semibold text-gray-600 text-center mb-2">Mentor Status</h6>
+                    <canvas id="mentorChart" class="chart-container"></canvas>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4 shadow">
+                    <h6 class="text-md font-semibold text-gray-600 text-center mb-2">Club Status</h6>
+                    <canvas id="clubChart" class="chart-container"></canvas>
+                </div>
+            </div>
+            <div class="flex justify-center gap-4">
+                <a href="@Url.Action("ViewMentors", "SubHOD")" class="nav-button bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                    View Mentors
+                </a>
+                <a href="@Url.Action("ViewClubs", "SubHOD")" class="nav-button bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600">
+                    View Clubs
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-white rounded-xl shadow-xl profile-card relative">
+            <i class="fas fa-bell bell-icon"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Profile</h2>
+            <div class="profile-info text-gray-700">
+                <p><strong>Name:</strong> @ViewBag.SubHODName</p>
+                <p><strong>Department:</strong> @ViewBag.DepartmentName</p>
+                <p><strong>University:</strong> @ViewBag.UniversityName</p>
+                <p><strong>Director:</strong> @ViewBag.DirectorName</p>
+                <p><strong>Sub-Departments:</strong></p>
+                <ul class="sub-department-list">
+                    @foreach (var sub in Model)
+                    {
+                        <li>@sub.SubDepartmentName</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,48 @@
+﻿@model List<WebApplication4.Models.MentorViewModel>
+@{
+    Layout = "~/Views/Shared/_SubHODLayout.cshtml";
+}
+
+<h2>Mentors List</h2>
+
+<div class="btn-group mb-3">
+    <button class="btn btn-primary" onclick="filterTable('all')">All Mentors (@ViewBag.TotalCount)</button>
+    <button class="btn btn-success" onclick="filterTable('active')">Active Mentors (@ViewBag.ActiveCount)</button>
+    <button class="btn btn-danger" onclick="filterTable('inactive')">Inactive Mentors (@ViewBag.InactiveCount)</button>
+</div>
+
+<div style="max-height: 300px; overflow-y: auto;">
+    <table class="table table-bordered table-striped text-center" id="mentorsTable">
+        <thead class="thead-dark">
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var mentor in Model)
+            {
+                var status = mentor.IsActive ? "Active" : "Inactive";
+                var statusClass = mentor.IsActive ? "table-success" : "table-danger";
+
+                <tr class="mentor-row @status.ToLower() @statusClass">
+                    <td>@mentor.FullName</td>
+                    <td>@mentor.Email</td>
+                    <td>@status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable(type) {
+            var rows = document.querySelectorAll('.mentor-row');
+            rows.forEach(row => {
+                row.style.display = (type === 'all' || row.classList.contains(type)) ? '' : 'none';
+            });
+        }
+    </script>
+}

@@ -21,36 +21,35 @@
     <a href="@Url.Action("ViewDeactivatedUniversities", "Admin", new { page = 1 })" class="btn btn-danger">View Deactivated Universities</a>
 </div>
 
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped table-hover text-center align-middle">
     <thead>
         <tr>
-            <th>University Name</th>
-            <th>Abbreviation</th>
-            <th>Location</th>
-            <th>Status</th>
+            <th style="width: 25%;">University Name</th>
+            <th style="width: 15%;">Abbreviation</th>
+            <th style="width: 10%;">Status</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var university in Model)
         {
             <tr>
-                <td>@university.UniversityNAME</td>
+                <td class="text-left">@university.UniversityNAME</td>
                 <td>@university.Abbreviation</td>
-                <td>@university.Location</td>
                 <td>
                     @if (university.IsActive == true)
                     {
-                        <span class="badge badge-success">Active</span>
+                        <span class="badge badge-success px-3 py-2">Active</span>
                     }
                     else
                     {
-                        <span class="badge badge-danger">Deactivated</span>
+                        <span class="badge badge-danger px-3 py-2">Deactivated</span>
                     }
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
 
 <!-- Pagination Container -->
 <div class="pagination-container">
@@ -159,6 +158,5 @@
     .pagination li.active .page-link {
         background-color: #007bff;
         color: white;
-
     }
 </style>

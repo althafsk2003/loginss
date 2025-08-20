@@ -14,8 +14,6 @@
         <h2 style="font-size: 24px; margin-bottom: 14px; color: #5a2c8c;">@Model.ClubName</h2>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Abbreviation:</strong> @Model.Abbreviation</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Description:</strong> @Model.Description</p>
-        <p style="margin: 8px 0; font-size: 16px;"><strong>Total Seats:</strong> @Model.TotalClubCommitteeSeats</p>
-        <p style="margin: 8px 0; font-size: 16px;"><strong>Available:</strong> @Model.AvailableClubCommitteeSeats</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Department:</strong> @ViewBag.DepartmentName</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Mentor:</strong> @ViewBag.MentorName</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Email:</strong> <a href="mailto:@ViewBag.MentorEmail" style="color: #007bff;">@ViewBag.MentorEmail</a></p>
@@ -590,7 +588,6 @@
 <div class="next-step-section">
     <h2 class="next-step-title">Ready to Take the Next Step?</h2>
     <div class="next-step-buttons">
-        <a href="#" class="next-step-button" id="openModalBtn" data-club-id="@Model.ClubID" style="text-decoration:none;">Register as a Club Leader/Member</a>
         <a href="@Url.Action("BrowseEvents", "Clubs", new { clubId = Model.ClubID })" class="next-step-button" style="text-decoration:none;">Browse Events</a>
     </div>
 </div>

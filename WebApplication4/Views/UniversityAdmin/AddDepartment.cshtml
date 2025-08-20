@@ -30,16 +30,38 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">HOD Name</label>
-                    <input type="text" name="Departments[0].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
-                    <span class="text-danger" id="HODError0"></span>
+                    <label class="form-label">Does this department have a Director?</label>
+                    <select class="form-control has-director" name="Departments[0].HasDirector" data-index="0" required>
+                        <option value="">-- Select Option --</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
                 </div>
 
+                <!-- Director Fields -->
+                <div class="director-fields" id="directorFields0" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Director Name</label>
+                        <input type="text" name="Departments[0].DirectorName" class="form-control director-name" placeholder="Enter Director Name" />
+                    </div>
 
-                <div class="form-group">
-                    <label class="form-label">HOD Email</label>
-                    <input type="email" name="Departments[0].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" pattern="[a-zA-Z0-9._%+-]+[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Enter a valid email address (e.g., name@example.com)" />
-                    <span class="text-danger" id="HODEmailError0"></span>
+                    <div class="form-group">
+                        <label class="form-label">Director Email</label>
+                        <input type="email" name="Departments[0].DirectorEmail" class="form-control director-email" placeholder="Enter Director Email address" />
+                    </div>
+                </div>
+
+                <!-- HOD Fields -->
+                <div class="hod-fields" id="hodFields0" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Student Clubs Co-Ordinator Name</label>
+                        <input type="text" name="Departments[0].HOD" class="form-control department-hod" placeholder="Enter Name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Student Clubs Co-Ordinator Email</label>
+                        <input type="email" name="Departments[0].HOD_Email" class="form-control department-hod-email" placeholder="Enter Email address" />
+                    </div>
                 </div>
 
                 <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
@@ -54,9 +76,6 @@
             </button>
         </div>
     </div>
-    <!-- Card End -->
-
-
 }
 
 <style>
@@ -105,14 +124,6 @@
     }
 
     select.form-control {
-        width: 100% !important;
-        padding: 10px;
-        font-size: 14px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        box-sizing: border-box;
-        white-space: normal;
-        overflow: visible;
         height: 50px;
     }
 
@@ -123,12 +134,7 @@
     }
 </style>
 
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-
-
 
 <script>
     $(document).ready(function () {
@@ -144,27 +150,65 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">HOD Name</label>
-                    <input type="text" name="Departments[${departmentCount}].HOD" class="form-control department-hod" required placeholder="Enter HOD Name" />
-                    <span class="text-danger" id="HODError${departmentCount}"></span>
+                    <label class="form-label">Does this department have a Director?</label>
+                    <select class="form-control has-director" name="Departments[${departmentCount}].HasDirector" data-index="${departmentCount}" required>
+                        <option value="">-- Select Option --</option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">HOD Email</label>
-                    <input type="email" name="Departments[${departmentCount}].HOD_Email" class="form-control department-hod-email" required placeholder="Enter HOD Email address" />
-                    <span class="text-danger" id="HODEmailError${departmentCount}"></span>
+                <div class="director-fields" id="directorFields${departmentCount}" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Director Name</label>
+                        <input type="text" name="Departments[${departmentCount}].DirectorName" class="form-control director-name" placeholder="Enter Director Name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Director Email</label>
+                        <input type="email" name="Departments[${departmentCount}].DirectorEmail" class="form-control director-email" placeholder="Enter Director Email address" />
+                    </div>
+                </div>
+
+                <div class="hod-fields" id="hodFields${departmentCount}" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">Student Clubs Co-Ordinator Name</label>
+                        <input type="text" name="Departments[${departmentCount}].HOD" class="form-control department-hod" placeholder="Enter Name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Student Clubs Co-Ordinator Email</label>
+                        <input type="email" name="Departments[${departmentCount}].HOD_Email" class="form-control department-hod-email" placeholder="Enter Email address" />
+                    </div>
                 </div>
 
                 <button type="button" class="btn btn-danger remove-department mt-2">Remove</button>
-            </div>`;
+            </div>
+            `;
             $("#dynamic-departments").append(html);
             departmentCount++;
         });
 
+        // Handle Remove
         $(document).on("click", ".remove-department", function () {
             $(this).closest(".department-entry").remove();
         });
+
+        // Handle show/hide director/HOD fields
+        $(document).on("change", ".has-director", function () {
+            var index = $(this).data("index");
+            var selected = $(this).val();
+
+            if (selected === "true") {
+                $(`#directorFields${index}`).show();
+                $(`#hodFields${index}`).hide();
+            } else if (selected === "false") {
+                $(`#directorFields${index}`).hide();
+                $(`#hodFields${index}`).show();
+            } else {
+                $(`#directorFields${index}`).hide();
+                $(`#hodFields${index}`).hide();
+            }
+        });
     });
 </script>
-
-

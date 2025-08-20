@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="f892b67683254e15bec843a8112b78f9" Name="Diagram1">
+      <Diagram DiagramId="9914f2ca132b4211b845041e03699e72" Name="Diagram1" ZoomLevel="55">
         <EntityTypeShape EntityType="dummyclubsModel.ApprovalStatusTable" Width="1.5" PointX="3" PointY="17.375" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.ClubRegistration" Width="1.5" PointX="7.5" PointY="22.625" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.CLUB" Width="1.5" PointX="5.25" PointY="20.25" IsExpanded="true" />
@@ -12,33 +12,40 @@
         <EntityTypeShape EntityType="dummyclubsModel.DEPARTMENT" Width="1.5" PointX="3" PointY="20.625" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.EventPhoto" Width="1.5" PointX="12.75" PointY="16.625" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.EventRegistration" Width="1.5" PointX="12.75" PointY="19.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="dummyclubsModel.EVENT" Width="1.5" PointX="10.5" PointY="15.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="dummyclubsModel.EVENT" Width="1.5" PointX="10.5" PointY="16.25" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.EventWinner" Width="1.5" PointX="12.75" PointY="24.125" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.Login" Width="1.5" PointX="5.25" PointY="14.75" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.Notification" Width="1.5" PointX="7.5" PointY="15.375" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.UNIVERSITY" Width="1.5" PointX="0.75" PointY="15.25" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.USER" Width="1.5" PointX="5.25" PointY="29.5" IsExpanded="true" />
-        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__Appro__7FEAFD3E" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__ApprovalS__30C33EC3" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__Approval__214BF109" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__ClubI__7EF6D905" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__UserI__7E02B4CC" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__Appro__7E37BEF6" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__ApprovalS__02FC7413" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__Approval__0A9D95DB" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__ClubI__7F2BE32F" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__ClubRegis__UserI__00200768" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_ClubRegistrations_Department" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_ClubRegistrations_University" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__Departmen__2EDAF651" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__MentorID__2FCF1A8A" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__ClubID__2057CCD0" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__Departmen__03F0984C" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__CLUBS__MentorID__04E4BC85" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__ClubID__0B91BA14" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Comments_Events" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Comments_Parent" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__DEPARTMEN__Unive__656C112C" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__DEPARTMEN__Unive__07C12930" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Logins_Department" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Users_Department" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__EventPhot__Event__67DE6983" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__EventPhot__Event__08B54D69" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Registrations_Events" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__EventOrg__22401542" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__EventWinn__Event__6ABAD62E" ManuallyRouted="false" />
-        <AssociationConnector Association="dummyclubsModel.FK__Notificat__Login__3F115E1A" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__EVENTS__EventOrg__0C85DE4D" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__EventWinn__Event__0D7A0286" ManuallyRouted="false" />
+        <AssociationConnector Association="dummyclubsModel.FK__Notificat__Login__10566F31" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Logins_University" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="dummyclubsModel.SUBDEPARTMENT" Width="1.5" PointX="5.25" PointY="25.375" />
+        <AssociationConnector Association="dummyclubsModel.FK__SUBDEPART__Depar__3F115E1A" />
+        <AssociationConnector Association="dummyclubsModel.FK_USER_SubDepartment" />
+        <AssociationConnector Association="dummyclubsModel.FK_Logins_SubDepartment" />
+        <AssociationConnector Association="dummyclubsModel.FK_CLUBS_SubDepartment" />
+        <AssociationConnector Association="dummyclubsModel.FK_ClubRegistrations_SubDepartment" />
+        <AssociationConnector Association="dummyclubsModel.FK_Logins_CLUBS" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

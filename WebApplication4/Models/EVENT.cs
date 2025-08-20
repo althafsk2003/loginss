@@ -46,9 +46,10 @@ namespace WebApplication4.Models
         public string BudgetDocumentPath { get; set; }
         public string ManualSheetPath { get; set; }
         public string EventBudget { get; set; }
-        public string RejectionReason { get; set; }
         public string EventFormPath { get; set; }
         public string ApprovedAmount { get; set; }
+        public string RejectionReason { get; set; }
+        public string Venue { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual CLUB CLUB { get; set; }

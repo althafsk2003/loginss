@@ -84,7 +84,7 @@
                 padding: 12px 16px;
                 font-size: 1rem;
                 border: 1px solid #ddd;
-                border-radius: 5Bubble Uppx;
+                border-radius: 5px;
                 background: #f8f8f8;
                 color: #333;
                 display: block;
@@ -169,6 +169,22 @@
             <div class="form-group">
                 <input type="email" name="email" required placeholder="Enter your registered email" />
             </div>
+            <div class="form-group">
+                <input type="text" class="form-control" name="CaptchaInput" placeholder="Enter CAPTCHA" required />
+            </div>
+
+            <div class="form-group">
+                <img src="@Url.Action("CaptchaImage", "Admin")" id="captchaImage" alt="CAPTCHA" style="width: 100px; height: 35px; vertical-align: middle;" />
+                <button type="button" id="refreshCaptcha" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #d32f2f;">
+                    &#x21bb;
+                </button>
+            </div>
+
+            <script>
+    document.getElementById("refreshCaptcha").addEventListener("click", function () {
+        document.getElementById("captchaImage").src = '@Url.Action("CaptchaImage", "Admin")' + '?' + new Date().getTime();
+    });
+            </script>
             <button type="submit">Login</button>
             @if (ViewBag.Error != null)
             {

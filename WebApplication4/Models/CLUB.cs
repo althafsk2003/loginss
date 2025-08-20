@@ -19,6 +19,7 @@ namespace WebApplication4.Models
         {
             this.ClubRegistrations = new HashSet<ClubRegistration>();
             this.EVENTS = new HashSet<EVENT>();
+            this.Logins = new HashSet<Login>();
         }
     
         public int ClubID { get; set; }
@@ -33,6 +34,7 @@ namespace WebApplication4.Models
         public string LogoImagePath { get; set; }
         public Nullable<bool> IsActive { get; set; }
         public int ApprovalStatusID { get; set; }
+        public Nullable<int> SubDepartmentID { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
@@ -41,5 +43,8 @@ namespace WebApplication4.Models
         public virtual Login Login { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EVENT> EVENTS { get; set; }
+        public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Login> Logins { get; set; }
     }
 }

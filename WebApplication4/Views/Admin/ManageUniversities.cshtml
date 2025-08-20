@@ -35,7 +35,6 @@
         <tr>
             <th>University Name</th>
             <th>Abbreviation</th>
-            <th>Location</th>
             <th>Status</th>
             <th>Action</th>
         </tr>
@@ -46,7 +45,6 @@
             <tr>
                 <td>@university.UniversityNAME</td>
                 <td>@university.Abbreviation</td>
-                <td>@university.Location</td>
                 <td>
                     @if (university.IsActive == true)
                     {
@@ -132,10 +130,6 @@
                     <div class="form-group">
                         <label for="Abbreviation">Abbreviation</label>
                         <input type="text" class="form-control" id="Abbreviation" name="Abbreviation" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="Location">Location</label>
-                        <input type="text" class="form-control" id="Location" name="Location" required />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -248,6 +242,5 @@
     .page-item.active .page-link {
         background-color: #007bff;
         color: white;
-
     }
 </style>

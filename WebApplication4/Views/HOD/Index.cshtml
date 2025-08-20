@@ -1,22 +1,215 @@
-﻿@{
+﻿@model dynamic
+@{
     Layout = "~/Views/Shared/_HodLayout.cshtml";
-    /* Layout = null;*/
     ViewBag.Title = "HOD Dashboard";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-0">
-                <div class="card-header bg-info text-white text-center">
-                    <h4>Welcome HOD</h4>
+@section Styles {
+    <style>
+        body {
+            background: #f8f9fc;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .dashboard-header {
+            padding: 2rem;
+            background-color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+            .dashboard-header h4 {
+                font-weight: 600;
+                margin-bottom: 1rem;
+            }
+
+            .dashboard-header .hod-info {
+                font-size: 0.95rem;
+                color: #6c757d;
+            }
+
+                .dashboard-header .hod-info p {
+                    margin: 0.25rem 0;
+                }
+
+        .card-box {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            transition: transform 0.3s ease;
+        }
+
+            .card-box:hover {
+                transform: translateY(-4px);
+            }
+
+        .counter {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .dashboard-wrapper {
+            padding: 0 2rem;
+        }
+
+        .mini-chart {
+            display: block;
+            width: 80px !important;
+            height: 80px !important;
+            margin: 0.75rem auto;
+        }
+
+        .breakdown-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1rem;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h4>Welcome, @ViewBag.HODName</h4>
+        <div class="hod-info">
+            <p><i class="fas fa-university me-2 text-danger"></i><strong>University:</strong> @ViewBag.UniversityName</p>
+            <p><i class="fas fa-building me-2 text-danger"></i><strong>Department:</strong> @ViewBag.DepartmentName</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="dashboard-wrapper">
+        <div class="row text-center">
+            <!-- Clubs -->
+            <div class="col-md-4 mb-4">
+                <div class="card-box py-4">
+                    <h6 class="card-title text-muted">Total Clubs</h6>
+                    <h2 class="counter text-primary" data-target="@ViewBag.TotalClubs">0</h2>
+                    <canvas id="clubsChart" class="mini-chart"></canvas>
+                    <div class="breakdown-label">
+                        Approved: @ViewBag.ApprovedClubs |
+                        Pending: @ViewBag.PendingClubs |
+                        Rejected: @ViewBag.RejectedClubs
+                    </div>
                 </div>
-                <div class="card-body text-center">
-                    <p><strong>University:</strong> @ViewBag.UniversityName</p>
-                    <p><strong>Department:</strong> @ViewBag.DepartmentName</p>
-                    <p><strong>Total Clubs in Your Department:</strong> @ViewBag.TotalClubs</p>
+            </div>
+
+            <!-- Mentors -->
+            <div class="col-md-4 mb-4">
+                <div class="card-box py-4">
+                    <h6 class="card-title text-muted">Total Mentors</h6>
+                    <h2 class="counter text-success" data-target="@ViewBag.TotalMentors">0</h2>
+                    <canvas id="mentorsChart" class="mini-chart"></canvas>
+                    <div class="breakdown-label">
+                        Active: @ViewBag.ActiveMentors |
+                        Inactive: @ViewBag.InactiveMentors
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events -->
+            <div class="col-md-4 mb-4">
+                <div class="card-box py-4">
+                    <h6 class="card-title text-muted">Total Events</h6>
+                    <h2 class="counter text-warning" data-target="@ViewBag.TotalEvents">0</h2>
+                    <canvas id="eventsChart" class="mini-chart"></canvas>
+                    <div class="breakdown-label">
+                        Approved: @ViewBag.ApprovedEvents |
+                        Pending: @ViewBag.PendingEvents |
+                        Rejected: @ViewBag.RejectedEvents
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Counter animation
+        document.querySelectorAll('.counter').forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-target');
+                const current = +counter.innerText;
+
+                const increment = target / 40;
+
+                if (current < target) {
+                    counter.innerText = Math.ceil(current + increment);
+                    setTimeout(updateCount, 20);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+
+            updateCount();
+        });
+
+        // Chart rendering helper
+        function renderDonutChart(id, data, colors) {
+            const canvas = document.getElementById(id);
+            if (!canvas || canvas.getAttribute('data-init')) return;
+            canvas.setAttribute('data-init', '1');
+
+            // Force dimensions to prevent infinite growth
+            canvas.width = 80;
+            canvas.height = 80;
+            canvas.style.width = '80px';
+            canvas.style.height = '80px';
+
+            let total = data.reduce((a, b) => a + b, 0);
+            if (total === 0) {
+                data = [1];
+                colors = ['#e0e0e0'];
+            }
+
+            new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        }
+
+        // Render all charts
+        renderDonutChart('clubsChart', [
+            @ViewBag.ApprovedClubs, @ViewBag.PendingClubs, @ViewBag.RejectedClubs
+        ], ['#28a745', '#ffc107', '#dc3545']);
+
+        renderDonutChart('mentorsChart', [
+            @ViewBag.ActiveMentors, @ViewBag.InactiveMentors
+        ], ['#28a745', '#dc3545']);
+
+        renderDonutChart('eventsChart', [
+            @ViewBag.ApprovedEvents, @ViewBag.PendingEvents, @ViewBag.RejectedEvents
+        ], ['#28a745', '#ffc107', '#dc3545']);
+    </script>
+}

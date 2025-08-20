@@ -10,8 +10,8 @@ namespace WebApplication4.Models
 {
     public class EmailService
     {
-        private readonly string _email = "kurmalapravallika@gmail.com"; // Your Gmail
-        private readonly string _password = "ocxbqwuffaiwuhrs"; // Your App Password
+        private readonly string _email = "althafsk2003@gmail.com"; // Your Gmail
+        private readonly string _password = "ncssleggpzqzlonb"; // Your App Password
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {

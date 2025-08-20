@@ -44,7 +44,8 @@
             <tr>
                 <th>University Name</th>
                 <th>Department Name</th>
-                <th>HOD</th>
+                <th>SCC</th>
+                <th>Director</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -54,7 +55,19 @@
                 <tr>
                     <td>@department.UNIVERSITY.UniversityNAME</td>
                     <td>@department.DepartmentName</td>
-                    <td>@department.HOD</td>
+
+                    @* ✅ HOD/Director logic *@
+                    @if (!string.IsNullOrEmpty(department.DirectorName))
+                    {
+                        <td>Nill</td>
+                        <td>@department.DirectorName</td>
+                    }
+                    else
+                    {
+                        <td>@department.HOD</td>
+                        <td>Nill</td>
+                    }
+
                     <td>
                         @if (department.IsActive == true)
                         {

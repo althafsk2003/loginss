@@ -8,14 +8,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IFHE Hyderabad - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap" rel="stylesheet">
+    @*    <link href="https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap" rel="stylesheet">
+    *@
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-         
+
         body {
             font-family: 'Arial', sans-serif;
             background: #f5f5f5;
@@ -198,20 +199,53 @@
             <p class="subtitle">Explore Clubs and Unforgettable Experiences</p>
             <p class="notice">Come & Choose your TrIbE with US.</p>
         </div>
-        <form method="post" action="@Url.Action("Login", "Admin")">
+
+        <form method="post" action="@Url.Action("Login", "Admin")" autocomplete="on">
             @Html.AntiForgeryToken()
+
             <div class="form-group">
-                @Html.TextBoxFor(m => m.Username, new { @type = "email", @id = "email", @placeholder = "Email Address", @class = "form-control" })
+                @Html.TextBoxFor(m => m.Username, new
+                {
+                    @type = "email",
+                    @id = "email",
+                    @placeholder = "Email Address",
+                    @class = "form-control",
+                    autocomplete = "email"
+                })
                 @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
             </div>
+
             <div class="form-group">
-                @Html.PasswordFor(m => m.Password, new { @id = "password", @placeholder = "Password", @class = "form-control" })
+                @Html.PasswordFor(m => m.Password, new
+                {
+                    @id = "password",
+                    @placeholder = "Password",
+                    @class = "form-control",
+                    autocomplete = "current-password"
+                })
                 @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
             </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <input type="text" class="form-control" name="CaptchaInput" placeholder="Enter CAPTCHA" required style="width: 155px;" />
+
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <img src="@Url.Action("CaptchaImage", "Admin")" id="captchaImage" alt="CAPTCHA" style="width: 100px; height: 35px;" />
+                    <button type="button" id="refreshCaptcha" title="Refresh CAPTCHA" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #d32f2f;">
+                        &#x21bb;
+                    </button>
+                </div>
+            </div>
+            <script>
+    document.getElementById("refreshCaptcha").addEventListener("click", function () {
+        document.getElementById("captchaImage").src = '@Url.Action("CaptchaImage", "Admin")' + '?' + new Date().getTime();
+    });
+            </script>
             <div class="form-options">
                 <a href="@Url.Action("ForgotPassword", "Admin")">Forgot Password?</a>
             </div>
+
             <button type="submit" class="btn btn-primary">Login</button>
+
             <p class="student-login">
                 If you are an ICFAI student, <a href="@Url.Action("Login", "stulogin")">click here</a> to login.
             </p>

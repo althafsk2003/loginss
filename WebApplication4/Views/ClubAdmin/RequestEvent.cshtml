@@ -123,6 +123,11 @@
                     <input type="text" name="EventName" id="EventName" class="form-control" required />
                     <div id="EventNameError" class="error-message"></div>
                 </div>
+                <div class="col-md-4 form-group">
+                    <label>Event Venue:</label>
+                    <input type="text" name="Venue" id="Venue" class="form-control" required />
+                    <div id="VenueError" class="error-message"></div>
+                </div>
 
                 <div class="col-md-12 form-group">
                     <label>Event Description:</label>
@@ -165,11 +170,10 @@
                 </div>
 
                 <div class="col-md-4 form-group">
-                    <label for="BudgetDocument">Upload Budget Document</label>
+                    <label for="BudgetDocument">Upload Event Document with Budget</label>
                     <input type="file" name="BudgetDocument" id="BudgetDocument" class="form-control" accept=".pdf,.xls,.xlsx" />
                     <div id="BudgetDocumentError" class="error-message"></div>
                 </div>
-
                 <div class="col-md-12 text-center mt-1">
                     <button type="submit" class="btn btn-primary">Submit Event</button>
                 </div>
@@ -187,225 +191,210 @@
         document.getElementById('EventEndDateAndTime').addEventListener('input', validateEndDateTime);
         document.getElementById('EventPoster').addEventListener('change', validateEventPoster);
         document.getElementById('BudgetDocument').addEventListener('change', validateBudgetDocument);
+        document.getElementById('Venue').addEventListener('input', validateVenue);
+        document.getElementById('EventBudget').addEventListener('input', function () {
+            formatAndValidateBudget(this);
+        });
     });
 
-/*    function validateEventName() {
-        const eventName = document.getElementById('EventName');
-        const error = document.getElementById('EventNameError');
-        if (eventName.value.trim().length < 5) {
-            error.textContent = "Event Name must be at least 5 characters.";
-            error.style.display = "block";
-            eventName.classList.add('is-invalid');
-            return false;
-        } else {
-            error.style.display = "none";
-            eventName.classList.remove('is-invalid');
-            return true;
-        }
+    function showError(id, message) {
+        const errorEl = document.getElementById(id + "Error");
+        const inputEl = document.getElementById(id);
+        errorEl.innerText = message;
+        errorEl.style.display = "block";
+        inputEl.classList.add("is-invalid");
     }
 
-    function validateEventDescription() {
-        const desc = document.getElementById('EventDescription');
-        const error = document.getElementById('EventDescriptionError');
-        if (desc.value.trim().length < 10) {
-            error.textContent = "Description must be at least 10 characters.";
-            error.style.display = "block";
-            desc.classList.add('is-invalid');
-            return false;
-        } else {
-            error.style.display = "none";
-            desc.classList.remove('is-invalid');
-            return true;
-        }
+    function clearError(id) {
+        const errorEl = document.getElementById(id + "Error");
+        const inputEl = document.getElementById(id);
+        errorEl.innerText = "";
+        errorEl.style.display = "none";
+        inputEl.classList.remove("is-invalid");
     }
 
-    function validateEventType() {
-        const type = document.getElementById('EventType');
-        const error = document.getElementById('EventTypeError');
-        if (!type.value) {
-            error.textContent = "Please select an Event Type.";
-            error.style.display = "block";
-            type.classList.add('is-invalid');
-            return false;
-        } else {
-            error.style.display = "none";
-            type.classList.remove('is-invalid');
-            return true;
-        }
-    }
-
-    function validateStartDateTime() {
-        const start = document.getElementById('EventStartDateAndTime');
-        const error = document.getElementById('EventStartDateAndTimeError');
-        if (!start.value) {
-            error.textContent = "Start Date & Time is required.";
-            error.style.display = "block";
-            start.classList.add('is-invalid');
-            return false;
-        } else {
-            error.style.display = "none";
-            start.classList.remove('is-invalid');
-            return true;
-        }
-    }
-
-    function validateEndDateTime() {
-        const end = document.getElementById('EventEndDateAndTime');
-        const error = document.getElementById('EventEndDateAndTimeError');
-        if (!end.value) {
-            error.textContent = "End Date & time is required.";
-            error.style.display = "block";
-            end.classList.add('is-invalid');
-            return false;
-        } else {
-            error.style.display = "none";
-            end.classList.remove('is-invalid');
-            return true;
-        }
-    }
-
-    function validateEventPoster() {
-        const poster = document.getElementById('EventPoster');
-        const error = document.getElementById('EventPosterError');
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        const maxSize = 2 * 1024 * 1024; // 2 MB
-        const minWidth = 800;
-        const minHeight = 600;
-        const maxWidth = 3000;
-        const maxHeight = 3000;
-        const targetAspectRatios = [4 / 3, 16 / 9]; // 1.333 and 1.778
-        const aspectRatioTolerance = 0.1;
-
-        if (!poster.files.length) {
-            error.textContent = "Event Poster is required.";
-            error.style.display = "block";
-            poster.classList.add('is-invalid');
+    function validateEventName() {
+        const value = document.getElementById("EventName").value.trim();
+        if (value === "") {
+            showError("EventName", "Event name is required.");
             return false;
         }
-
-        const file = poster.files[0];
-        if (!allowedTypes.includes(file.type)) {
-            error.textContent = "Only JPG, JPEG, PNG, or WEBP files are allowed.";
-            error.style.display = "block";
-            poster.classList.add('is-invalid');
-            return false;
-        }
-
-        if (file.size > maxSize) {
-            error.textContent = "Image must be smaller than 2MB.";
-            error.style.display = "block";
-            poster.classList.add('is-invalid');
-            return false;
-        }
-
-        // Check dimensions and aspect ratio
-        return new Promise((resolve) => {
-            const img = new Image();
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                img.src = e.target.result;
-
-                img.onload = () => {
-                    const width = img.width;
-                    const height = img.height;
-                    const aspectRatio = width / height;
-
-                    if (width < minWidth || height < minHeight) {
-                        error.textContent = "Image must be at least 800x600 pixels.";
-                        error.style.display = "block";
-                        poster.classList.add('is-invalid');
-                        resolve(false);
-                        return;
-                    }
-
-                    if (width > maxWidth || height > maxHeight) {
-                        error.textContent = "Image must not exceed 3000x3000 pixels.";
-                        error.style.display = "block";
-                        poster.classList.add('is-invalid');
-                        resolve(false);
-                        return;
-                    }
-
-                    const isValidAspectRatio = targetAspectRatios.some(
-                        (ratio) =>
-                            Math.abs(aspectRatio - ratio) <= aspectRatioTolerance
-                    );
-
-                    if (!isValidAspectRatio) {
-                        error.textContent = "Image should have a 4:3 or 16:9 aspect ratio.";
-                        error.style.display = "block";
-                        poster.classList.add('is-invalid');
-                        resolve(false);
-                        return;
-                    }
-
-                    error.style.display = "none";
-                    poster.classList.remove('is-invalid');
-                    resolve(true);
-                };
-
-                img.onerror = () => {
-                    error.textContent = "Error loading image.";
-                    error.style.display = "block";
-                    poster.classList.add('is-invalid');
-                    resolve(false);
-                };
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function validateBudgetDocument() {
-        const budgetDoc = document.getElementById('BudgetDocument');
-        const error = document.getElementById('BudgetDocumentError');
-        const allowedTypes = ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        const maxSize = 1 * 1024 * 1024; // 1 MB
-
-        if (!budgetDoc.files.length) {
-            error.textContent = "Budget Document is optional but recommended.";
-            error.style.display = "block";
-            budgetDoc.classList.add('is-invalid');
-            return false;
-        }
-
-        const file = budgetDoc.files[0];
-        if (!allowedTypes.includes(file.type)) {
-            error.textContent = "Only PDF, XLS, or XLSX files are allowed.";
-            error.style.display = "block";
-            budgetDoc.classList.add('is-invalid');
-            return false;
-        }
-
-        if (file.size > maxSize) {
-            error.textContent = "Document must be smaller than 1MB.";
-            error.style.display = "block";
-            budgetDoc.classList.add('is-invalid');
-            return false;
-        }
-
-        error.style.display = "none";
-        budgetDoc.classList.remove('is-invalid');
+        clearError("EventName");
         return true;
     }
 
-    async function validateForm(event) {
-        event.preventDefault();
+    function validateVenue() {
+        const value = document.getElementById("Venue").value.trim();
+        if (value === "") {
+            showError("Venue", "Event venue is required.");
+            return false;
+        }
+        clearError("Venue");
+        return true;
+    }
 
-        const isValid =
-            validateEventName() &
-            validateEventDescription() &
-            validateEventType() &
-            validateStartDateTime() &
-            validateEndDateTime() &
-            (await validateEventPoster()) &
-            validateBudgetDocument();
+    function validateEventDescription() {
+        const value = document.getElementById("EventDescription").value.trim();
+        if (value === "") {
+            showError("EventDescription", "Event description is required.");
+            return false;
+        }
+        clearError("EventDescription");
+        return true;
+    }
 
-        if (isValid) {
-            document.getElementById('eventForm').submit();
+    function validateEventType() {
+        const value = document.getElementById("EventType").value;
+        if (value === "") {
+            showError("EventType", "Please select an event type.");
+            return false;
+        }
+        clearError("EventType");
+        return true;
+    }
+
+    function validateStartDateTime() {
+        const value = document.getElementById("EventStartDateAndTime").value;
+        if (!value) {
+            showError("EventStartDateAndTime", "Start date and time is required.");
+            return false;
+        }
+        clearError("EventStartDateAndTime");
+        return true;
+    }
+
+    function validateEndDateTime() {
+        const value = document.getElementById("EventEndDateAndTime").value;
+        const start = document.getElementById("EventStartDateAndTime").value;
+        if (!value) {
+            showError("EventEndDateAndTime", "End date and time is required.");
+            return false;
+        }
+        if (start && value <= start) {
+            showError("EventEndDateAndTime", "End time must be after start time.");
+            return false;
+        }
+        clearError("EventEndDateAndTime");
+        return true;
+    }
+
+    function validateEventPoster() {
+        const input = document.getElementById("EventPoster");
+        const file = input.files[0];
+
+        if (!file) {
+            showError("EventPoster", "Please upload an event poster.");
+            return false;
         }
 
-        return false;
-    }*/
+        const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+        if (!validTypes.includes(file.type)) {
+            showError("EventPoster", "Only JPG, JPEG, PNG, or WEBP files are allowed.");
+            return false;
+        }
+
+        if (file.size > 1024 * 1024) { // 1MB
+            showError("EventPoster", "Poster size must be less than or equal to 1 MB.");
+            return false;
+        }
+
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = function () {
+            URL.revokeObjectURL(url);
+
+            const requiredWidth = 960;
+            const requiredHeight = 1280;
+            const aspectRatio = 3 / 4;
+            const actualRatio = img.naturalWidth / img.naturalHeight;
+
+            if (
+                img.naturalWidth !== requiredWidth ||
+                img.naturalHeight !== requiredHeight ||
+                Math.abs(actualRatio - aspectRatio) > 0.01
+            ) {
+                showError("EventPoster", "Poster must be exactly 960×1280 px with a 3:4 aspect ratio.");
+                return false;
+            }
+
+            clearError("EventPoster");
+        };
+
+        img.onerror = function () {
+            showError("EventPoster", "Invalid image file.");
+        };
+
+        img.src = url;
+        return true;
+    }
+
+
+    function formatAndValidateBudget(input) {
+        let rawValue = input.value.replace(/,/g, '').trim();
+        const errorId = "EventBudget";
+
+        if (!rawValue) {
+            showError(errorId, "Event budget is required.");
+            return false;
+        }
+
+        if (!/^\d+$/.test(rawValue)) {
+            showError(errorId, "Please enter digits only (e.g., 23000).");
+            return false;
+        }
+
+        // Format number with commas (Indian style)
+        input.value = parseInt(rawValue).toLocaleString("en-IN");
+        clearError(errorId);
+        return true;
+    }
+
+    function validateBudgetDocument() {
+        const input = document.getElementById("BudgetDocument");
+        const file = input.files[0];
+        if (!file) {
+            clearError("BudgetDocument"); // optional field
+            return true;
+        }
+
+        const allowedTypes = [
+            "application/pdf",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ];
+
+        const maxSize = 1 * 1024 * 1024; // 1MB
+
+        if (!allowedTypes.includes(file.type)) {
+            showError("BudgetDocument", "Only PDF, XLS, or XLSX allowed.");
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            showError("BudgetDocument", "Document must be less than 1MB.");
+            return false;
+        }
+
+        clearError("BudgetDocument");
+        return true;
+    }
+
+    function validateForm(event) {
+        let valid = true;
+        valid &= validateEventName();
+        valid &= validateVenue();
+        valid &= validateEventDescription();
+        valid &= validateEventType();
+        valid &= validateStartDateTime();
+        valid &= validateEndDateTime();
+        valid &= validateEventPoster();
+        valid &= formatAndValidateBudget(document.getElementById("EventBudget"));
+        valid &= validateBudgetDocument();
+
+        if (!valid) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
 </script>

@@ -38,15 +38,15 @@
         flex-grow: 1;
     }
 
-    .info-block h5 {
-        margin: 0;
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
+        .info-block h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
 
-    .info-block small {
-        color: #6c757d;
-    }
+        .info-block small {
+            color: #6c757d;
+        }
 
     @@keyframes revealUp {
         to {
@@ -60,15 +60,15 @@
         margin-bottom: 2rem;
     }
 
-    .department-header i {
-        color: #28a745;
-        margin-right: 0.5rem;
-    }
+        .department-header i {
+            color: #28a745;
+            margin-right: 0.5rem;
+        }
 
-    .department-header a {
-        color: #007bff;
-        text-decoration: none;
-    }
+        .department-header a {
+            color: #007bff;
+            text-decoration: none;
+        }
 
     .btn-view-clubs {
         white-space: nowrap;
@@ -88,6 +88,7 @@
         {
             var dept = Model[i];
             var delay = i * 0.2; // Reveal delay
+            var leader = !string.IsNullOrEmpty(dept.DirectorName) ? $"Director: {dept.DirectorName}" : $"HOD: {dept.HOD}";
 
             <div class="department-block" style="animation-delay: @($"{delay}s");">
                 <div class="d-flex align-items-center">
@@ -96,7 +97,7 @@
                     </div>
                     <div class="info-block">
                         <h5>@dept.DepartmentName</h5>
-                        <small>HOD: @dept.HOD</small>
+                        <small>@leader</small>
                     </div>
                 </div>
                 <a href="@Url.Action("ViewClubs", "UniversityAdmin", new { departmentId = dept.DepartmentID })"

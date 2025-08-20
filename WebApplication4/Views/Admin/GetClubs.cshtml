@@ -41,6 +41,15 @@
 
     .info-block small {
         color: #555;
+        display: block;
+    }
+
+    .see-toggle {
+        color: #007bff;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-left: 5px;
     }
 
     @@keyframes revealUp {
@@ -59,6 +68,7 @@
         {
             var club = Model[i];
             var delay = i * 0.2; // reveal delay
+            var shortDesc = club.Description?.Length > 100 ? club.Description.Substring(0, 100) + "..." : club.Description;
 
             <div class="club-block" style="animation-delay: @($"{delay}s");">
                 <div class="icon-block">
@@ -66,7 +76,15 @@
                 </div>
                 <div class="info-block flex-grow-1">
                     <h5>@club.ClubName</h5>
-                    <small>@club.Description</small>
+
+                    <small>
+                        <span class="short-desc">@shortDesc</span>
+                        <span class="full-desc d-none">@club.Description</span>
+                        @if (!string.IsNullOrEmpty(club.Description) && club.Description.Length > 100)
+                        {
+                            <span class="see-toggle">See more</span>
+                        }
+                    </small>
                 </div>
                 <a href="@Url.Action("ViewDetails", "Admin", new { clubId = club.ClubID })"
                    class="btn btn-outline-success btn-sm">
@@ -76,3 +94,25 @@
         }
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".see-toggle").forEach(function (toggle) {
+            toggle.addEventListener("click", function () {
+                var parent = this.closest(".info-block");
+                var shortDesc = parent.querySelector(".short-desc");
+                var fullDesc = parent.querySelector(".full-desc");
+
+                if (fullDesc.classList.contains("d-none")) {
+                    shortDesc.classList.add("d-none");
+                    fullDesc.classList.remove("d-none");
+                    this.textContent = "See less";
+                } else {
+                    fullDesc.classList.add("d-none");
+                    shortDesc.classList.remove("d-none");
+                    this.textContent = "See more";
+                }
+            });
+        });
+    });
+</script>

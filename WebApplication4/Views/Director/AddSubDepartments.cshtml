@@ -1,0 +1,131 @@
+﻿@model WebApplication4.Models.SubDepartmentPageViewModel
+
+@{
+    Layout = "~/Views/Shared/DirectorLayout.cshtml";
+    ViewBag.Title = "Add Sub-Departments under HOD";
+}
+
+<h2 class="text-center mb-4 text-primary font-weight-bold">
+    <i class="fas fa-sitemap"></i> Assign Sub-Departments to SCC
+</h2>
+
+@using (Html.BeginForm("AddSubDepartments", "Director", FormMethod.Post))
+{
+    <div id="hod-container">
+        @{
+            var initialIndex = 0;
+        }
+        <div class="hod-block p-3 mb-3 rounded shadow-sm border bg-light" style="max-width:900px; margin:auto;">
+            <div class="row">
+                <div class="col-md-5 mb-2">
+                    <label class="font-weight-bold">SCC Name</label>
+                    <input type="text" name="HODs[@initialIndex].HODName" class="form-control form-control-sm" placeholder="Enter SCC Name" required />
+                </div>
+                <div class="col-md-5 mb-2">
+                    <label class="font-weight-bold">SCC Email</label>
+                    <input type="email" name="HODs[@initialIndex].HODEmail" class="form-control form-control-sm" placeholder="Enter SCC Email" required />
+                </div>
+            </div>
+
+            <div class="sub-departments">
+                <label class="font-weight-bold">Sub-Departments</label>
+                <div class="sub-dept-entry d-flex mb-2">
+                    <input type="text" name="HODs[@initialIndex].SubDepartments[0]" class="form-control form-control-sm" placeholder="Enter Sub-Department" required style="max-width:300px;" />
+                    <button type="button" class="btn btn-success btn-sm ml-2 add-sub-dept">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-right mt-2">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-hod">
+                    <i class="fas fa-trash-alt"></i> Remove HOD
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="button" id="add-hod" class="btn btn-secondary btn-sm mt-2">
+            <i class="fas fa-user-plus"></i> Add Another HOD
+        </button>
+    </div>
+
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-primary btn-sm px-4">
+            <i class="fas fa-save"></i> Save Assignments
+        </button>
+    </div>
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let hodCount = 1;
+
+    $(document).on("click", "#add-hod", function () {
+        const hodIndex = hodCount++;
+        const hodHtml = `
+        <div class="hod-block p-3 mb-3 rounded shadow-sm border bg-light" style="max-width:900px; margin:auto; display:none;">
+            <div class="row">
+                <div class="col-md-5 mb-2">
+                    <label class="font-weight-bold">SCC Name</label>
+                    <input type="text" name="HODs[${hodIndex}].HODName" class="form-control form-control-sm" placeholder="Enter SCC Name" required />
+                </div>
+                <div class="col-md-5 mb-2">
+                    <label class="font-weight-bold">SCC Email</label>
+                    <input type="email" name="HODs[${hodIndex}].HODEmail" class="form-control form-control-sm" placeholder="Enter SCC Email" required />
+                </div>
+            </div>
+
+            <div class="sub-departments">
+                <label class="font-weight-bold">Sub-Departments</label>
+                <div class="sub-dept-entry d-flex mb-2">
+                    <input type="text" name="HODs[${hodIndex}].SubDepartments[0]" class="form-control form-control-sm" placeholder="Enter Sub-Department" required style="max-width:300px;" />
+                    <button type="button" class="btn btn-success btn-sm ml-2 add-sub-dept">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-right mt-2">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-hod">
+                    <i class="fas fa-trash-alt"></i> Remove HOD
+                </button>
+            </div>
+        </div>`;
+
+        const $newHod = $(hodHtml);
+        $("#hod-container").append($newHod);
+        $newHod.fadeIn(300);
+    });
+
+    $(document).on("click", ".remove-hod", function () {
+        $(this).closest(".hod-block").fadeOut(200, function () {
+            $(this).remove();
+        });
+    });
+
+    $(document).on("click", ".add-sub-dept", function () {
+        const hodBlock = $(this).closest(".hod-block");
+        const subDeptContainer = hodBlock.find(".sub-departments");
+        const inputCount = subDeptContainer.find(".sub-dept-entry").length;
+        const hodIndex = $("#hod-container .hod-block").index(hodBlock);
+        const subDeptHtml = `
+        <div class="sub-dept-entry d-flex mb-2" style="display:none;">
+            <input type="text" name="HODs[${hodIndex}].SubDepartments[${inputCount}]" class="form-control form-control-sm" placeholder="Enter Sub-Department" required style="max-width:300px;" />
+            <button type="button" class="btn btn-danger btn-sm ml-2 remove-sub-dept">
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>`;
+
+        const $newSubDept = $(subDeptHtml);
+        subDeptContainer.append($newSubDept);
+        $newSubDept.fadeIn(300);
+    });
+
+    $(document).on("click", ".remove-sub-dept", function () {
+        $(this).closest(".sub-dept-entry").fadeOut(200, function () {
+            $(this).remove();
+        });
+    });
+</script>

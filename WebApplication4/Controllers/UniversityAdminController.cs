@@ -86,37 +86,73 @@ namespace WebApplication4.Controllers
                     dept.createdDate = DateTime.Now;
                     dept.IsActive = true;
                     dept.IsActiveDate = DateTime.Now;
+                    dept.HOD = dept.HOD;
+                    dept.DirectorName = dept.DirectorName;
 
                     _db.DEPARTMENTs.Add(dept);
-                    await _db.SaveChangesAsync(); // Save to get DepartmentID for HOD login
+                    await _db.SaveChangesAsync(); // Save to get DepartmentID
 
-                    // ✅ Create HOD Login Entry
-                    var hodLogin = new Models.Login
+                    if (dept.HasDirector == true)
                     {
-                        Email = dept.HOD_Email,
-                        PasswordHash = "Hod@123", // Ideally, hash the password
-                        Role = "HOD",
-                        IsActive=true,
-                        DepartmentID = dept.DepartmentID,
-                        UniversityID = dept.Universityid,
-                        CreatedDate = DateTime.Now
-                    };
+                        // ✅ Create Director Login
+                        var directorLogin = new Models.Login
+                        {
+                            Email = dept.DirectorEmail,
+                            PasswordHash = "Director@123", // You should hash passwords ideally
+                            Role = "Director",
+                            IsActive = true,
+                            DepartmentID = dept.DepartmentID,
+                            UniversityID = dept.Universityid,
+                            CreatedDate = DateTime.Now
+                        };
 
-                    _db.Logins.Add(hodLogin);
+                        _db.Logins.Add(directorLogin);
+
+
+
+                        // ✅ Email to Director
+                        string subject = "Welcome Director!";
+                        string body = $"Hello {dept.DirectorName},<br/><br/>" +
+                                      $"You have been added as the Director of <strong>{dept.DepartmentName}</strong>.<br/>" +
+                                      $"<strong>Username:</strong> {dept.DirectorEmail}<br/>" +
+                                      $"<strong>Password:</strong> Director@123<br/><br/>" +
+                                      $"Please login and change your password.";
+
+                        await _emailService.SendEmailAsync(dept.DirectorEmail, subject, body);
+                    }
+                    else
+                    {
+                        // ✅ Create HOD Login
+                        var hodLogin = new Models.Login
+                        {
+                            Email = dept.HOD_Email,
+                            PasswordHash = "Hod@123",
+                            Role = "HOD",
+                            IsActive = true,
+                            DepartmentID = dept.DepartmentID,
+                            UniversityID = dept.Universityid,
+                            CreatedDate = DateTime.Now
+                        };
+
+                        _db.Logins.Add(hodLogin);
+
+
+
+                        // ✅ Email to HOD
+                        string subject = "Welcome HOD!";
+                        string body = $"Hello {dept.HOD},<br/><br/>" +
+                                      $"You have been added as the HOD of <strong>{dept.DepartmentName}</strong>.<br/>" +
+                                      $"<strong>Username:</strong> {dept.HOD_Email}<br/>" +
+                                      $"<strong>Password:</strong> Hod@123<br/><br/>" +
+                                      $"Please login and change your password.";
+
+                        await _emailService.SendEmailAsync(dept.HOD_Email, subject, body);
+                    }
+
                     await _db.SaveChangesAsync();
-
-                    // ✅ Send welcome email
-                    string subject = "Welcome to Our Platform!";
-                    string body = $"Hello {dept.HOD},<br/><br/>" +
-                                  $"You have been successfully added as a HOD. Here are your login details:<br/>" +
-                                  $"<strong>Username:</strong> {dept.HOD_Email}<br/>" +
-                                  $"<strong>Password:</strong> Hod@123 (Please change your password upon login).<br/><br/>" +
-                                  "Please log in and complete your profile.";
-
-                    await _emailService.SendEmailAsync(dept.HOD_Email, subject, body);
                 }
 
-                TempData["SuccessMessage"] = "Departments and HOD logins added successfully!";
+                TempData["SuccessMessage"] = "Departments and logins added successfully!";
                 return RedirectToAction("ManageDepartments");
             }
             catch (Exception ex)
@@ -126,6 +162,7 @@ namespace WebApplication4.Controllers
                 return View(Departments);
             }
         }
+
 
 
         // ✅ Manage Departments
@@ -511,6 +548,131 @@ namespace WebApplication4.Controllers
             return View("ViewMentors", deactivatedMentors);
         }
 
+
+
+        // ✅ Club Requests - Only show clubs under logged-in University Admin
+        public ActionResult ClubRequests()
+        {
+            int universityId = GetUniversityID(); // 👈 Your method to get Uni ID from login/session
+
+            var clubs = _db.CLUBS
+                .Include(c => c.Login)
+                .Include(c => c.DEPARTMENT.UNIVERSITY)
+                .Where(c => c.DEPARTMENT.Universityid == universityId) // 👈 Filter by University
+                .ToList();
+
+            foreach (var club in clubs)
+            {
+                var mentorUser = _db.USERs.FirstOrDefault(u => u.Email == club.Login.Email);
+                club.MentorName = mentorUser != null
+                    ? mentorUser.FirstName + " " + mentorUser.LastName
+                    : "Not Assigned";
+            }
+
+            return View(clubs);
+        }
+
+        // ✅ Club Status with pagination - Only show clubs under logged-in University Admin
+        public ActionResult ClubStatus(int page = 1, int? status = null)
+        {
+            int universityId = GetUniversityID();
+
+            int pageSize = 5;
+
+            var clubsQuery = _db.CLUBS
+                .Include(c => c.DEPARTMENT)
+                .Include(c => c.DEPARTMENT.UNIVERSITY)
+                .Include(c => c.ApprovalStatusTable)
+                .Include(c => c.Login)
+                .Where(c => c.DEPARTMENT.Universityid == universityId) // 👈 Filter
+                .AsQueryable();
+
+            if (status.HasValue)
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == status.Value);
+            }
+
+            var totalClubs = clubsQuery.Count();
+            var clubs = clubsQuery
+                .OrderBy(c => c.ClubName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var mentorEmails = clubs.Select(c => c.Login.Email).Distinct().ToList();
+            var mentorNames = _db.USERs
+                .Where(u => mentorEmails.Contains(u.Email))
+                .ToDictionary(u => u.Email, u => u.FirstName);
+
+            foreach (var club in clubs)
+            {
+                club.MentorName = mentorNames.ContainsKey(club.Login?.Email)
+                    ? mentorNames[club.Login.Email]
+                    : "Unknown Mentor";
+            }
+
+            var mentorIds = clubs.Select(c => c.MentorID).ToList();
+            var notifications = _db.Notifications
+                .Where(n => n.LoginID.HasValue && mentorIds.Contains(n.LoginID.Value) && n.Message.Contains("rejected"))
+                .ToList();
+
+            ViewBag.Notifications = notifications;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalClubs / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, totalClubs);
+            ViewBag.TotalItemCount = totalClubs;
+            ViewBag.CurrentStatus = status;
+
+            return View(clubs);
+        }
+
+        // ✅ Manage Clubs with pagination - Only University Admin's clubs
+        public ActionResult ManageClubs(int page = 1)
+        {
+            int universityId = GetUniversityID();
+
+            int pageSize = 5;
+
+            var clubs = _db.CLUBS
+                .Where(c => c.DEPARTMENT.Universityid == universityId) // 👈 Filter
+                .OrderBy(c => c.ClubName)
+                .ToList();
+
+            var pagedClubs = clubs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalItemCount = clubs.Count;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)clubs.Count / pageSize);
+            ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, clubs.Count);
+
+            return View(pagedClubs);
+        }
+        public ActionResult DeactivateClub(int id, int page = 1)
+        {
+            var club = _db.CLUBS.Find(id);
+            if (club != null)
+            {
+                club.IsActive = false;
+                _db.SaveChanges();
+            }
+            return RedirectToAction("ManageClubs", new { page });
+        }
+
+        public ActionResult ActivateClub(int id, int page = 1)
+        {
+            var club = _db.CLUBS.Find(id);
+            if (club != null)
+            {
+                club.IsActive = true;
+                _db.SaveChanges();
+            }
+            return RedirectToAction("ManageClubs", new { page });
+        }
+
+
+
         [HttpGet]
         public ActionResult ChangePassword()
         {
@@ -530,12 +692,12 @@ namespace WebApplication4.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var userEmail = Session["Email"]?.ToString();
+            var userEmail = Session["UserEmail"]?.ToString();
 
             if (string.IsNullOrEmpty(userEmail))
             {
                 TempData["ErrorMessage"] = "Your session has expired. Please login again.";
-                return RedirectToAction("Login", "Admin");
+                return RedirectToAction("Login", "UniversityAdmin");
             }
 
             var user = _db.Logins.FirstOrDefault(u => u.Email == userEmail);
@@ -558,7 +720,7 @@ namespace WebApplication4.Controllers
             _db.SaveChanges();
 
             TempData["Success"] = "Password changed successfully!";
-            return RedirectToAction("Index", "UniversityAdmin"); // ✅ Redirecting to Mentor Dashboard
+            return RedirectToAction("ChangePassword", "UniversityAdmin"); // ✅ Redirecting to Mentor Dashboard
         }
         //forgetpassword
         [HttpGet]

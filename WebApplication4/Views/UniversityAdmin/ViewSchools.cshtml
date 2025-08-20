@@ -20,7 +20,8 @@
         <tr>
             <th>University</th>
             <th>School Name</th>
-            <th>HOD</th>
+            <th>Director</th>
+            <th>SCC</th>
             <th>Status</th>
         </tr>
     </thead>
@@ -30,7 +31,8 @@
             <tr class="school-row" data-status="@(dept.IsActive == true ? "active" : "inactive")">
                 <td>@dept.UNIVERSITY.UniversityNAME</td>
                 <td>@dept.DepartmentName</td>
-                <td>@dept.HOD</td>
+                <td>@(string.IsNullOrEmpty(dept.DirectorName) ? "-" : dept.DirectorName)</td>
+                <td>@(string.IsNullOrEmpty(dept.HOD) ? "-" : dept.HOD)</td>
                 <td>
                     @if (dept.IsActive == true)
                     {

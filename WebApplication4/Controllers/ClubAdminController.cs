@@ -16,61 +16,68 @@ namespace WebApplication1.Controllers
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities(); // Database context // Database context
 
-        // GET: ClubAdmin Dashboard (Index)
         public ActionResult Index()
         {
-            // Check if the user is logged in
             if (Session["UserEmail"] == null)
             {
-                return RedirectToAction("Login", "Admin"); // Redirect to login if not authenticated
+                return RedirectToAction("Login", "Admin");
             }
 
-            // Get logged-in user's email
             string userEmail = Session["UserEmail"].ToString();
 
-            // Fetch Club Admin details
-            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
+            var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
 
             if (clubAdmin == null)
             {
                 return HttpNotFound("Club Admin not found");
             }
 
-            // Fetch Club Name from the CLUB table using ClubID
-            var club = _db.CLUBS.FirstOrDefault(cl => cl.ClubID == clubAdmin.ClubID);
-
             int loginId = Convert.ToInt32(Session["UserID"]);
             System.Diagnostics.Debug.WriteLine($"[DEBUG] clubadmin LoginID: {loginId}");
 
-            // Fetch notifications
+            // ✅ Get club using ClubID directly from the login
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubAdmin.ClubID && c.IsActive == true);
+
+            if (club == null)
+            {
+                return HttpNotFound("Associated club not found for this Club Admin.");
+            }
+
+            int clubId = club.ClubID;
+
+            // ✅ Notifications
             var notifications = _db.Notifications
-                                    .Where(n => n.LoginID == loginId && n.IsRead == false && n.EndDate > DateTime.Now)
+                                    .Where(n => n.LoginID == loginId && (n.IsRead ?? false) == false && n.EndDate > DateTime.Now)
                                     .ToList();
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] Total Unread Notifications: {notifications.Count}");
 
             ViewBag.Notifications = notifications;
 
-            // Pass club admin details to the view
-            ViewBag.ClubAdminName = clubAdmin.FullName;
-            ViewBag.ClubName = club?.ClubName ?? "Not Assigned"; // Show club name or "Not Assigned" if null
-            ViewBag.Department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == clubAdmin.DepartmentID)?.DepartmentName;
-            ViewBag.University = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME;
-            ViewBag.ClubAdminPhoto = clubAdmin.ProfileImagePath; // Assuming the photo is stored as a file path or URL
+            // ✅ Info for dashboard
+            ViewBag.ClubAdminName = club.ClubName; // This is fine even if it's ClubName, you can rename label in View
+            ViewBag.ClubName = club.ClubName;
+            ViewBag.ClubAdminPhoto = club.LogoImagePath;
 
-            // -----------------------------  New Code for Events and Clubs Count -----------------------------
+            ViewBag.University = _db.UNIVERSITies
+                                    .FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME;
 
-            // Count Number of Events for this Club Admin's Club
-            int clubId = clubAdmin.ClubID ?? 0; // handling if null
-            int numberOfEvents = _db.EVENTS.Count(e => e.ClubID == clubId);
-            ViewBag.NumberOfEvents = numberOfEvents;
+            // ✅ Department & SubDepartment Names
+            var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
+            var subDepartment = club.SubDepartmentID != null
+                ? _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == club.SubDepartmentID)
+                : null;
 
-            // Count Number of Clubs (assuming one club per admin, otherwise adjust logic)
+            ViewBag.Department = department?.DepartmentName;
+            ViewBag.SubDepartment = subDepartment?.SubDepartmentName;
+
+            // ✅ Statistics
+            ViewBag.NumberOfEvents = _db.EVENTS.Count(e => e.ClubID == clubId);
             ViewBag.NumberOfClubs = 1;
-
-            // ----------------------------------------------------------------------------------------------
 
             return View();
         }
+
+
+
 
         // GET: Request Event Form
         public ActionResult RequestEvent()
@@ -81,33 +88,42 @@ namespace WebApplication1.Controllers
             }
 
             string userEmail = Session["UserEmail"].ToString();
-            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
 
-            if (clubAdmin == null)
+            // Get login record for club admin
+            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
+            if (loginRecord == null)
             {
                 return HttpNotFound("Club Admin not found");
             }
 
-            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubAdmin.ClubID);
-            var department = club != null ? _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID) : null;
+            // ✅ Fetch club using ClubID from login
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == loginRecord.ClubID && c.IsActive == true);
+            if (club == null)
+            {
+                return HttpNotFound("Associated club not found for this Club Admin.");
+            }
+
+            var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
+            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == loginRecord.UniversityID);
 
             var model = new EVENT
             {
-                ClubID = clubAdmin.ClubID, // Store ClubID for event creation
-                ClubName = club?.ClubName, // Retrieve ClubName safely
-                Department = department?.DepartmentName, // Safe null check
-                University = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME // Show in view
+                ClubID = club.ClubID,
+                ClubName = club.ClubName,
+                Department = department?.DepartmentName,
+                University = university?.UniversityNAME
             };
 
-            ViewBag.OrganizerName = clubAdmin.FullName;
+            ViewBag.OrganizerName = club.ClubName + " Admin";
 
             return View(model);
         }
 
+
         // POST: Request Event Submission
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RequestEvent(EVENT model, HttpPostedFileBase EventPoster ,HttpPostedFileBase BudgetDocument)
+        public ActionResult RequestEvent(EVENT model, HttpPostedFileBase EventPoster, HttpPostedFileBase BudgetDocument)
         {
             if (Session["UserEmail"] == null)
             {
@@ -119,18 +135,27 @@ namespace WebApplication1.Controllers
                 return View(model);
             }
 
+            string userEmail = Session["UserEmail"].ToString();
+
+            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
+            if (loginRecord == null)
+            {
+                TempData["ErrorMessage"] = "Club Admin not found.";
+                return View(model);
+            }
+
+            // ✅ Fetch club using ClubID
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == loginRecord.ClubID && c.IsActive == true);
+            if (club == null)
+            {
+                TempData["ErrorMessage"] = "Associated club not found.";
+                return View(model);
+            }
+
             string uploadsFolder = Server.MapPath("~/uploads");
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
-            }
-
-            string userEmail = Session["UserEmail"].ToString();
-            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
-
-            if (clubAdmin == null)
-            {
-                return HttpNotFound("Club Admin not found");
             }
 
             // Handle Event Poster Upload
@@ -141,18 +166,14 @@ namespace WebApplication1.Controllers
                 string savePath = Path.Combine(uploadsFolder, uniqueFileName);
                 EventPoster.SaveAs(savePath);
                 filePath = "/uploads/" + uniqueFileName;
-
-                // ✅ Debugging File Path
-                Console.WriteLine("File uploaded successfully: " + filePath);
             }
 
-            // Check if filePath is null before saving
             if (string.IsNullOrEmpty(filePath))
             {
-                filePath = "DefaultPath"; // Set a default path if needed
+                filePath = "/uploads/default-poster.png"; // fallback default
             }
 
-            // --- Upload Budget Document ---
+            // Handle Budget Document Upload
             string budgetPath = null;
             if (BudgetDocument != null && BudgetDocument.ContentLength > 0)
             {
@@ -162,34 +183,24 @@ namespace WebApplication1.Controllers
                 budgetPath = "/uploads/" + budgetFileName;
             }
 
-            // Check if the club admin's RegistrationID exists in the Logins table
-            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
-            if (loginRecord == null)
-            {
-                TempData["ErrorMessage"] = "Error: No associated LoginID found for this club admin.";
-                return View(model);
-            }
-
-            Console.WriteLine("File uploaded successfully: " + filePath);
-
             var newEvent = new EVENT
             {
                 EventName = model.EventName,
                 EventDescription = model.EventDescription,
-                ClubID = clubAdmin.ClubID,
+                ClubID = club.ClubID,
                 EventOrganizerID = loginRecord.LoginID,
                 EventType = "Campus",
-                ApprovalStatusID = 1,
+                ApprovalStatusID = 1, // Pending
                 EventCreatedDate = DateTime.Now,
                 EventStartDateAndTime = model.EventStartDateAndTime,
                 EventEndDateAndTime = model.EventEndDateAndTime,
-                EventBudget=model.EventBudget,
-                BudgetDocumentPath = budgetPath, // ✅ Newly added
-                EventPoster = filePath, // ✅ Ensure this is assigned correctly
+                EventBudget = model.EventBudget,
+                BudgetDocumentPath = budgetPath,
+                EventPoster = filePath,
+                Venue = model.Venue,
                 IsActive = false
             };
 
-            // Save event and check if EventPoster is stored
             try
             {
                 _db.EVENTS.Add(newEvent);
@@ -197,7 +208,6 @@ namespace WebApplication1.Controllers
 
                 if (changes > 0)
                 {
-                    Console.WriteLine("Event saved successfully with EventPoster: " + filePath);
                     TempData["SuccessMessage"] = "Event request submitted successfully!";
                     return RedirectToAction("RequestEvent");
                 }
@@ -213,10 +223,12 @@ namespace WebApplication1.Controllers
                 {
                     ex = ex.InnerException;
                 }
+
                 TempData["ErrorMessage"] = "Error: " + ex.Message;
                 return View(model);
             }
         }
+
 
 
 
@@ -253,7 +265,7 @@ namespace WebApplication1.Controllers
             string userEmail = Session["UserEmail"].ToString();
 
             // Fetch Club Admin details
-            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
+            var clubAdmin = _db.Logins.FirstOrDefault(c => c.Email == userEmail);
 
             if (clubAdmin == null)
             {
@@ -590,7 +602,7 @@ namespace WebApplication1.Controllers
             string userEmail = Session["UserEmail"].ToString();
 
             // Fetch Club Admin details
-            var clubAdmin = _db.ClubRegistrations.FirstOrDefault(c => c.Email == userEmail);
+            var clubAdmin = _db.Logins.FirstOrDefault(c => c.Email == userEmail);
 
             if (clubAdmin == null)
             {
@@ -855,7 +867,7 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public ActionResult ChangePassword()
         {
-            if (Session["UserID"] == null)
+            if (Session["UserEmail"] == null)
             {
                 TempData["ErrorMessage"] = "Your session has expired. Please login again.";
                 return RedirectToAction("Login", "Admin"); // ✅ Redirects to AdminController
@@ -871,7 +883,7 @@ namespace WebApplication1.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var userEmail = Session["UserID"]?.ToString();
+            var userEmail = Session["UserEmail"]?.ToString();
 
             if (string.IsNullOrEmpty(userEmail))
             {
@@ -899,7 +911,7 @@ namespace WebApplication1.Controllers
             _db.SaveChanges();
 
             TempData["SuccessMessage"] = "Password changed successfully!";
-            return RedirectToAction("Dashboard", "ClubAdmin");
+            return RedirectToAction("ChangePassword", "ClubAdmin");
         }
 
         //forgetpassword

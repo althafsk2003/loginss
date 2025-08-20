@@ -1,0 +1,128 @@
+﻿@model WebApplication4.Models.ClubDashboardViewModel
+@{
+    ViewBag.Title = "Club Management";
+    Layout = "~/Views/Shared/DirectorLayout.cshtml";
+}
+
+<style>
+    /* Keep header fixed during scroll */
+    .table-responsive {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #004085; /* Deep blue for header */
+        color: white;
+        z-index: 2;
+    }
+
+    /* Zebra striping */
+    .table tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    /* Hover effect */
+    .table tbody tr:hover {
+        background-color: #e2e6ea;
+    }
+
+    /* Filter buttons spacing */
+    .btn-group .btn {
+        margin-right: 5px;
+    }
+
+    /* Badge style */
+    .badge {
+        font-size: 0.9rem;
+    }
+
+    /* Card styling */
+    .card {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- Filter Buttons -->
+    <div class="mb-3 text-center">
+        <a href="@Url.Action("ViewClubs", new { filter = "manage" })" class="btn btn-primary me-2 shadow-sm">
+            Manage Clubs
+        </a>
+        <a href="@Url.Action("ViewClubs", new { filter = "all" })" class="btn btn-secondary me-2 shadow-sm">
+            All Clubs <span class="badge bg-light text-dark">@Model.TotalCount</span>
+        </a>
+        <a href="@Url.Action("ViewClubs", new { filter = "active" })" class="btn btn-success me-2 shadow-sm">
+            Active <span class="badge bg-light text-dark">@Model.ActiveCount</span>
+        </a>
+        <a href="@Url.Action("ViewClubs", new { filter = "inactive" })" class="btn btn-danger shadow-sm">
+            Inactive <span class="badge bg-light text-dark">@Model.InactiveCount</span>
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover m-0">
+                    <thead>
+                        <tr>
+                            <th>Club Name</th>
+                            <th>Department</th>
+                            <th>Sub Department</th>
+                            <th>Status</th>
+                            @if (Model.ShowToggle)
+                            {
+                                <th>Action</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var club in Model.TableData)
+                        {
+                            <tr>
+                                <td>@club.ClubName</td>
+                                <td>@club.DepartmentName</td>
+                                <td>@club.SubDepartmentName</td>
+                                <td id="status-@club.ClubID" class="fw-bold text-@(club.IsActive ? "success" : "danger")">
+                                    @(club.IsActive ? "Active" : "Inactive")
+                                </td>
+                                @if (Model.ShowToggle)
+                                {
+                                    <td>
+                                        <input type="checkbox" @(club.IsActive ? "checked" : "")
+                                               onchange="toggleClubStatus(@club.ClubID, this.checked)" />
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function toggleClubStatus(id, isChecked) {
+            $.post('@Url.Action("ToggleClubStatus", "Director")',
+                { id: id, isActive: isChecked },
+                function (response) {
+                    if (response.success) {
+                        $("#status-" + id)
+                            .text(isChecked ? "Active" : "Inactive")
+                            .removeClass("text-success text-danger")
+                            .addClass(isChecked ? "text-success" : "text-danger");
+                    } else {
+                        alert(response.message);
+                    }
+                });
+        }
+    </script>
+}

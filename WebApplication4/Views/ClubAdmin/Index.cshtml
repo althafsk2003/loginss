@@ -317,9 +317,9 @@
     <div class="main-section">
         <!-- Left Section: Profile Card -->
         <div class="left-section">
-            <!-- Profile Card -->
             <div class="card profile-card">
-                <h4 class="mb-3">Club Admin Profile</h4>
+                <h4 class="mb-3">Club Profile</h4>
+
                 <!-- Notification Icon -->
                 <div class="notification-container">
                     <i class="fas fa-bell notification-icon" onclick="toggleNotifications()"></i>
@@ -344,29 +344,41 @@
                         }
                     </div>
                 </div>
+
+                <!-- Club Logo -->
                 @if (!string.IsNullOrEmpty(ViewBag.ClubAdminPhoto))
                 {
-                    <img src="@Url.Content(ViewBag.ClubAdminPhoto)" alt="Club Admin Profile Picture" class="profile-img">
+                    <img src="@Url.Content(ViewBag.ClubAdminPhoto)" alt="Club Logo" class="profile-img">
                 }
                 else
                 {
                     <i class="fas fa-user-circle" style="font-size: 100px; color: #4b5cc4;"></i>
-                    <p class="text-muted mt-2">No Profile Photo Uploaded</p>
+                    <p class="text-muted mt-2">No Club Logo Uploaded</p>
                 }
 
-                <!-- Details Section -->
-                <ul class="details-list">
-                    <li><i class="fas fa-user"></i> <strong>Admin Name:</strong> @(ViewBag.ClubAdminName ?? "N/A")</li>
-                    <li><i class="fas fa-home"></i> <strong>Club Name:</strong> @(ViewBag.ClubName ?? "N/A")</li>
-                    <li><i class="fas fa-building"></i> <strong>Department:</strong> @(ViewBag.Department ?? "N/A")</li>
-                    <li><i class="fas fa-university"></i> <strong>University:</strong> @(ViewBag.University ?? "N/A")</li>
-                </ul>
+                <!-- Club Details -->
+            <ul class="details-list">
+                <li><i class="fas fa-home"></i> <strong>Club Name:</strong> @(ViewBag.ClubName ?? "N/A")</li>
+                <li>
+                    <i class="fas fa-building"></i>
+                    <strong>Department:</strong>
+                    @if (!string.IsNullOrEmpty(ViewBag.SubDepartment))
+                    {
+                        @($"{ViewBag.SubDepartment} (Sub) / {ViewBag.Department}")
+                    }
+                    else
+                    {
+                        @ViewBag.Department
+                    }
+                </li>
+                <li><i class="fas fa-university"></i> <strong>University:</strong> @(ViewBag.University ?? "N/A")</li>
+            </ul>
             </div>
         </div>
 
-        <!-- Right Section: Stats and Graph -->
+        <!-- Right Section -->
         <div class="right-section">
-            <!-- Stats Card -->
+            <!-- Stats -->
             <div class="card stats-card">
                 <div class="stats-container">
                     <div class="stat-card">
@@ -387,7 +399,7 @@
                 </div>
             </div>
 
-            <!-- Graph Card -->
+            <!-- Graph -->
             <div class="card graph-card">
                 <h4>Clubs and Events Overview</h4>
                 <canvas id="eventsChart" aria-label="Chart showing clubs and events data"></canvas>

@@ -140,16 +140,16 @@
                 <a href="@Url.Action("RegisterClub", "Mentor")"><i class="fas fa-plus"></i> Club Registration</a>
 
                 <!-- View Clubs Section -->
-                <a href="#viewClubsSubmenu" data-toggle="collapse">
-                    <i class="fas fa-list"></i> View Clubs <i class="fas fa-caret-down float-right"></i>
+                <!-- View Clubs Section -->
+                <a href="@Url.Action("ViewClubStatus", "Mentor")">
+                    <i class="fas fa-list"></i> View Club Status
                 </a>
-                <div id="viewClubsSubmenu" class="collapse">
-                    <a href="@Url.Action("ViewClubStatus", "Mentor")" class="nested-collapse"><i class="fas fa-info-circle"></i> View Club Status</a>
-                    <a href="@Url.Action("ViewClubRegistrations", "Mentor")" class="nested-collapse"><i class="fas fa-file-alt"></i> View Club Registrations</a>
-                </div>
 
                 <div>
                     <a href="@Url.Action("ViewEventRequests", "Mentor")"><i class="fas fa-envelope"></i> View Event Requests</a>
+                    <a href="@Url.Action("AwaitingConfirmation", "Mentor")">
+                        <i class="fas fa-hourglass-half"></i> Events Awaiting Confirmation
+                    </a>
                     <a href="@Url.Action("ChangePassword", "Mentor")"><i class="fas fa-key"></i> Change Password</a>
                     <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger mt-3"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>

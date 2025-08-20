@@ -92,7 +92,20 @@
 
                 <tr class="club-row" data-status="@club.ApprovalStatusID">
                     <td>@club.ClubName</td>
-                    <td>@club.Description</td>
+                    <td>
+                        @{
+                            var desc = club.Description ?? "";
+                            var shortDesc = desc.Length > 10 ? desc.Substring(0, 10) + "..." : desc;
+                        }
+
+                        <span class="short-desc">@shortDesc</span>
+                        <span class="full-desc d-none">@desc</span>
+
+                        @if (desc.Length > 10)
+                        {
+                            <a href="javascript:void(0);" class="toggle-desc text-primary ms-2">Show more</a>
+                        }
+                    </td>
                     <td>@club.MentorName</td>
                     <td>@club.DEPARTMENT.UNIVERSITY.UniversityNAME</td>
                     <td>@club.DEPARTMENT.DepartmentName</td>
@@ -122,6 +135,22 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    $(document).on("click", ".toggle-desc", function () {
+        var $this = $(this);
+        var $row = $this.closest("td");
+
+        $row.find(".short-desc, .full-desc").toggleClass("d-none");
+
+        if ($this.text() === "Show more") {
+            $this.text("Show less");
+        } else {
+            $this.text("Show more");
+        }
+    });
+</script>
+
 
 <!-- ✅ JavaScript for Filtering -->
 <script>

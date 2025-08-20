@@ -4,7 +4,6 @@
     Layout = "~/Views/Shared/_UniversityAdminLayout.cshtml";
 }
 
-<!-- Font Awesome (Optional) -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
 <style>
@@ -41,6 +40,18 @@
 
     .info-block small {
         color: #555;
+        display: block;
+    }
+
+    .description {
+        display: inline;
+    }
+
+    .see-more {
+        color: #007bff;
+        cursor: pointer;
+        font-size: 0.85rem;
+        margin-left: 5px;
     }
 
     @@keyframes revealUp {
@@ -58,7 +69,7 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var club = Model[i];
-            var delay = i * 0.2; // reveal delay
+            var delay = i * 0.2;
 
             <div class="club-block" style="animation-delay: @($"{delay}s");">
                 <div class="icon-block">
@@ -66,7 +77,18 @@
                 </div>
                 <div class="info-block flex-grow-1">
                     <h5>@club.ClubName</h5>
-                    <small>@club.Description</small>
+                    <small>
+                        <span class="description">
+                            @(club.Description?.Length > 80
+                                ? club.Description.Substring(0, 80) + "..."
+                                : club.Description)
+                        </span>
+                        @if (!string.IsNullOrEmpty(club.Description) && club.Description.Length > 80)
+                        {
+                            <span class="see-more" onclick="toggleDescription(this)"
+                                  data-full="@club.Description">See More</span>
+                        }
+                    </small>
                 </div>
                 <a href="@Url.Action("ViewEvents", "UniversityAdmin", new { clubId = club.ClubID })"
                    class="btn btn-outline-success btn-sm">
@@ -76,3 +98,18 @@
         }
     </div>
 </div>
+
+<script>
+    function toggleDescription(element) {
+        let desc = element.previousElementSibling;
+        let fullText = element.getAttribute("data-full");
+
+        if (element.innerText === "See More") {
+            desc.innerText = fullText;
+            element.innerText = "See Less";
+        } else {
+            desc.innerText = fullText.substring(0, 80) + "...";
+            element.innerText = "See More";
+        }
+    }
+</script>

@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - HOD Dashboard</title>
+    <title>@ViewBag.Title - SCC Dashboard</title>
     <!-- Bootstrap & FontAwesome -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-
+    @RenderSection("Styles", required: false)
     <style>
         /* Header Styling */
         .header {
@@ -109,7 +109,7 @@
     <!-- Header -->
     <div class="header bg-primary text-white py-3">
         <i class="fas fa-bars hamburger"></i>
-        <h2>HOD Dashboard</h2>
+        <h2>SCC Dashboard</h2>
     </div>
 
     <!-- Sidebar Popup -->

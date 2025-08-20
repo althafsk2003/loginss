@@ -1,0 +1,186 @@
+﻿@model WebApplication4.Models.DirectorEventApprovalViewModel
+@{
+    Layout = "~/Views/Shared/DirectorLayout.cshtml";
+    ViewBag.Title = "Director - Event Approval";
+}
+
+@section Styles {
+    <style>
+        h2.page-title {
+            font-weight: 700;
+            color: #2c3e50;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 25px;
+        }
+
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+            font-weight: 600;
+        }
+
+        .table td, .table th {
+            vertical-align: middle !important;
+            font-size: 0.95rem;
+        }
+
+        .action-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+            .action-form h5 {
+                margin-bottom: 15px;
+                color: #2c3e50;
+                font-weight: 600;
+            }
+
+        .btn-sm {
+            padding: 4px 10px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+    </style>
+}
+
+<h2 class="page-title">📋 Events Awaiting Director Approval</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> @TempData["Error"]</div>
+}
+
+@if (Model.Events.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped shadow-sm">
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Start Date</th>
+                    <th>Club</th>
+                    <th>Budget</th>
+                    <th>Form</th>
+                    <th style="width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ev in Model.Events)
+                {
+                    <tr>
+                        <td>@ev.EventName</td>
+                        <td>@ev.EventStartDateAndTime.ToString("dd-MM-yyyy hh:mm tt")</td>
+                        <td>@ev.CLUB.ClubName</td>
+                        <td>₹@string.Format("{0:N0}", ev.EventBudget)</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(ev.BudgetDocumentPath))
+                            {
+                                <a href="@Url.Content(ev.BudgetDocumentPath)" target="_blank" class="btn btn-link p-0">
+                                    <i class="fas fa-file-pdf text-danger"></i> View PDF
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted"><i class="fas fa-times-circle"></i> No form</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-sm" type="button" onclick="toggleApprove('@ev.EventID')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" type="button" onclick="toggleReject('@ev.EventID')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Approve Form -->
+                    <tr id="approve-form-@ev.EventID" style="display:none;">
+                        <td colspan="6">
+                            @using (Html.BeginForm("DirectorApproveEvent", "Director", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                @Html.Hidden("eventId", ev.EventID)
+
+                                <div class="action-form">
+                                    <h5><i class="fas fa-check-circle text-success"></i> Approve Event: @ev.EventName</h5>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>Approved Amount (optional)</label>
+                                            <input type="number" name="approvedAmount" class="form-control form-control-sm" step="0.01" placeholder="Leave blank for full amount" />
+                                        </div>
+                                        <div class="form-group col-md-5">
+                                            <label>Upload Signed Approval Document (PDF)</label>
+                                            <input type="file" name="signedDocument" class="form-control-file" accept=".pdf" required />
+                                        </div>
+                                        <div class="form-group col-md-3 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-success mr-2 btn-sm">
+                                                <i class="fas fa-paper-plane"></i> Submit
+                                            </button>
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleApprove('@ev.EventID')">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+
+                    <!-- Reject Form -->
+                    <tr id="reject-form-@ev.EventID" style="display:none;">
+                        <td colspan="6">
+                            @using (Html.BeginForm("DirectorRejectEvent", "Director", FormMethod.Post))
+                            {
+                                @Html.Hidden("eventId", ev.EventID)
+
+                                <div class="action-form">
+                                    <h5><i class="fas fa-times-circle text-danger"></i> Reject Event: @ev.EventName</h5>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-9">
+                                            <label>Rejection Reason</label>
+                                            <input type="text" name="rejectionReason" class="form-control form-control-sm" placeholder="Enter reason" required />
+                                        </div>
+                                        <div class="form-group col-md-3 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-danger mr-2 btn-sm">
+                                                <i class="fas fa-paper-plane"></i> Submit
+                                            </button>
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleReject('@ev.EventID')">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info"><i class="fas fa-info-circle"></i> No events awaiting approval.</div>
+}
+
+@section Scripts {
+    <script>
+        function toggleApprove(eventId) {
+            $('#approve-form-' + eventId).slideToggle(200);
+            $('#reject-form-' + eventId).hide();
+        }
+
+        function toggleReject(eventId) {
+            $('#reject-form-' + eventId).slideToggle(200);
+            $('#approve-form-' + eventId).hide();
+        }
+    </script>
+}

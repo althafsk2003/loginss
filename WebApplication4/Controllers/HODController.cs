@@ -9,9 +9,6 @@ using System.Web.Mvc;
 using System.Data.Entity;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-
-
-
 using WebApplication4.Models;
 using System.Drawing;
 using System.Windows.Documents;
@@ -21,36 +18,71 @@ namespace WebApplication4.Controllers
 {
     public class HODController : Controller
     {
-
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
 
         // GET: HOD
         public ActionResult Index()
         {
-            // Check if session has required data
+            // ---------- 1) Guard ----------
             if (Session["DepartmentID"] == null || Session["UniversityID"] == null)
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
             int departmentId = Convert.ToInt32(Session["DepartmentID"]);
             int universityId = Convert.ToInt32(Session["UniversityID"]);
             string departmentName = Session["DepartmentName"]?.ToString();
             string universityName = Session["UniversityName"]?.ToString();
 
-            // Count the number of clubs under this department
-            int clubCount = _db.CLUBS.Count(c => c.DepartmentID == departmentId);
+            // ---------- 2) Get HOD Info ----------
+            string hodEmail = Session["UserEmail"]?.ToString();
+            string hodName = _db.DEPARTMENTs
+                                .Where(d => d.DepartmentID == departmentId)
+                                .Select(d => d.HOD) // or the column name where you store it
+                                .FirstOrDefault() ?? "HOD";
 
-            // Pass values to view
+
+            // ---------- 3) Clubs ----------
+            var clubs = _db.CLUBS.Where(c => c.DepartmentID == departmentId).ToList();
+            int totalClubs = clubs.Count;
+            int approvedClubs = clubs.Count(c => c.ApprovalStatusID == 2);
+            int pendingClubs = clubs.Count(c => c.ApprovalStatusID == 1);
+            int rejectedClubs = clubs.Count(c => c.ApprovalStatusID == 3);
+
+            // ---------- 4) Mentors ----------
+            var mentors = _db.Logins.Where(m => m.DepartmentID == departmentId && m.Role == "Mentor").ToList();
+            int totalMentors = mentors.Count;
+            int activeMentors = mentors.Count(m => m.IsActive == true);
+            int inactiveMentors = mentors.Count(m => m.IsActive == false);
+
+            // ---------- 5) Events ----------
+            var clubIds = clubs.Select(c => c.ClubID).ToList();
+            var events = _db.EVENTS.Where(e => e.ClubID.HasValue && clubIds.Contains(e.ClubID.Value)).ToList();
+            int totalEvents = events.Count;
+            int approvedEvents = events.Count(e => e.ApprovalStatusID == 2);
+            int pendingEvents = events.Count(e => e.ApprovalStatusID == 1);
+            int rejectedEvents = events.Count(e => e.ApprovalStatusID == 3);
+
+            // ---------- 6) ViewBag Passing ----------
+            ViewBag.HodName = hodName;
             ViewBag.DepartmentName = departmentName;
             ViewBag.UniversityName = universityName;
-            ViewBag.TotalClubs = clubCount;
+
+            ViewBag.TotalClubs = totalClubs;
+            ViewBag.ApprovedClubs = approvedClubs;
+            ViewBag.PendingClubs = pendingClubs;
+            ViewBag.RejectedClubs = rejectedClubs;
+
+            ViewBag.TotalMentors = totalMentors;
+            ViewBag.ActiveMentors = activeMentors;
+            ViewBag.InactiveMentors = inactiveMentors;
+
+            ViewBag.TotalEvents = totalEvents;
+            ViewBag.ApprovedEvents = approvedEvents;
+            ViewBag.PendingEvents = pendingEvents;
+            ViewBag.RejectedEvents = rejectedEvents;
 
             return View();
         }
-
-
 
         // ✅ Add Mentor - GET method
         [HttpGet]
@@ -72,8 +104,8 @@ namespace WebApplication4.Controllers
                 model.UserType = "Mentor";
             }
 
-                try
-                {
+            try
+            {
                 if (Photo != null && Photo.ContentLength > 0)
                 {
                     string uploadDir = Server.MapPath("~/Uploads/");
@@ -126,8 +158,6 @@ namespace WebApplication4.Controllers
             }
         }
 
-
-
         private int GetDepartmentID()
         {
             if (Session["DepartmentID"] != null)
@@ -137,8 +167,6 @@ namespace WebApplication4.Controllers
 
             throw new Exception("Department ID not found in session. HOD must be logged in.");
         }
-
-
 
         // MANAGE MENTORS (ALL - ACTIVE + INACTIVE)
         public ActionResult ManageMentors()
@@ -276,15 +304,12 @@ namespace WebApplication4.Controllers
             return View("ViewMentors", mentors);
         }
 
-
         private bool IsHODLoggedIn()
         {
             return Session["UserRole"] != null &&
                    Session["DepartmentID"] != null &&
                    ((string)Session["UserRole"]).Equals("HOD", StringComparison.OrdinalIgnoreCase);
         }
-
-
 
         // Club Requests (only under HOD's department)
         public ActionResult ClubRequests()
@@ -312,7 +337,6 @@ namespace WebApplication4.Controllers
             return View(clubs);
         }
 
-
         public ActionResult ApproveClub(int id)
         {
             var club = _db.CLUBS.Find(id);
@@ -339,7 +363,6 @@ namespace WebApplication4.Controllers
 
             return RedirectToAction("ClubRequests");
         }
-
 
         // ❌ Reject Club with Reason
         [HttpPost]
@@ -547,7 +570,6 @@ namespace WebApplication4.Controllers
             return View(clubs);
         }
 
-
         [HttpGet]
         public ActionResult ChangePassword()
         {
@@ -567,7 +589,7 @@ namespace WebApplication4.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var userEmail = Session["Email"]?.ToString();
+            var userEmail = Session["UserEmail"]?.ToString();
 
             if (string.IsNullOrEmpty(userEmail))
             {
@@ -595,8 +617,9 @@ namespace WebApplication4.Controllers
             _db.SaveChanges();
 
             TempData["Success"] = "Password changed successfully!";
-            return RedirectToAction("Index", "UniversityAdmin"); // ✅ Redirecting to Mentor Dashboard
+            return RedirectToAction("ChangePassword", "HOD"); // ✅ Redirecting to Mentor Dashboard
         }
+
         //forgetpassword
         [HttpGet]
         public ActionResult ForgotPassword()
@@ -625,7 +648,6 @@ namespace WebApplication4.Controllers
 
             return RedirectToAction("VerifyOTP", new { email = user.Email });
         }
-
 
         //otpverify
         [HttpGet]
@@ -675,37 +697,23 @@ namespace WebApplication4.Controllers
 
             // Step 4: Get all events for those clubs that are pending HOD approval
             var events = _db.EVENTS
+                .Include(e => e.CLUB) // ✅ include navigation property
                 .Where(e => e.ApprovalStatusID == 4 && clubIds.Contains((int)e.ClubID))
                 .ToList();
 
             return View(events);
         }
 
-
-        public ActionResult DownloadEventForm(int id)
+        public ActionResult ViewEventDocument(int id)
         {
-            var ev = _db.EVENTS.Find(id);
+            var ev = _db.EVENTS.FirstOrDefault(e => e.EventID == id);
             if (ev == null || string.IsNullOrEmpty(ev.BudgetDocumentPath))
-                return HttpNotFound("Event or budget document not found.");
-
-            string filePath = Server.MapPath(ev.BudgetDocumentPath);
-            string fileName = Path.GetFileName(filePath);
-            string contentType = MimeMapping.GetMimeMapping(fileName);
-
-            return File(filePath, contentType, fileName); // download trigger
-        }
-
-
-        public ActionResult ViewEventDetails(int id)
-        {
-            var ev = _db.EVENTS
-                .Include(e => e.CLUB)  // ensure Club navigation is loaded
-                .FirstOrDefault(e => e.EventID == id);
-
-            if (ev == null)
                 return HttpNotFound();
 
-            return View(ev); // Create a ViewEventDetails.cshtml to show this
+            ViewBag.DocumentPath = ev.BudgetDocumentPath;
+            ViewBag.EventName = ev.EventName;
+
+            return View();
         }
 
         [HttpPost]
@@ -759,94 +767,121 @@ namespace WebApplication4.Controllers
 
             _db.SaveChanges();
             TempData["Message"] = "Event rejected and notifications sent!";
-            return RedirectToAction("PendingEvents");
-        }
-
-
-        public ActionResult GenerateDocument(int id)
-        {
-            var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == id);
-            if (ev == null) return HttpNotFound();
-
-            return View("GenerateApprovalForm", ev);
+            return RedirectToAction("EventsForApproval", new { id = eventId });
         }
 
         // Step 4: POST Action Method
         [HttpPost]
-        public ActionResult ApproveEvent(int eventId, decimal approvedAmount)
+        [ValidateAntiForgeryToken]
+        public ActionResult ApproveEvent(int eventId,
+                                  decimal? approvedAmount,
+                                  HttpPostedFileBase signedDocument)
         {
-            var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == eventId);
-            if (ev == null) return HttpNotFound();
+            var ev = _db.EVENTS.Include(e => e.CLUB)
+                               .FirstOrDefault(e => e.EventID == eventId);
+            if (ev == null) return HttpNotFound("Event not found.");
 
-            ev.ApprovalStatusID = 2;
-            string amountStr = ev.EventBudget.ToString(); // ✅
+            // --- 1. Validate upload --------------------------------------------------
+            if (signedDocument == null || signedDocument.ContentLength == 0)
+            {
+                TempData["Error"] = "Signed PDF is required.";
+                return RedirectToAction("EventsForApproval", new { id = eventId });
+            }
+            if (!signedDocument.FileName.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Error"] = "Only PDF files are allowed.";
+                return RedirectToAction("EventsForApproval", new { id = eventId });
+            }
 
+            // --- 2. Save the PDF -----------------------------------------------------
+            string uploadsRoot = Server.MapPath("~/uploads");
+            Directory.CreateDirectory(uploadsRoot);
 
-            string uploadsFolder = Server.MapPath("~/uploads");
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            string fileName = $"Signed_Approval_{eventId}_{DateTime.Now:yyyyMMddHHmmss}.pdf";
+            string fullPath = Path.Combine(uploadsRoot, fileName);
+            signedDocument.SaveAs(fullPath);
 
-            string fileName = $"Approval_{eventId}_{DateTime.Now.Ticks}.pdf";
-            string filePath = Path.Combine(uploadsFolder, fileName);
             ev.EventFormPath = "/uploads/" + fileName;
 
-            GenerateApprovalPDF(ev, approvedAmount, filePath);
+            // --- 3. Determine approved amount ---------------------------------------
+            decimal proposedBudget = 0;
+            decimal.TryParse(ev.EventBudget, out proposedBudget);
+
+            // Use the approvedAmount if provided and greater than 0, otherwise fallback
+            decimal finalBudget = (approvedAmount.HasValue && approvedAmount.Value > 0)
+                                  ? approvedAmount.Value
+                                  : proposedBudget;
+
+            ev.ApprovedAmount = finalBudget.ToString(); // Always set this
+
+            bool budgetReduced = finalBudget < proposedBudget;
+
+
+            // --- 4. Update status ----------------------------------------------------
+            if (budgetReduced)
+            {
+                ev.ApprovalStatusID = 6;   // WaitingMentor (define in enum / table)
+            }
+            else
+            {
+                ev.ApprovalStatusID = 2;   // Approved
+            }
+
             _db.SaveChanges();
 
-            TempData["Message"] = "Approval document generated successfully!";
-            return RedirectToAction("PendingEvents");
-        }
-
-
-        // Step 4: POST Action Method
-        /* [HttpPost]
-         public ActionResult ApproveEvent(int eventId, decimal approvedAmount)
-         {
-             var ev = _db.EVENTS.Include("CLUB").FirstOrDefault(e => e.EventID == eventId);
-             if (ev == null) return HttpNotFound();
-
-             ev.ApprovalStatusID = 2;
-             ev.ApprovedAmount = approvedAmount;
-
-             string uploadsFolder = Server.MapPath("~/uploads");
-             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-             string fileName = $"Approval_{eventId}_{DateTime.Now.Ticks}.pdf";
-             string filePath = Path.Combine(uploadsFolder, fileName);
-             ev.EventFormPath = "/uploads/" + fileName;
-
-             GenerateApprovalPDF(ev, approvedAmount, filePath);
-             _db.SaveChanges();
-
-             TempData["Message"] = "Approval document generated successfully!";
-             return RedirectToAction("PendingEvents");
-         }*/
-
-        // Step 5: PDF Generation Method using iTextSharp
-        public void GenerateApprovalPDF(EVENT ev, decimal amount, string fullPath)
-        {
-            using (FileStream fs = new FileStream(fullPath, FileMode.Create))
+            // --- 5. Notifications ----------------------------------------------------
+            string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
+            if (budgetReduced)
             {
-                // Explicitly specify iTextSharp classes to avoid ambiguity
-                iTextSharp.text.Document doc = new iTextSharp.text.Document();
-                iTextSharp.text.pdf.PdfWriter.GetInstance(doc, fs);
-                doc.Open();
-
-                iTextSharp.text.Font headerFont = iTextSharp.text.FontFactory.GetFont("Arial", 16, iTextSharp.text.Font.BOLD);
-                iTextSharp.text.Font bodyFont = iTextSharp.text.FontFactory.GetFont("Arial", 12);
-
-                doc.Add(new iTextSharp.text.Paragraph("📄 Event Approval Document", headerFont));
-                doc.Add(new iTextSharp.text.Paragraph("\n"));
-                doc.Add(new iTextSharp.text.Paragraph($"Event: {ev.EventName}", bodyFont));
-                doc.Add(new iTextSharp.text.Paragraph($"Club: {ev.CLUB.ClubName}", bodyFont));
-                doc.Add(new iTextSharp.text.Paragraph($"Event Date: {ev.EventStartDateAndTime:dd MMM yyyy}", bodyFont));
-                doc.Add(new iTextSharp.text.Paragraph($"Requested Budget: ₹{ev.EventBudget}", bodyFont));
-                doc.Add(new iTextSharp.text.Paragraph($"✅ Approved Budget: ₹{amount}", bodyFont));
-                doc.Add(new iTextSharp.text.Paragraph("\n\nSignature of HOD: ________________________", bodyFont));
-
-                doc.Close();
+                // Notify mentor ONLY
+                _db.Notifications.Add(new Notification
+                {
+                    LoginID = ev.CLUB.MentorID,
+                    Message = baseMsg + $"was approved with a reduced budget of ₹{finalBudget:N0}. Please confirm.",
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                });
             }
+            else
+            {
+                // Notify mentor
+                _db.Notifications.Add(new Notification
+                {
+                    LoginID = ev.CLUB.MentorID,
+                    Message = baseMsg + "has been fully approved.",
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                });
+
+                // Notify club admin (if found)
+                var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
+                var clubAdminId = clubReg == null ? 0 :
+                                  _db.Logins.Where(l => l.Email == clubReg.Email)
+                                            .Select(l => l.LoginID)
+                                            .FirstOrDefault();
+
+                if (clubAdminId != 0)
+                {
+                    _db.Notifications.Add(new Notification
+                    {
+                        LoginID = clubAdminId,
+                        Message = baseMsg + "is now fully approved.",
+                        IsRead = false,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(7),
+                        CreatedDate = DateTime.Now
+                    });
+                }
+            }
+
+            _db.SaveChanges();
+
+            TempData["Message"] = "Event approval recorded successfully.";
+            return RedirectToAction("EventsForApproval", new { id = eventId });
         }
-
-
     }
 }

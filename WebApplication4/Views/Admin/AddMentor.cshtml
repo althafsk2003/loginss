@@ -394,7 +394,7 @@
             universityError.textContent = "";
         }
 
-        fetch(`/Admin/GetActiveDepartments?universityId=${universityId}`)
+fetch(`@Url.Action("GetActiveDepartments", "Admin")?universityId=${universityId}`)
             .then(response => response.json())
             .then(data => {
                 departmentDropdown.innerHTML = '<option value="">Select Department</option>';

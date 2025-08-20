@@ -59,6 +59,7 @@
         {
             var dept = Model[i];
             var delay = i * 0.2; // reveal delay
+            string responsible = !string.IsNullOrEmpty(dept.DirectorName) ? dept.DirectorName : dept.HOD;
 
             <div class="department-block" style="animation-delay: @($"{delay}s");">
                 <div class="icon-block">
@@ -66,7 +67,11 @@
                 </div>
                 <div class="info-block flex-grow-1">
                     <h5>@dept.DepartmentName</h5>
-                    <small>HOD: @dept.HOD</small>
+                    <small>
+                        @( !string.IsNullOrEmpty(dept.DirectorName)
+                            ? $"Director: {dept.DirectorName}"
+                            : $"HOD: {dept.HOD}" )
+                    </small>
                 </div>
                 <a href="@Url.Action("GetClubs", "Admin", new { departmentId = dept.DepartmentID })"
                    class="btn btn-outline-success btn-sm">

@@ -11,10 +11,16 @@
     {
         foreach (var dept in departments)
         {
-            var count = mentors.Count(m => m.DepartmentID == dept.DepartmentID);
-            deptMentorCounts.Add(dept.DepartmentName, count);
+            int count = mentors.Count(m => m.DepartmentID == dept.DepartmentID);
+
+            // Razor requires braces around this block
+            if (!deptMentorCounts.ContainsKey(dept.DepartmentName))
+            {
+                deptMentorCounts.Add(dept.DepartmentName, count);
+            }
         }
     }
+
 }
 
 <style>
@@ -181,12 +187,22 @@
                     <div class="card-header bg-primary text-white">
                         <div>
                             <h5>@department.DepartmentName</h5>
-                            <small>HOD: @department.HOD</small>
+                            <small>
+                                @if (!string.IsNullOrEmpty(department.DirectorName))
+                                {
+                                    @:Director: @department.DirectorName
+                                }
+                                else
+                                {
+                                    @:HOD: @department.HOD
+                                }
+                            </small>
                         </div>
                         <span class="badge @(department.IsActive ?? false ? "bg-success" : "bg-danger")">
                             @(department.IsActive ?? false ? "Active" : "Deactivated")
                         </span>
                     </div>
+
                     <div class="card-body">
                         <h6>Mentors:</h6>
                         @{

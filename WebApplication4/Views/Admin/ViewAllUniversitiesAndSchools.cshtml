@@ -21,9 +21,8 @@
         <tr>
             <th>University Name</th>
             <th>Abbreviation</th>
-            <th>Location</th>
             <th>Status</th>
-            <th>Departments (Schools)</th>
+            <th>Departments (Schools) with HOD/Director</th>
         </tr>
     </thead>
     <tbody>
@@ -32,7 +31,6 @@
             <tr>
                 <td>@university.UniversityNAME</td>
                 <td>@university.Abbreviation</td>
-                <td>@university.Location</td>
                 <td>
                     @if (university.IsActive == true)
                     {
@@ -48,7 +46,19 @@
                         @foreach (var department in university.DEPARTMENTs)
                         {
                             <li>
-                                @department.DepartmentName - @department.HOD
+                                @if (!string.IsNullOrEmpty(department.DirectorName))
+                                {
+                                    @($"{department.DepartmentName} - {department.DirectorName} (Director)")
+                                }
+                                else if (!string.IsNullOrEmpty(department.HOD))
+                                {
+                                    @($"{department.DepartmentName} - {department.HOD} (HOD)")
+                                }
+                                else
+                                {
+                                    @($"{department.DepartmentName} - Nill")
+                                }
+
                                 @if (department.IsActive == false)
                                 {
                                     <span class="badge badge-danger ml-1">Deactivated</span>

@@ -5,94 +5,83 @@
     Layout = "~/Views/Shared/_ClubadminLayout.cshtml";
 }
 
-<div class="container mt-3 form-container">
-    <div class="card shadow-lg p-4 event-card">
-        <h4 class="text-center mb-4">Post Event to Website</h4>
+<div class="container mt-2 form-container">
+    <div class="card shadow-lg p-3 event-card">
+        <h4 class="text-center mb-3">Post Event to Website</h4>
 
         @if (!string.IsNullOrEmpty(ViewBag.Message))
         {
             <p style="color: green;">@ViewBag.Message</p>
-
         }
-
 
         @using (Html.BeginForm("PostEvent", "ClubAdmin", FormMethod.Post, new { enctype = "multipart/form-data", id = "postEventForm" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.EventID)
 
-            <div class="row g-3">
-                <div class="col-md-6 form-group">
+            <div class="row g-2">
+                <!-- Row 1 -->
+                <div class="col-md-3 form-group">
                     @Html.LabelFor(m => m.EventName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control form-control-custom", @readonly = "readonly", id = "EventName" })
+                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control form-control-custom", @readonly = "readonly" })
                 </div>
-
-                <div class="col-md-6 form-group">
+                <div class="col-md-3 form-group">
                     @Html.LabelFor(m => m.ClubName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control form-control-custom", id = "ClubName" })
+                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
+                </div>
+                <div class="col-md-3 form-group">
+                    @Html.LabelFor(m => m.EventStartDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom" })
+                </div>
+                <div class="col-md-3 form-group">
+                    @Html.LabelFor(m => m.EventEndDateAndTime, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom" })
                 </div>
 
+                <!-- Row 2 -->
                 <div class="col-md-12 form-group">
                     @Html.LabelFor(m => m.EventDescription, new { @class = "form-label" })
-                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control form-control-custom", rows = 3, id = "EventDescription" })
-                    <div id="EventDescriptionError" class="error-message"></div>
+                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control form-control-custom", rows = 3 })
                 </div>
 
+                <!-- Row 3 -->
                 <div class="col-md-6 form-group">
-                    @Html.Label("Event Poster (Image)", new { @class = "form-label" })
-                    <input type="file" name="EventPosterFile" id="EventPosterFile" class="form-control form-control-custom" accept="image/png,image/jpeg,image/jpg" />
-                    <div id="EventPosterError" class="error-message"></div>
+                    <label for="EventPosterFile" class="form-label">Event Poster (Image)</label>
+                    <input type="file" name="EventPosterFile" id="EventPosterFile" class="form-control form-control-custom" accept="image/*" />
                     @if (!string.IsNullOrEmpty(Model.EventPoster))
                     {
-                        <div class="image-preview">
+                        <div class="image-preview mt-1">
                             <img src="@Model.EventPoster" alt="Event Poster" />
                         </div>
                     }
                 </div>
-
                 <div class="col-md-6 form-group">
-                    @Html.Label("Event Banner (Image)", new { @class = "form-label" })
-                    <input type="file" name="EventBannerFile" id="EventBannerFile" class="form-control form-control-custom" accept="image/png,image/jpeg,image/jpg" />
-                    <div id="EventBannerError" class="error-message"></div>
+                    <label for="EventBannerFile" class="form-label">Event Banner (Image)</label>
+                    <input type="file" name="EventBannerFile" id="EventBannerFile" class="form-control form-control-custom" accept="image/*" />
                     @if (!string.IsNullOrEmpty(Model.EventBanner))
                     {
-                        <div class="image-preview">
+                        <div class="image-preview mt-1">
                             <img src="@Model.EventBanner" alt="Event Banner" />
                         </div>
                     }
                 </div>
 
-                <div class="col-md-6 form-group">
-                    @Html.LabelFor(m => m.EventStartDateAndTime, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom", id = "EventStartDateAndTime" })
-                    <div id="EventStartDateAndTimeError" class="error-message"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
-                    @Html.LabelFor(m => m.EventEndDateAndTime, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom", id = "EventEndDateAndTime" })
-                    <div id="EventEndDateAndTimeError" class="error-message"></div>
-                </div>
-
-                <div class="col-md-6 form-group">
+                <!-- Row 4 -->
+                <div class="col-md-4 form-group">
                     @Html.LabelFor(m => m.Venue, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control form-control-custom", id = "Venue" })
-                    <div id="VenueError" class="error-message"></div>
+                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
                 </div>
-
-                <div class="col-md-6 form-group">
+                <div class="col-md-4 form-group">
                     @Html.LabelFor(m => m.RegistrationURL, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control form-control-custom", id = "RegistrationURL" })
-                    <div id="RegistrationURLError" class="error-message"></div>
+                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control form-control-custom", required = "required", type = "url" })
                 </div>
-
-                <div class="col-md-12 form-group">
+                <div class="col-md-4 form-group">
                     @Html.LabelFor(m => m.OrganizerName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control form-control-custom", id = "OrganizerName" })
-                    <div id="OrganizerNameError" class="error-message"></div>
+                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
                 </div>
 
-                <div class="col-md-12 text-center mt-4">
+                <!-- Submit -->
+                <div class="col-md-12 text-center mt-3">
                     <button type="submit" class="btn btn-primary btn-submit">Submit Event</button>
                 </div>
             </div>
@@ -107,10 +96,138 @@
         }
     </div>
 </div>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("postEventForm");
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            const fields = {
+                clubName: document.getElementById("ClubName"),
+                venue: document.getElementById("Venue"),
+                organizerName: document.getElementById("OrganizerName"),
+                regUrl: document.getElementById("RegistrationURL"),
+                poster: document.getElementById("EventPosterFile"),
+                banner: document.getElementById("EventBannerFile"),
+            };
+
+            const messages = {};
+
+            for (const key in fields) {
+                const field = fields[key];
+                const msgEl = document.createElement("div");
+                msgEl.className = "text-danger small mt-1";
+                field.parentElement.appendChild(msgEl);
+                messages[key] = msgEl;
+            }
+
+            // Real-time validations
+            fields.clubName.addEventListener("input", () => validateText(fields.clubName, messages.clubName, "Club Name"));
+            fields.venue.addEventListener("input", () => validateText(fields.venue, messages.venue, "Venue"));
+            fields.organizerName.addEventListener("input", () => validateText(fields.organizerName, messages.organizerName, "Organizer Name"));
+            fields.regUrl.addEventListener("input", () => validateUrl(fields.regUrl, messages.regUrl));
+
+            fields.poster.addEventListener("change", () => validateImage(fields.poster, 960, 1280, "Poster", messages.poster));
+            fields.banner.addEventListener("change", () => validateImage(fields.banner, 1472, 832, "Banner", messages.banner));
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const results = await Promise.all([
+                    validateText(fields.clubName, messages.clubName, "Club Name"),
+                    validateText(fields.venue, messages.venue, "Venue"),
+                    validateText(fields.organizerName, messages.organizerName, "Organizer Name"),
+                    validateUrl(fields.regUrl, messages.regUrl),
+                    validateImage(fields.poster, 960, 1280, "Poster", messages.poster),
+                    validateImage(fields.banner, 1472, 832, "Banner", messages.banner)
+                ]);
+
+                if (results.every(r => r)) {
+                    form.submit();
+                }
+            });
+
+            function validateText(field, msgEl, label) {
+                if (!field.value || field.value.trim().length < 3) {
+                    msgEl.textContent = `${label} must be at least 3 characters.`;
+                    return false;
+                }
+                msgEl.textContent = "";
+                return true;
+            }
+
+            function validateUrl(field, msgEl) {
+                try {
+                    new URL(field.value);
+                    msgEl.textContent = "";
+                    return true;
+                } catch {
+                    msgEl.textContent = "Please enter a valid Registration URL.";
+                    return false;
+                }
+            }
+
+            function validateImage(input, requiredWidth, requiredHeight, label, msgEl) {
+                return new Promise(resolve => {
+                    const file = input.files[0];
+                    if (!file) {
+                        msgEl.textContent = `${label} image is required.`;
+                        resolve(false);
+                        return;
+                    }
+
+                    const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+                    if (!validTypes.includes(file.type)) {
+                        msgEl.textContent = `${label} must be JPG, JPEG, PNG, or WEBP format.`;
+                        resolve(false);
+                        return;
+                    }
+
+                    if (file.size > 1024 * 1024) {
+                        msgEl.textContent = `${label} must be ≤ 1MB.`;
+                        resolve(false);
+                        return;
+                    }
+
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+                    img.onload = function () {
+                        URL.revokeObjectURL(url);
+                        const aspectRatio = img.naturalWidth / img.naturalHeight;
+                        const expectedRatio = requiredWidth / requiredHeight;
+
+                        if (img.naturalWidth !== requiredWidth || img.naturalHeight !== requiredHeight ||
+                            Math.abs(aspectRatio - expectedRatio) > 0.01) {
+                            msgEl.textContent = `${label} must be exactly ${requiredWidth}×${requiredHeight}px.`;
+                            resolve(false);
+                        } else {
+                            msgEl.textContent = "";
+                            resolve(true);
+                        }
+                    };
+                    img.onerror = () => {
+                        msgEl.textContent = "Invalid image file.";
+                        resolve(false);
+                    };
+                    img.src = url;
+                });
+            }
+        });
+    </script>
+}
+<style>
+    .form-group {
+        position: relative;
+    }
+
+        .form-group .text-danger {
+            position: relative;
+            top: 0.25rem;
+        }
+</style>
 
 @section Styles {
     <style>
-        /* Advanced Color Palette */
         :root {
             --primary-gradient-start: #4a00e0;
             --primary-gradient-end: #8e2de2;
@@ -122,168 +239,115 @@
             --error-color: #dc3545;
         }
 
-        /* Global Styles */
         html, body {
             margin: 0;
-            padding: 10px;
+            padding: 0;
             min-height: 100vh;
             box-sizing: border-box;
             background: linear-gradient(180deg, var(--secondary-color), #ffffff);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
         }
 
-        /* Form Container */
         .form-container {
-            max-width: 100%;
-            height: auto;
-            padding: 0 10px;
+            padding: 0;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
         }
 
-        /* Event Card */
         .event-card {
-            padding: 20px;
-            border-radius: 16px;
-            background: linear-gradient(145deg, #ffffff, var(--secondary-color));
-            box-shadow: 0 6px 18px var(--shadow-color);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow-y: auto;
-            max-height: calc(100vh - 80px);
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #ffffff;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            border: 1px solid #e0e0e0;
         }
 
-        .event-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 24px var(--shadow-color);
-        }
+            .event-card h4 {
+                font-weight: 700;
+                font-size: 2.5rem;
+                color: var(--primary-gradient-start);
+                position: relative;
+            }
 
-        /* Heading */
-        .event-card h4 {
-            font-weight: 700;
-            font-size: 1.8rem;
-            color: var(--primary-gradient-start);
-            position: relative;
-            letter-spacing: 0.5px;
-        }
+                .event-card h4::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -6px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 50px;
+                    height: 3px;
+                    background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
+                    border-radius: 2px;
+                }
 
-        .event-card h4::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            border-radius: 2px;
-        }
-
-        /* Form Elements */
         .form-group {
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.4rem;
         }
 
         .form-label {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: var(--text-primary);
-            margin-bottom: 0.4rem;
-            display: block;
         }
 
         .form-control-custom {
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid #ced4da;
-            padding: 0.65rem;
-            font-size: 0.9rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            padding: 0.5rem 0.65rem;
+            font-size: 1rem;
             background: #fff;
         }
 
-        .form-control-custom:focus {
-            border-color: var(--primary-gradient-start);
-            box-shadow: 0 0 8px rgba(74, 0, 224, 0.2);
-            outline: none;
-        }
+            .form-control-custom:focus {
+                border-color: var(--primary-gradient-start);
+                box-shadow: 0 0 6px rgba(74, 0, 224, 0.2);
+                outline: none;
+            }
 
-        .form-control-custom[readonly] {
-            background: #f1f3f5;
-            cursor: not-allowed;
-            color: var(--text-secondary);
-        }
-
-        /* Image Preview */
-        .image-preview {
-            margin-top: 0.5rem;
-        }
+            .form-control-custom[readonly] {
+                background: #f1f3f5;
+                cursor: not-allowed;
+                color: var(--text-secondary);
+            }
 
         .image-preview img {
-            max-height: 80px;
-            border-radius: 8px;
+            max-height: 70px;
+            border-radius: 6px;
             object-fit: cover;
             border: 1px solid #dee2e6;
         }
 
-        /* Error Message */
         .error-message {
             color: var(--error-color);
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
+            font-size: 0.8rem;
             display: none;
             font-weight: 500;
         }
 
-        .is-invalid {
-            border-color: var(--error-color) !important;
-            box-shadow: 0 0 6px rgba(220, 53, 69, 0.2) !important;
-        }
-
-        /* Submit Button */
         .btn-submit {
             background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
             border: none;
-            border-radius: 10px;
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
+            border-radius: 8px;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #fff;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
         }
 
-        .btn-submit:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 12px rgba(74, 0, 224, 0.3);
-            background: linear-gradient(135deg, #3a00b8, #751cb8);
-        }
+            .btn-submit:hover {
+                transform: scale(1.05);
+                background: linear-gradient(135deg, #3a00b8, #751cb8);
+                box-shadow: 0 6px 12px rgba(74, 0, 224, 0.3);
+            }
 
-        .btn-submit::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease, height 0.4s ease;
-        }
-
-        .btn-submit:hover::after {
-            width: 200px;
-            height: 200px;
-        }
-
-        /* Alerts */
         .alert {
-            border-radius: 8px;
-            padding: 0.8rem;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            position: relative;
+            border-radius: 6px;
+            padding: 0.7rem;
+            font-size: 0.85rem;
         }
 
         .alert-success {
@@ -297,59 +361,31 @@
             transition: filter 0.3s ease;
         }
 
-        .btn-close:hover {
-            filter: opacity(1);
-        }
+            .btn-close:hover {
+                filter: opacity(1);
+            }
 
-        /* Responsive Adjustments */
         @@media (max-width: 768px) {
-            html, body {
-                padding: 8px;
-            }
-
-            .form-container {
-                padding: 5px;
-            }
-
-            .event-card {
-                padding: 15px;
-                max-height: calc(100vh - 60px);
+            .col-md-3, .col-md-4, .col-md-6, .col-md-12 {
+                flex: 0 0 100%;
+                max-width: 100%;
+                padding-left: 5px;
+                padding-right: 5px;
             }
 
             .event-card h4 {
-                font-size: 1.5rem;
-            }
-
-            .event-card h4::after {
-                width: 50px;
-            }
-
-            .form-group {
-                margin-bottom: 0.6rem;
+                font-size: 1.4rem;
             }
 
             .form-control-custom {
-                padding: 0.55rem;
-                font-size: 0.85rem;
-            }
-
-            .form-label {
-                font-size: 0.9rem;
+                padding: 0.45rem;
+                font-size: 0.82rem;
             }
 
             .btn-submit {
-                padding: 0.65rem 1.5rem;
-                font-size: 0.95rem;
-            }
-
-            .image-preview img {
-                max-height: 60px;
-            }
-
-            .error-message {
-                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.88rem;
             }
         }
     </style>
 }
-

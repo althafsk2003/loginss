@@ -32,6 +32,8 @@ namespace WebApplication4.Models
         public Nullable<int> DepartmentID { get; set; }
         public string OTP { get; set; }
         public Nullable<System.DateTime> OTPExpiry { get; set; }
+        public Nullable<int> SubDepartmentID { get; set; }
+        public Nullable<int> ClubID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CLUB> CLUBS { get; set; }
@@ -41,5 +43,7 @@ namespace WebApplication4.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual UNIVERSITY UNIVERSITY { get; set; }
+        public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
+        public virtual CLUB CLUB { get; set; }
     }
 }
