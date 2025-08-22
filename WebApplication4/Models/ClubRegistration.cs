@@ -31,10 +31,28 @@ namespace WebApplication4.Models
         public Nullable<int> SubDepartmentID { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable1 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable2 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable3 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable4 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable5 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable6 { get; set; }
         public virtual CLUB CLUB { get; set; }
+        public virtual CLUB CLUB1 { get; set; }
+        public virtual CLUB CLUB2 { get; set; }
+        public virtual CLUB CLUB3 { get; set; }
+        public virtual CLUB CLUB4 { get; set; }
+        public virtual CLUB CLUB5 { get; set; }
+        public virtual CLUB CLUB6 { get; set; }
         public virtual USER USER { get; set; }
+        public virtual USER USER1 { get; set; }
+        public virtual USER USER2 { get; set; }
+        public virtual USER USER3 { get; set; }
+        public virtual USER USER4 { get; set; }
+        public virtual USER USER5 { get; set; }
+        public virtual USER USER6 { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
-        public virtual UNIVERSITY UNIVERSITY { get; set; }
         public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
+        public virtual UNIVERSITY UNIVERSITY { get; set; }
     }
 }

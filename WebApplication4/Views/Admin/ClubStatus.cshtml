@@ -93,17 +93,15 @@
                 <tr class="club-row" data-status="@club.ApprovalStatusID">
                     <td>@club.ClubName</td>
                     <td>
-                        @{
-                            var desc = club.Description ?? "";
-                            var shortDesc = desc.Length > 10 ? desc.Substring(0, 10) + "..." : desc;
-                        }
-
-                        <span class="short-desc">@shortDesc</span>
-                        <span class="full-desc d-none">@desc</span>
-
-                        @if (desc.Length > 10)
+                        @if (!string.IsNullOrEmpty(club.Description) && club.Description.Length > 10)
                         {
-                            <a href="javascript:void(0);" class="toggle-desc text-primary ms-2">Show more</a>
+                            <span class="short-text">@club.Description.Substring(0, 10)...</span>
+                            <span class="full-text d-none">@club.Description</span>
+                            <a href="javascript:void(0);" class="see-more" onclick="toggleDescription(this)">See More</a>
+                        }
+                        else
+                        {
+                            @club.Description
                         }
                     </td>
                     <td>@club.MentorName</td>
@@ -137,18 +135,21 @@
 </div>
 
 <script>
-    $(document).on("click", ".toggle-desc", function () {
-        var $this = $(this);
-        var $row = $this.closest("td");
+    function toggleDescription(link) {
+        var row = link.closest("td");
+        var shortText = row.querySelector(".short-text");
+        var fullText = row.querySelector(".full-text");
 
-        $row.find(".short-desc, .full-desc").toggleClass("d-none");
-
-        if ($this.text() === "Show more") {
-            $this.text("Show less");
+        if (fullText.classList.contains("d-none")) {
+            shortText.classList.add("d-none");
+            fullText.classList.remove("d-none");
+            link.textContent = "See Less";
         } else {
-            $this.text("Show more");
+            shortText.classList.remove("d-none");
+            fullText.classList.add("d-none");
+            link.textContent = "See More";
         }
-    });
+    }
 </script>
 
 

@@ -355,14 +355,7 @@
                                 <strong>Event Type:</strong> <span>@item.EventType</span>
                                 <strong>Start Date:</strong> <span>@item.EventStartDateAndTime</span>
                                 <strong>End Date:</strong> <span>@item.EventEndDateAndTime</span>
-                                @if (ViewBag.OrganizerNames.ContainsKey(item.EventOrganizerID.ToString()))
-                                {
-                                    <strong>Organizer:</strong> <span>@ViewBag.OrganizerNames[item.EventOrganizerID.ToString()]</span>
-                                }
-                                else
-                                {
-                                    <strong>Organizer:</strong> <span>unknown</span>
-                                }
+
                                 <strong>Club Name:</strong> <span>@ViewBag.ClubNames[(int)item.ClubID]</span>
                                 <strong>University:</strong> <span>ICFAI Foundation for Higher Education</span>
                                 @if (!string.IsNullOrEmpty(item.BudgetDocumentPath))

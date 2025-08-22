@@ -21,5 +21,11 @@ namespace WebApplication4.Models
         public string Description { get; set; }
     
         public virtual EVENT EVENT { get; set; }
+        public virtual EVENT EVENT1 { get; set; }
+        public virtual EVENT EVENT2 { get; set; }
+        public virtual EVENT EVENT3 { get; set; }
+        public virtual EVENT EVENT4 { get; set; }
+        public virtual EVENT EVENT5 { get; set; }
+        public virtual EVENT EVENT6 { get; set; }
     }
 }

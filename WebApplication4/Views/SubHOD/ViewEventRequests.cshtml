@@ -28,14 +28,17 @@
                     var evt = Model.Events[i];
                     <div class="carousel-item @(i == 0 ? "active" : "")">
                         <div class="card mx-auto mt-3 shadow-sm" style="width: 38rem; border-radius: 16px;">
-                            <img src="@Url.Content(evt.EventPoster ?? "~/Content/Images/no-poster.png")" class="card-img-top" alt="Event Poster" style="max-height: 250px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px;" />
+                            <img src="@Url.Content(evt.EventPoster ?? "~/Content/Images/no-poster.png")"
+                                 class="card-img-top"
+                                 alt="Event Poster"
+                                 style="max-height: 250px; object-fit: cover; border-top-left-radius: 16px; border-top-right-radius: 16px;" />
                             <div class="card-body">
                                 <h5 class="card-title text-primary">@evt.EventName</h5>
                                 <p class="card-text">
-                                    <span class="short-desc d-inline">
+                                    <span class="short-desc">
                                         @(evt.EventDescription?.Length > 150
-        ? evt.EventDescription.Substring(0, 150) + "..."
-        : evt.EventDescription)
+                                            ? evt.EventDescription.Substring(0, 150) + "..."
+                                            : evt.EventDescription)
                                     </span>
                                     <span class="full-desc d-none">@evt.EventDescription</span>
                                     @if (!string.IsNullOrEmpty(evt.EventDescription) && evt.EventDescription.Length > 150)
@@ -103,8 +106,8 @@
                 <div class="modal-body">
                     @Html.Hidden("eventId", "", new { id = "rejectEventId" })
                     <div class="form-group">
-                        <label>Reason for rejection:</label>
-                        <textarea name="reason" class="form-control" required></textarea>
+                        <label for="RejectReason">Reason for rejection:</label>
+                        <textarea id="RejectReason" name="reason" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -122,6 +125,18 @@
             $('#rejectEventId').val(eventId);
             $('#rejectModal').modal('show');
         }
+
+        $(document).ready(function () {
+            $('.toggle-desc').on('click', function () {
+                var $link = $(this);
+                var $cardText = $link.closest('.card-text');
+
+                $cardText.find('.short-desc').toggleClass('d-none');
+                $cardText.find('.full-desc').toggleClass('d-none');
+
+                $link.text($link.text().trim() === 'See more' ? 'See less' : 'See more');
+            });
+        });
     </script>
 }
 
@@ -130,7 +145,7 @@
         html, body {
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
             background-color: #f5f8fa;
         }
 
@@ -150,10 +165,9 @@
         .card {
             border-radius: 16px;
             border: 1px solid #dee2e6;
-            margin: 0 auto; /* Center the card */
+            margin: 0 auto;
         }
 
-        /* Carousel controls positioning tightly next to the card */
         .carousel-control-prev,
         .carousel-control-next {
             width: 40px;
@@ -170,7 +184,6 @@
             right: 150px;
         }
 
-
         .carousel-control-prev-icon,
         .carousel-control-next-icon {
             background-color: #007bff;
@@ -182,15 +195,6 @@
             background-position: center;
         }
 
-        .carousel-control-prev-icon {
-            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 8 8'%3E%3Cpath d='M5.5 0L4.09 1.41 6.67 4l-2.58 2.59L5.5 8 9 4.5z'/%3E%3C/svg%3E");
-            transform: rotate(180deg);
-        }
-
-        .carousel-control-next-icon {
-            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 8 8'%3E%3Cpath d='M5.5 0L4.09 1.41 6.67 4l-2.58 2.59L5.5 8 9 4.5z'/%3E%3C/svg%3E");
-        }
-
         .carousel-inner {
             padding: 0;
         }
@@ -200,65 +204,9 @@
             padding-right: 0;
         }
 
-        .card-text {
-            position: relative;
-        }
-
         .toggle-desc {
             cursor: pointer;
             font-weight: 500;
         }
     </style>
 }
-
-<script>
-    function showRejectModal(eventId) {
-        $('#rejectEventId').val(eventId);
-        $('#rejectModal').modal('show');
-    }
-
-    $(document).ready(function () {
-        $('.toggle-desc').click(function () {
-            var $link = $(this);
-            var $cardText = $link.closest('.card-text');
-            $cardText.find('.short-desc').toggleClass('d-none');
-            $cardText.find('.full-desc').toggleClass('d-none');
-
-            $link.text($link.text() === 'See more' ? 'See less' : 'See more');
-        });
-    });
-</script>
-
-
-<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            @using (Html.BeginForm("RejectEvent", "SubHOD", FormMethod.Post, new { id = "rejectForm" }))
-            {
-                <div class="modal-header">
-                    <h5 class="modal-title">Reject Event</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    @Html.Hidden("EventID")
-                    <div class="form-group">
-                        <label for="RejectionReason">Reason for Rejection</label>
-                        <textarea class="form-control" name="RejectionReason" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger">Reject</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-
-<script>
-    function showRejectModal(eventId) {
-        $('#rejectModal input[name="EventID"]').val(eventId);
-        $('#rejectModal').modal('show');
-    }
-</script>

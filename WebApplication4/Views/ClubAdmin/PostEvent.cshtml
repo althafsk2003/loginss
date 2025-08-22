@@ -96,11 +96,11 @@
         }
     </div>
 </div>
+
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("postEventForm");
-            const submitBtn = form.querySelector('button[type="submit"]');
 
             const fields = {
                 clubName: document.getElementById("ClubName"),
@@ -112,7 +112,6 @@
             };
 
             const messages = {};
-
             for (const key in fields) {
                 const field = fields[key];
                 const msgEl = document.createElement("div");
@@ -121,18 +120,15 @@
                 messages[key] = msgEl;
             }
 
-            // Real-time validations
+            // Live validation
             fields.clubName.addEventListener("input", () => validateText(fields.clubName, messages.clubName, "Club Name"));
             fields.venue.addEventListener("input", () => validateText(fields.venue, messages.venue, "Venue"));
             fields.organizerName.addEventListener("input", () => validateText(fields.organizerName, messages.organizerName, "Organizer Name"));
             fields.regUrl.addEventListener("input", () => validateUrl(fields.regUrl, messages.regUrl));
-
             fields.poster.addEventListener("change", () => validateImage(fields.poster, 960, 1280, "Poster", messages.poster));
             fields.banner.addEventListener("change", () => validateImage(fields.banner, 1472, 832, "Banner", messages.banner));
 
             form.addEventListener("submit", async function (e) {
-                e.preventDefault();
-
                 const results = await Promise.all([
                     validateText(fields.clubName, messages.clubName, "Club Name"),
                     validateText(fields.venue, messages.venue, "Venue"),
@@ -142,8 +138,8 @@
                     validateImage(fields.banner, 1472, 832, "Banner", messages.banner)
                 ]);
 
-                if (results.every(r => r)) {
-                    form.submit();
+                if (!results.every(r => r)) {
+                    e.preventDefault(); // ❌ only stop if invalid
                 }
             });
 
@@ -175,29 +171,22 @@
                         resolve(false);
                         return;
                     }
-
                     const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
                     if (!validTypes.includes(file.type)) {
                         msgEl.textContent = `${label} must be JPG, JPEG, PNG, or WEBP format.`;
                         resolve(false);
                         return;
                     }
-
                     if (file.size > 1024 * 1024) {
                         msgEl.textContent = `${label} must be ≤ 1MB.`;
                         resolve(false);
                         return;
                     }
-
                     const img = new Image();
                     const url = URL.createObjectURL(file);
                     img.onload = function () {
                         URL.revokeObjectURL(url);
-                        const aspectRatio = img.naturalWidth / img.naturalHeight;
-                        const expectedRatio = requiredWidth / requiredHeight;
-
-                        if (img.naturalWidth !== requiredWidth || img.naturalHeight !== requiredHeight ||
-                            Math.abs(aspectRatio - expectedRatio) > 0.01) {
+                        if (img.naturalWidth !== requiredWidth || img.naturalHeight !== requiredHeight) {
                             msgEl.textContent = `${label} must be exactly ${requiredWidth}×${requiredHeight}px.`;
                             resolve(false);
                         } else {
@@ -215,177 +204,4 @@
         });
     </script>
 }
-<style>
-    .form-group {
-        position: relative;
-    }
 
-        .form-group .text-danger {
-            position: relative;
-            top: 0.25rem;
-        }
-</style>
-
-@section Styles {
-    <style>
-        :root {
-            --primary-gradient-start: #4a00e0;
-            --primary-gradient-end: #8e2de2;
-            --secondary-color: #f7f9fc;
-            --text-primary: #2d2d2d;
-            --text-secondary: #6c757d;
-            --accent-color: #ff6f61;
-            --shadow-color: rgba(0, 0, 0, 0.15);
-            --error-color: #dc3545;
-        }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            box-sizing: border-box;
-            background: linear-gradient(180deg, var(--secondary-color), #ffffff);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-
-        .form-container {
-            padding: 0;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .event-card {
-            padding: 10px 12px;
-            border-radius: 10px;
-            background: #ffffff;
-            box-shadow: 0 4px 10px var(--shadow-color);
-            border: 1px solid #e0e0e0;
-        }
-
-            .event-card h4 {
-                font-weight: 700;
-                font-size: 2.5rem;
-                color: var(--primary-gradient-start);
-                position: relative;
-            }
-
-                .event-card h4::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -6px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 50px;
-                    height: 3px;
-                    background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
-                    border-radius: 2px;
-                }
-
-        .form-group {
-            margin-bottom: 0.4rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-        }
-
-        .form-control-custom {
-            border-radius: 6px;
-            border: 1px solid #ced4da;
-            padding: 0.5rem 0.65rem;
-            font-size: 1rem;
-            background: #fff;
-        }
-
-            .form-control-custom:focus {
-                border-color: var(--primary-gradient-start);
-                box-shadow: 0 0 6px rgba(74, 0, 224, 0.2);
-                outline: none;
-            }
-
-            .form-control-custom[readonly] {
-                background: #f1f3f5;
-                cursor: not-allowed;
-                color: var(--text-secondary);
-            }
-
-        .image-preview img {
-            max-height: 70px;
-            border-radius: 6px;
-            object-fit: cover;
-            border: 1px solid #dee2e6;
-        }
-
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.8rem;
-            display: none;
-            font-weight: 500;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            border: none;
-            border-radius: 8px;
-            padding: 0.5rem 1.2rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-
-            .btn-submit:hover {
-                transform: scale(1.05);
-                background: linear-gradient(135deg, #3a00b8, #751cb8);
-                box-shadow: 0 6px 12px rgba(74, 0, 224, 0.3);
-            }
-
-        .alert {
-            border-radius: 6px;
-            padding: 0.7rem;
-            font-size: 0.85rem;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .btn-close {
-            filter: opacity(0.6);
-            transition: filter 0.3s ease;
-        }
-
-            .btn-close:hover {
-                filter: opacity(1);
-            }
-
-        @@media (max-width: 768px) {
-            .col-md-3, .col-md-4, .col-md-6, .col-md-12 {
-                flex: 0 0 100%;
-                max-width: 100%;
-                padding-left: 5px;
-                padding-right: 5px;
-            }
-
-            .event-card h4 {
-                font-size: 1.4rem;
-            }
-
-            .form-control-custom {
-                padding: 0.45rem;
-                font-size: 0.82rem;
-            }
-
-            .btn-submit {
-                padding: 0.5rem 1rem;
-                font-size: 0.88rem;
-            }
-        }
-    </style>
-}

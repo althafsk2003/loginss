@@ -19,6 +19,12 @@ namespace WebApplication4.Models
         {
             this.ClubRegistrations = new HashSet<ClubRegistration>();
             this.DEPARTMENTs = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs1 = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs2 = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs3 = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs4 = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs5 = new HashSet<DEPARTMENT>();
+            this.DEPARTMENTs6 = new HashSet<DEPARTMENT>();
             this.Logins = new HashSet<Login>();
         }
     
@@ -37,6 +43,18 @@ namespace WebApplication4.Models
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DEPARTMENT> DEPARTMENTs { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DEPARTMENT> DEPARTMENTs6 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Login> Logins { get; set; }
     }

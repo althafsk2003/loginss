@@ -18,6 +18,12 @@ namespace WebApplication4.Models
         public USER()
         {
             this.ClubRegistrations = new HashSet<ClubRegistration>();
+            this.ClubRegistrations1 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations2 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations3 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations4 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations5 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations6 = new HashSet<ClubRegistration>();
         }
     
         public int UserID { get; set; }
@@ -44,6 +50,18 @@ namespace WebApplication4.Models
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations6 { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
         public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
     }

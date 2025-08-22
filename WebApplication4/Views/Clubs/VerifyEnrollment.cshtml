@@ -3,15 +3,23 @@
     Layout = "~/Views/Shared/_ClubsLayout.cshtml";
 }
 
-<h2>Enter Your Enrollment ID</h2>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card shadow-lg p-4" style="max-width: 500px; width: 100%; border-radius: 12px;">
+        <h3 class="text-center mb-4" style="color:#0d6efd; font-weight:700;">🔑 Verify Enrollment</h3>
 
-<form method="post" action="@Url.Action("VerifyEnrollment", "Clubs")">
-    <input type="hidden" name="eventId" value="@ViewBag.EventID" />
+        <form method="post" action="@Url.Action("VerifyEnrollment", "Clubs")">
+            <input type="hidden" name="eventId" value="@ViewBag.EventID" />
 
-    <label>Enrollment ID:</label>
-    <input type="text" name="enrollmentId" required />
+            <div class="mb-3">
+                <label class="form-label" style="font-weight:600;">Enrollment ID</label>
+                <input type="text" name="enrollmentId" class="form-control form-control-lg" placeholder="Enter your ID" required />
+            </div>
 
-    <br /><br />
-    <button type="submit">Submit</button>
-</form>
-
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" style="border-radius:8px; font-weight:600;">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

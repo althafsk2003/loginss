@@ -18,7 +18,19 @@ namespace WebApplication4.Models
         public CLUB()
         {
             this.ClubRegistrations = new HashSet<ClubRegistration>();
+            this.ClubRegistrations1 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations2 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations3 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations4 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations5 = new HashSet<ClubRegistration>();
+            this.ClubRegistrations6 = new HashSet<ClubRegistration>();
             this.EVENTS = new HashSet<EVENT>();
+            this.EVENTS1 = new HashSet<EVENT>();
+            this.EVENTS2 = new HashSet<EVENT>();
+            this.EVENTS3 = new HashSet<EVENT>();
+            this.EVENTS4 = new HashSet<EVENT>();
+            this.EVENTS5 = new HashSet<EVENT>();
+            this.EVENTS6 = new HashSet<EVENT>();
             this.Logins = new HashSet<Login>();
         }
     
@@ -37,12 +49,54 @@ namespace WebApplication4.Models
         public Nullable<int> SubDepartmentID { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable1 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable2 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable3 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable4 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable5 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable6 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClubRegistration> ClubRegistrations { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClubRegistration> ClubRegistrations6 { get; set; }
         public virtual DEPARTMENT DEPARTMENT { get; set; }
+        public virtual DEPARTMENT DEPARTMENT1 { get; set; }
+        public virtual DEPARTMENT DEPARTMENT2 { get; set; }
+        public virtual DEPARTMENT DEPARTMENT3 { get; set; }
+        public virtual DEPARTMENT DEPARTMENT4 { get; set; }
+        public virtual DEPARTMENT DEPARTMENT5 { get; set; }
+        public virtual DEPARTMENT DEPARTMENT6 { get; set; }
         public virtual Login Login { get; set; }
+        public virtual Login Login1 { get; set; }
+        public virtual Login Login2 { get; set; }
+        public virtual Login Login3 { get; set; }
+        public virtual Login Login4 { get; set; }
+        public virtual Login Login5 { get; set; }
+        public virtual Login Login6 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EVENT> EVENTS { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EVENT> EVENTS6 { get; set; }
         public virtual SUBDEPARTMENT SUBDEPARTMENT { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Login> Logins { get; set; }

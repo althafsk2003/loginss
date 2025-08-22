@@ -36,8 +36,8 @@ namespace WebApplication4.Models
         public virtual DbSet<EventWinner> EventWinners { get; set; }
         public virtual DbSet<Login> Logins { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<SUBDEPARTMENT> SUBDEPARTMENTs { get; set; }
         public virtual DbSet<UNIVERSITY> UNIVERSITies { get; set; }
         public virtual DbSet<USER> USERs { get; set; }
-        public virtual DbSet<SUBDEPARTMENT> SUBDEPARTMENTs { get; set; }
     }
 }

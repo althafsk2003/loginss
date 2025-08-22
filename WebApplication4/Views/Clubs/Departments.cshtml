@@ -44,31 +44,31 @@
                 }
                 else
                 {
-            <div class="col-md-6 text-column">
-                <h3>@department.DepartmentName</h3>
-                <p>
-                    <b>Head of the school:</b>
-                    @(string.IsNullOrWhiteSpace(department.DirectorName) ? department.HOD : department.DirectorName)
-                </p>
-                <p>
-                    @switch (department.DepartmentName)
-                    {
-                        case "ICFAI School Of Architecture":
-                            @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
-                            break;
-                        case "ICFAI Law School":
-                            @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
-                            break;
-                        case "ICFAI School Of Social Sciences":
-                            @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
-                            break;
-                        default:
-                            @:Learn more about the exciting programs and research opportunities offered by this department.
-                            break;
-                    }
-                </p>
-                <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
-            </div>
+                    <div class="col-md-6 text-column">
+                        <h3>@department.DepartmentName</h3>
+                        <p>
+                            <b>Head of the school:</b>
+                            @(string.IsNullOrWhiteSpace(department.DirectorName) ? department.HOD : department.DirectorName)
+                        </p>
+                        <p>
+                            @switch (department.DepartmentName)
+                            {
+                                case "ICFAI School Of Architecture":
+                                    @:The ICFAI School of Architecture offers a comprehensive B.Arch program that fosters creativity, design thinking, and technical expertise.
+                                    break;
+                                case "ICFAI Law School":
+                                    @:The ICFAI Law School provides a rigorous legal education with a focus on practical skills and contemporary legal issues.
+                                    break;
+                                case "ICFAI School Of Social Sciences":
+                                    @:The ICFAI School of Social Sciences offers diverse programs in fields like psychology, sociology, and political science, encouraging critical thinking and social awareness.
+                                    break;
+                                default:
+                                    @:Learn more about the exciting programs and research opportunities offered by this department.
+                                    break;
+                            }
+                        </p>
+                        <button class="custom-button show-clubs" data-department-id="@department.DepartmentID">@department.DepartmentName</button>
+                    </div>
                     <div class="col-md-6 image-column">
                         <img src="~/wwwroot/Images/@(department.DepartmentName.Replace(" ", "")).jpg" alt="@department.DepartmentName" class="img-fluid department-image" />
                     </div>
@@ -467,4 +467,51 @@
             })
             .catch(error => console.error("Error fetching club logos:", error));
     }
+</script>
+
+<!-- Back to Top Button -->
+<button type="button" id="btn-back-to-top" title="Go to top">
+    ↑
+</button>
+
+<style>
+    #btn-back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none;
+        z-index: 9999;
+        background-color: orange;
+        color: white;
+        border: none;
+        outline: none;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        font-size: 22px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        #btn-back-to-top:hover {
+            background-color: darkorange;
+        }
+</style>
+
+<script>
+    const backToTopBtn = document.getElementById("btn-back-to-top");
+
+    window.onscroll = function () {
+        if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+            backToTopBtn.style.display = "block";
+        } else {
+            backToTopBtn.style.display = "none";
+        }
+    };
+
+    backToTopBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 </script>

@@ -13,7 +13,39 @@
     <div style="flex: 1; background-color: #f8f9fa; color: #333; padding: 25px 30px;">
         <h2 style="font-size: 24px; margin-bottom: 14px; color: #5a2c8c;">@Model.ClubName</h2>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Abbreviation:</strong> @Model.Abbreviation</p>
-        <p style="margin: 8px 0; font-size: 16px;"><strong>Description:</strong> @Model.Description</p>
+        @{
+            // Show first 200 chars only
+            var shortDesc = Model.Description != null && Model.Description.Length > 200
+                ? Model.Description.Substring(0, 200) + "..."
+                : Model.Description;
+        }
+
+        <p style="margin: 8px 0; font-size: 16px;">
+            <strong>Description:</strong>
+            @shortDesc
+            @if (!string.IsNullOrEmpty(Model.Description) && Model.Description.Length > 200)
+            {
+                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#descModal">See more</a>
+            }
+        </p>
+
+        <!-- Bootstrap Modal for Full Description -->
+        <div class="modal fade" id="descModal" tabindex="-1" aria-labelledby="descModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="descModalLabel">Full Description</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="font-size:16px; white-space: pre-line;">
+                            @Model.Description
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <p style="margin: 8px 0; font-size: 16px;"><strong>Department:</strong> @ViewBag.DepartmentName</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Mentor:</strong> @ViewBag.MentorName</p>
         <p style="margin: 8px 0; font-size: 16px;"><strong>Email:</strong> <a href="mailto:@ViewBag.MentorEmail" style="color: #007bff;">@ViewBag.MentorEmail</a></p>
@@ -160,12 +192,12 @@
     .next-step-section {
         text-align: center;
         padding: 30px 0;
-        max-width: 1000px;
+        max-width: 600px;
         box-sizing: border-box;
         border-radius: 15px;
         margin: 40px auto;
-        background: linear-gradient(135deg, rgba(255, 245, 235, 0.9), rgba(255, 255, 255, 0.95));
-        box-shadow: 0 4px 15px rgba(255, 153, 51, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, rgba(0, 102, 204, 0.9), rgba(135, 206, 250, 0.95));
+        box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
         animation: fadeInUp 0.8s ease-out;
         overflow: hidden;
         position: relative;
@@ -180,7 +212,7 @@
             bottom: 0;
             border: 2px solid;
             border-radius: 15px;
-            background: linear-gradient(45deg, #ff9900, #ffd700);
+            background: linear-gradient(45deg, #0066cc, #87cefa);
             z-index: -1;
         }
 
@@ -188,22 +220,15 @@
         font-size: 1.8rem;
         font-weight: 700;
         margin-bottom: 15px;
-        background: linear-gradient(45deg, #ff9900, #ffd700);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .next-step-buttons {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 20px;
+        color: #000; /* changed from gradient to black */
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: unset;
     }
 
     .next-step-button {
         display: inline-block;
         padding: 10px 22px;
-        border: 2px solid #ff9900;
+        border: 2px solid #0066cc;
         color: #333;
         text-decoration: none;
         border-radius: 6px;
@@ -215,10 +240,10 @@
     }
 
         .next-step-button:hover {
-            background: #ffd700;
+            background: #87cefa;
             color: #333;
             transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
             animation: pulse 0.6s ease;
         }
 
@@ -932,5 +957,52 @@
                 Object.values(fields).forEach(field => field.classList.remove("invalid"));
             }
         });
+    });
+</script>
+
+<!-- Back to Top Button -->
+<button type="button" id="btn-back-to-top" title="Go to top">
+    ↑
+</button>
+
+<style>
+    #btn-back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none;
+        z-index: 9999;
+        background-color: orange;
+        color: white;
+        border: none;
+        outline: none;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        font-size: 22px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        #btn-back-to-top:hover {
+            background-color: darkorange;
+        }
+</style>
+
+<script>
+    const backToTopBtn = document.getElementById("btn-back-to-top");
+
+    window.onscroll = function () {
+        if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+            backToTopBtn.style.display = "block";
+        } else {
+            backToTopBtn.style.display = "none";
+        }
+    };
+
+    backToTopBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 </script>

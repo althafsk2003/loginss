@@ -23,5 +23,11 @@ namespace WebApplication4.Models
         public Nullable<System.DateTime> CreatedDate { get; set; }
     
         public virtual Login Login { get; set; }
+        public virtual Login Login1 { get; set; }
+        public virtual Login Login2 { get; set; }
+        public virtual Login Login3 { get; set; }
+        public virtual Login Login4 { get; set; }
+        public virtual Login Login5 { get; set; }
+        public virtual Login Login6 { get; set; }
     }
 }

@@ -19,8 +19,20 @@ namespace WebApplication4.Models
         {
             this.Comments = new HashSet<Comment>();
             this.EventPhotos = new HashSet<EventPhoto>();
+            this.EventPhotos1 = new HashSet<EventPhoto>();
+            this.EventPhotos2 = new HashSet<EventPhoto>();
+            this.EventPhotos3 = new HashSet<EventPhoto>();
+            this.EventPhotos4 = new HashSet<EventPhoto>();
+            this.EventPhotos5 = new HashSet<EventPhoto>();
+            this.EventPhotos6 = new HashSet<EventPhoto>();
             this.EventRegistrations = new HashSet<EventRegistration>();
             this.EventWinners = new HashSet<EventWinner>();
+            this.EventWinners1 = new HashSet<EventWinner>();
+            this.EventWinners2 = new HashSet<EventWinner>();
+            this.EventWinners3 = new HashSet<EventWinner>();
+            this.EventWinners4 = new HashSet<EventWinner>();
+            this.EventWinners5 = new HashSet<EventWinner>();
+            this.EventWinners6 = new HashSet<EventWinner>();
         }
     
         public Nullable<int> ClubID { get; set; }
@@ -52,15 +64,57 @@ namespace WebApplication4.Models
         public string Venue { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable1 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable2 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable3 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable4 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable5 { get; set; }
+        public virtual ApprovalStatusTable ApprovalStatusTable6 { get; set; }
         public virtual CLUB CLUB { get; set; }
+        public virtual CLUB CLUB1 { get; set; }
+        public virtual CLUB CLUB2 { get; set; }
+        public virtual CLUB CLUB3 { get; set; }
+        public virtual CLUB CLUB4 { get; set; }
+        public virtual CLUB CLUB5 { get; set; }
+        public virtual CLUB CLUB6 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventPhoto> EventPhotos { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventPhoto> EventPhotos6 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventRegistration> EventRegistrations { get; set; }
         public virtual Login Login { get; set; }
+        public virtual Login Login1 { get; set; }
+        public virtual Login Login2 { get; set; }
+        public virtual Login Login3 { get; set; }
+        public virtual Login Login4 { get; set; }
+        public virtual Login Login5 { get; set; }
+        public virtual Login Login6 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventWinner> EventWinners { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners2 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners3 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners4 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners5 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventWinner> EventWinners6 { get; set; }
     }
 }
