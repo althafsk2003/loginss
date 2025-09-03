@@ -1,6 +1,8 @@
 ﻿
+using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -120,22 +122,34 @@ namespace WebApplication1.Controllers
         }
 
 
-        // POST: Request Event Submission
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RequestEvent(EVENT model, HttpPostedFileBase EventPoster, HttpPostedFileBase BudgetDocument)
+        public async Task<ActionResult> RequestEvent(
+            EVENT model, HttpPostedFileBase EventPoster, HttpPostedFileBase BudgetDocument)
         {
             if (Session["UserEmail"] == null)
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
             if (!ModelState.IsValid)
+                return View(model);
+
+            if (EventPoster != null && EventPoster.FileName == null)
+                throw new Exception("EventPoster.FileName is null");
+
+            if (BudgetDocument != null && BudgetDocument.FileName == null)
+                throw new Exception("BudgetDocument.FileName is null");
+
+            if (Server.MapPath("~/uploads") == null)
+                throw new Exception("Server.MapPath returned null");
+
+
+            string userEmail = Session["UserEmail"]?.ToString();
+            if (string.IsNullOrEmpty(userEmail))
             {
+                TempData["ErrorMessage"] = "User email not found in session.";
                 return View(model);
             }
-
-            string userEmail = Session["UserEmail"].ToString();
 
             var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
             if (loginRecord == null)
@@ -144,7 +158,6 @@ namespace WebApplication1.Controllers
                 return View(model);
             }
 
-            // ✅ Fetch club using ClubID
             var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == loginRecord.ClubID && c.IsActive == true);
             if (club == null)
             {
@@ -152,82 +165,167 @@ namespace WebApplication1.Controllers
                 return View(model);
             }
 
-            string uploadsFolder = Server.MapPath("~/uploads");
+            string uploadsFolder = Server.MapPath("~/uploads") ?? Server.MapPath("/");
             if (!Directory.Exists(uploadsFolder))
-            {
                 Directory.CreateDirectory(uploadsFolder);
-            }
-
-            // Handle Event Poster Upload
-            string filePath = null;
-            if (EventPoster != null && EventPoster.ContentLength > 0)
+            // Event Poster
+            string posterPath = "/uploads/default-poster.png";
+            if (EventPoster != null && !string.IsNullOrWhiteSpace(EventPoster.FileName) && EventPoster.ContentLength > 0)
             {
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(EventPoster.FileName);
+                string safeFileName = Path.GetFileName(EventPoster.FileName ?? "default.png"); // safe fallback
+                string uniqueFileName = Guid.NewGuid() + "_" + safeFileName;
                 string savePath = Path.Combine(uploadsFolder, uniqueFileName);
                 EventPoster.SaveAs(savePath);
-                filePath = "/uploads/" + uniqueFileName;
+                posterPath = "/uploads/" + uniqueFileName;
             }
 
-            if (string.IsNullOrEmpty(filePath))
-            {
-                filePath = "/uploads/default-poster.png"; // fallback default
-            }
-
-            // Handle Budget Document Upload
+            // Budget Document
             string budgetPath = null;
-            if (BudgetDocument != null && BudgetDocument.ContentLength > 0)
+            if (BudgetDocument != null && !string.IsNullOrWhiteSpace(BudgetDocument.FileName) && BudgetDocument.ContentLength > 0)
             {
-                string budgetFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(BudgetDocument.FileName);
+                string safeBudgetFileName = Path.GetFileName(BudgetDocument.FileName ?? "default.pdf"); // safe fallback
+                string budgetFileName = Guid.NewGuid() + "_" + safeBudgetFileName;
                 string budgetSavePath = Path.Combine(uploadsFolder, budgetFileName);
                 BudgetDocument.SaveAs(budgetSavePath);
                 budgetPath = "/uploads/" + budgetFileName;
             }
 
+
             var newEvent = new EVENT
             {
-                EventName = model.EventName,
-                EventDescription = model.EventDescription,
+                EventName = model.EventName ?? "Unnamed Event",
+                EventDescription = model.EventDescription ?? "No description provided",
                 ClubID = club.ClubID,
                 EventOrganizerID = loginRecord.LoginID,
                 EventType = "Campus",
-                ApprovalStatusID = 1, // Pending
+                ApprovalStatusID = 1,
                 EventCreatedDate = DateTime.Now,
                 EventStartDateAndTime = model.EventStartDateAndTime,
                 EventEndDateAndTime = model.EventEndDateAndTime,
                 EventBudget = model.EventBudget,
                 BudgetDocumentPath = budgetPath,
-                EventPoster = filePath,
-                Venue = model.Venue,
+                EventPoster = posterPath,
+                Venue = model.Venue ?? "Venue not specified",
                 IsActive = false
             };
 
             try
             {
                 _db.EVENTS.Add(newEvent);
-                int changes = _db.SaveChanges();
+                _db.SaveChanges();
 
-                if (changes > 0)
+                var mentorLogin = _db.Logins.FirstOrDefault(m => m.LoginID == club.MentorID);
+
+                Debug.WriteLine($"mentorLogin = {(mentorLogin != null ? "found" : "null")}");
+
+                if (mentorLogin != null && !string.IsNullOrEmpty(mentorLogin.Email))
                 {
-                    TempData["SuccessMessage"] = "Event request submitted successfully!";
-                    return RedirectToAction("RequestEvent");
+                    string mentorEmail = mentorLogin.Email;
+                    Debug.WriteLine($"mentorEmail = '{mentorEmail}'");
+
+                    var mentorUser = _db.USERs.FirstOrDefault(u => u.Email == mentorEmail);
+                    Debug.WriteLine($"mentorUser = {(mentorUser != null ? "found" : "null")}");
+                    Debug.WriteLine($"mentorUser.FirstName = '{mentorUser?.FirstName}'");
+                    Debug.WriteLine($"mentorUser.LastName = '{mentorUser?.LastName}'");
+
+                    string mentorFullName = mentorUser != null
+                        ? $"{mentorUser.FirstName ?? ""} {mentorUser.LastName ?? ""}".Trim()
+                        : "Mentor";
+                    Debug.WriteLine($"mentorFullName = '{mentorFullName}'");
+
+                    // Token generation
+                    string plainData = $"{newEvent.EventID}|{club.ClubID}";
+                    Debug.WriteLine($"plainData = '{plainData}'");
+
+                    string encryptedToken = SecureHelper.Encrypt(plainData);
+                    Debug.WriteLine($"SecureHelper.Encrypt(plainData) = '{encryptedToken}'");
+
+                    string token = !string.IsNullOrEmpty(encryptedToken) ? encryptedToken : "defaultToken";
+                    Debug.WriteLine($"token = '{token}'");
+
+
+                    // Base URL (use PC's local IP for mobile testing)
+                    string baseUrl = "https://localhost:44368"; // Use http for local testing
+                    Debug.WriteLine($"baseUrl = '{baseUrl}'");
+
+                    // Forward & Reject URLs (absolute URLs)
+                    string forwardUrl = Url.Action("ForwardEventToHOD", "Mentor", new { token = token }, Request.Url.Scheme);
+                    string rejectUrl = Url.Action("RejectEventRequest", "Mentor", new { token = token }, Request.Url.Scheme);
+                    Debug.WriteLine($"forwardUrl = '{forwardUrl}'");
+                    Debug.WriteLine($"rejectUrl = '{rejectUrl}'");
+
+                    // Poster & Budget Document URLs (absolute URLs)
+                    string posterUrl = !string.IsNullOrEmpty(newEvent.EventPoster)
+                        ? $"{baseUrl}{newEvent.EventPoster}"
+                        : $"{baseUrl}/uploads/default-poster.png";
+
+                    string budgetDocUrl = !string.IsNullOrEmpty(newEvent.BudgetDocumentPath)
+                        ? $"{baseUrl}{newEvent.BudgetDocumentPath}"
+                        : "#";
+
+                    Debug.WriteLine($"posterUrl = '{posterUrl}'");
+                    Debug.WriteLine($"budgetDocUrl = '{budgetDocUrl}'");
+
+                    // Club name safe
+                    string clubNameSafe = club.ClubName ?? "Unknown Club";
+                    Debug.WriteLine($"clubNameSafe = '{clubNameSafe}'");
+
+
+                    // Email body
+                    string emailBody = $@"
+<div style='font-family: Arial, sans-serif; font-size: 14px; color: #000; line-height: 1.5;'>
+    <h3 style='margin-bottom: 10px;'>Dear {mentorFullName},</h3>
+    <div style='margin-bottom: 10px;'>
+        A new event request has been submitted by <strong>{clubNameSafe}</strong>.
+    </div>
+    <div style='margin-bottom: 10px;'><strong>Event:</strong> {newEvent.EventName}</div>
+    <div style='margin-bottom: 10px;'><strong>Description:</strong> {newEvent.EventDescription}</div>
+    <div style='margin-bottom: 10px;'><strong>Dates:</strong> {newEvent.EventStartDateAndTime} - {newEvent.EventEndDateAndTime}</div>
+    <div style='margin-bottom: 10px;'><strong>Venue:</strong> {newEvent.Venue}</div>
+    <div style='margin-bottom: 10px;'><strong>Budget:</strong> {newEvent.EventBudget}</div>
+    <div style='margin-bottom: 10px;'>
+        <strong>Budget Document:</strong> <a href='{budgetDocUrl}' style='color: #1a73e8;'>View Document</a>
+    </div>
+
+    <div style='margin-top:15px;'>
+        <a href='{forwardUrl}' style='padding:10px 15px; background-color:#28a745; color:#fff; text-decoration:none; margin-right:10px; display:inline-block;'>Forward to HOD</a>
+        <a href='{rejectUrl}' style='padding:10px 15px; background-color:#dc3545; color:#fff; text-decoration:none; display:inline-block;'>Reject Event</a>
+    </div>
+    <!-- Invisible spacer to prevent Gmail collapse -->
+    <div style='display:none; font-size:1px; line-height:1px;'>&nbsp;</div>
+</div>";
+
+
+                    try
+                    {
+                        var emailService = new EmailService();
+                        await emailService.SendEmailAsync(mentorEmail, "Event Request for Approval", emailBody);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Email sending failed: {ex.Message}");
+                        TempData["WarningMessage"] = "Event saved, but email could not be sent to mentor.";
+                    }
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "No changes were made.";
-                    return View(model);
+                    TempData["WarningMessage"] = "Event saved, but mentor not found. Cannot send email.";
                 }
+
+
+                TempData["SuccessMessage"] = "Event request submitted successfully!";
+                return RedirectToAction("RequestEvent");
             }
             catch (Exception ex)
             {
                 while (ex.InnerException != null)
-                {
                     ex = ex.InnerException;
-                }
 
                 TempData["ErrorMessage"] = "Error: " + ex.Message;
                 return View(model);
             }
         }
+
 
 
 

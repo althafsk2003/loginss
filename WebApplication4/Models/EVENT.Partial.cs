@@ -19,6 +19,8 @@ namespace WebApplication4.Models
 
         [NotMapped]
         public string OrganizerName;
+        [NotMapped]
+        public string Token { get; set; }
 
     }
 }

@@ -15,9 +15,6 @@ using Org.BouncyCastle.Asn1.Ocsp;
 using SendGrid;
 using System.Data.Entity.Infrastructure;
 
-
-
-
 namespace WebApplication4.Controllers
 {
     public class ClubsController : Controller
@@ -35,7 +32,6 @@ namespace WebApplication4.Controllers
         {
             return View();
         }
-
 
         public ActionResult Departments()
         {
@@ -71,12 +67,11 @@ namespace WebApplication4.Controllers
         {
             var clubs = db.CLUBS
                 .Where(c => c.DepartmentID == departmentId)
-                .Select(c => new { c.ClubID, c.ClubName, c.LogoImagePath }) // Keep the original path
+                .Select(c => new { c.ClubID, c.ClubName, c.LogoImagePath })
                 .ToList();
 
             return Json(clubs, JsonRequestBehavior.AllowGet);
         }
-
 
         public ActionResult GetClubDetails(int clubId)
         {
@@ -92,47 +87,28 @@ namespace WebApplication4.Controllers
                 return HttpNotFound();
             }
 
-            // Fetching Department Name based on DepartmentID
             var department = db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
-
-            // Fetching Mentor's Email from Logins table
             var mentorLogin = db.Logins.FirstOrDefault(m => m.LoginID == club.MentorID);
-
-            // Fetching Mentor's Name from Users table using the Email
             var mentorUser = db.USERs.FirstOrDefault(u => u.Email == mentorLogin.Email);
 
-            // Storing values in ViewBag
             ViewBag.DepartmentName = department != null ? department.DepartmentName : "Unknown";
             ViewBag.MentorName = mentorUser != null ? mentorUser.FirstName : "Unknown";
             ViewBag.MentorEmail = mentorLogin != null ? mentorLogin.Email : "Unknown";
 
-
-            // --- Set University and Departments ---
-            // First, fetch the university based on the club's department.
             var university = department != null
                 ? db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid)
                 : null;
 
-            // Fetch all departments under this university
             var departments = university != null
-? db.DEPARTMENTs
-.Where(d => d.Universityid == university.UniversityID)
-.Select(d => new DepartmentDto { Id = d.DepartmentID, Name = d.DepartmentName })
-.ToList()
-: new List<DepartmentDto>();
+                ? db.DEPARTMENTs
+                    .Where(d => d.Universityid == university.UniversityID)
+                    .Select(d => new DepartmentDto { Id = d.DepartmentID, Name = d.DepartmentName })
+                    .ToList()
+                : new List<DepartmentDto>();
 
-
-
-            // Assign values to ViewBag so they are available in the view (and in your modal)
             ViewBag.UniversityName = university?.UniversityNAME ?? "Unknown";
-            ViewBag.UniversityId = university?.UniversityID; // Hidden ID for Form Submission
+            ViewBag.UniversityId = university?.UniversityID;
             ViewBag.Departments = departments;
-            // --- End of University and Departments assignment ---
-
-            // Optionally, for debugging
-            // System.Diagnostics.Debug.WriteLine("University: " + ViewBag.UniversityName);
-
-
 
             return View(club);
         }
@@ -157,37 +133,21 @@ namespace WebApplication4.Controllers
             return Json(new { UniversityName = university.UniversityNAME, Departments = departments }, JsonRequestBehavior.AllowGet);
         }
 
-
-
-
-
         [HttpPost]
         public ActionResult Register(ClubRegistration model, HttpPostedFileBase ProfileImage)
         {
-
-            System.Diagnostics.Debug.WriteLine("This is a trace message");
-            System.Diagnostics.Debug.WriteLine("Profile Image: " + (ProfileImage != null ? ProfileImage.FileName : "No file uploaded"));
-            System.Diagnostics.Debug.WriteLine("Model Data: " + JsonConvert.SerializeObject(model));
-            System.Diagnostics.Debug.WriteLine($"ClubID: {model.ClubID}, DepartmentID: {model.DepartmentID}, UniversityID: {model.UniversityID}");
-
-
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors)
                                               .Select(e => e.ErrorMessage)
                                               .ToList();
-
-                System.Diagnostics.Debug.WriteLine("Validation Errors: " + string.Join(", ", errors));
-
                 return Json(new { success = false, message = "Invalid data!", errors });
             }
-
 
             using (var transaction = db.Database.BeginTransaction())
             {
                 try
                 {
-                    // 1️⃣ Check if User Already Exists
                     var existingUser = db.USERs.FirstOrDefault(u => u.Email == model.Email);
                     if (existingUser == null)
                     {
@@ -218,7 +178,6 @@ namespace WebApplication4.Controllers
                         db.SaveChanges();
                     }
 
-                    // 2️⃣ Fetch the University ID from the Department
                     var department = db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == model.DepartmentID);
                     var university = db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
                     if (university == null)
@@ -226,7 +185,6 @@ namespace WebApplication4.Controllers
                         return Json(new { success = false, message = "University not found!" });
                     }
 
-                    // 3️⃣ Upload Profile Image
                     if (ProfileImage != null && ProfileImage.ContentLength > 0)
                     {
                         string uploadsFolder = Server.MapPath("~/uploads");
@@ -240,21 +198,18 @@ namespace WebApplication4.Controllers
                         existingUser.PhotoPath = "/uploads/" + uniqueFileName;
                     }
 
-                    // 4️⃣ Check if User is Already Registered in the Club
                     var existingRegistration = db.ClubRegistrations.FirstOrDefault(cr => cr.UserID == existingUser.UserID && cr.ClubID == model.ClubID);
                     if (existingRegistration != null)
                     {
                         return Json(new { success = false, message = "User already registered for this club!" });
                     }
 
-                    // 5️⃣ Validate Club Seat Availability
                     var club = db.CLUBS.FirstOrDefault(c => c.ClubID == model.ClubID);
                     if (club == null || club.AvailableClubCommitteeSeats <= 0)
                     {
                         return Json(new { success = false, message = "No available seats in this club!" });
                     }
 
-                    // 6️⃣ Save Club Registration
                     var clubRegistration = new ClubRegistration
                     {
                         UserID = existingUser.UserID,
@@ -272,9 +227,7 @@ namespace WebApplication4.Controllers
                     };
 
                     db.ClubRegistrations.Add(clubRegistration);
-
-                    // 7️⃣ Reduce Club Seats with **Concurrency Handling**
-                    db.Entry(club).Reload(); // Ensure the latest data
+                    db.Entry(club).Reload();
                     if (club.AvailableClubCommitteeSeats <= 0)
                     {
                         return Json(new { success = false, message = "Seats are no longer available!" });
@@ -298,20 +251,17 @@ namespace WebApplication4.Controllers
         {
             using (var db = new dummyclubsEntities())
             {
-                // Fetch Club Name
                 var club = db.CLUBS.FirstOrDefault(c => c.ClubID == clubId);
                 if (club != null)
                 {
                     ViewBag.ClubName = club.ClubName;
                 }
 
-                // Get upcoming events
                 var upcomingEvents = db.EVENTS
                     .Where(e => e.ClubID == clubId &&
                                 (e.EventStatus == "Upcoming not posted" || e.EventStatus == "Upcoming posted"))
                     .ToList();
 
-                // Update those with "Upcoming not posted"
                 foreach (var ev in upcomingEvents.Where(e => e.EventStatus == "Upcoming not posted"))
                 {
                     ev.IsActive = true;
@@ -319,20 +269,18 @@ namespace WebApplication4.Controllers
                 }
                 db.SaveChanges();
 
-                // Project upcoming events to DTO
                 var upcomingDtos = upcomingEvents.Select(e => new EventDto
                 {
                     EventID = e.EventID,
                     EventName = e.EventName,
                     EventPoster = e.EventPoster,
-                    EventStartDateAndTime=e.EventStartDateAndTime,
+                    EventStartDateAndTime = e.EventStartDateAndTime,
                     EventEndDateAndTime = e.EventEndDateAndTime,
                     EventStatus = e.EventStatus,
                     IsActive = e.IsActive
                 }).ToList();
                 ViewBag.UpcomingEvents = upcomingDtos;
 
-                // Get all concluded events
                 var concludedEvents = db.EVENTS
                     .Where(e => e.ClubID == clubId &&
                                 e.EventStatus == "Concluded" &&
@@ -351,7 +299,6 @@ namespace WebApplication4.Controllers
                 }).ToList();
                 ViewBag.ConcludedEvents = concludedDtos;
 
-                // Extract distinct years for filter
                 var concludedYears = concludedEvents
                     .Select(e => e.EventEndDateAndTime.Year)
                     .Distinct()
@@ -359,7 +306,6 @@ namespace WebApplication4.Controllers
                     .ToList();
                 ViewBag.ConcludedEventYears = concludedYears;
 
-                // Load comments for all upcoming events
                 var eventIds = upcomingEvents.Select(e => e.EventID).ToList();
                 var commentDtos = db.Comments
                     .Where(c => eventIds.Contains(c.EventID))
@@ -371,17 +317,12 @@ namespace WebApplication4.Controllers
                     }).ToList();
                 ViewBag.Comments = commentDtos;
 
-                // Set ViewBag.EventID for AJAX
                 ViewBag.EventID = upcomingDtos.FirstOrDefault()?.EventID ?? 0;
             }
 
             return View();
         }
 
-
-
-
-        // GET: Events/Details/5
         public ActionResult EventDetails(int id)
         {
             var eventItem = db.EVENTS
@@ -394,23 +335,14 @@ namespace WebApplication4.Controllers
                 return HttpNotFound();
             }
 
-            // Only include top-level comments
             eventItem.Comments = eventItem.Comments
                 .Where(c => c.ParentCommentID == null)
                 .ToList();
 
-            // Generate QR code for the registration URL
-            //string registrationLink = Url.Action("VerifyEnrollment", "Clubs", new { id = eventItem.EventID }, protocol: "http");
-
-            // Replace localhost with your ngrok URL
             string registrationLink = Url.Action("VerifyEnrollment", "Clubs", new { id = eventItem.EventID }, protocol: "https");
             registrationLink = registrationLink.Replace("localhost:44368", "61a7-123-63-49-246.ngrok-free.app");
 
-
-            // Generate the QR code for this URL
             string qrCodeImage = GenerateQRCode(registrationLink);
-
-            // Pass the QR image to the view
             ViewBag.QRImage = qrCodeImage;
 
             return View(eventItem);
@@ -428,8 +360,6 @@ namespace WebApplication4.Controllers
 
             return View(eventDetails);
         }
-
-
 
         [HttpPost]
         public ActionResult AddComment(Comment comment)
@@ -454,46 +384,9 @@ namespace WebApplication4.Controllers
                 return Content("Registration link not found.");
             }
 
-            // Redirect to the Google form URL
             return Redirect(eventEntity.RegistrationURL);
         }
 
-        // Action to get the registration link based on EventID
-        /* [HttpGet]
-         public async Task<ActionResult> EventDetail(int eventId)
-         {
-             // Fetch the event details from the database using EventID
-             var eventDetails = await db.EVENTS
-                                          .Where(e => e.EventID == eventId)
-                                          .FirstOrDefaultAsync();
-
-             if (eventDetails == null)
-             {
-                 return View();
-             }
-
-             // Generate QR code for the registration link
-             string registrationLink = eventDetails.RegistrationURL;
-             string qrCodeImage = GenerateQRCode(registrationLink);
-
-             // Log QR base64 string for debugging
-             System.Diagnostics.Debug.WriteLine("QR Image: " + qrCodeImage);
-
-             // Pass the event details along with the QR code image as a model to the view
-             var model = new PostEventViewModel
-             {
-                 EventID = eventDetails.EventID,
-                 EventName = eventDetails.EventName,
-                 EventDescription = eventDetails.EventDescription,
-                 RegistrationURL = registrationLink,
-                 QRContentText = registrationLink,
-                 QRImage = qrCodeImage // Set this property with the generated QR code image as base64 string
-             };
-
-             return View(model);
-         }*/
-
-        // Helper method to generate QR code
         private string GenerateQRCode(string data)
         {
             using (var qrGenerator = new QRCodeGenerator())
@@ -501,7 +394,7 @@ namespace WebApplication4.Controllers
                 var qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
                 using (var qrCode = new QRCode(qrCodeData))
                 {
-                    using (var bitmap = qrCode.GetGraphic(20))  // 20 is the pixel size
+                    using (var bitmap = qrCode.GetGraphic(20))
                     {
                         using (var ms = new MemoryStream())
                         {
@@ -514,56 +407,43 @@ namespace WebApplication4.Controllers
             }
         }
 
-        // GET: Clubs/VerifyEnrollment
         public ActionResult VerifyEnrollment(int id)
         {
             ViewBag.EventID = id;
             return View();
         }
 
-        // POST: Validate and redirect
         [HttpPost]
         public ActionResult VerifyEnrollment(string enrollmentId, int eventId)
         {
-            // You can also validate enrollmentId if needed
-
             var eventDetails = db.EVENTS.FirstOrDefault(e => e.EventID == eventId);
             if (eventDetails != null)
             {
                 Session["EventID"] = eventId;
-                return Redirect(eventDetails.RegistrationURL); // Redirect to actual registration form
+                return Redirect(eventDetails.RegistrationURL);
             }
 
             return HttpNotFound();
         }
 
-
-
         [HttpPost]
-
-    
         public ActionResult StoreResponse()
         {
             try
             {
-                // 1. Read request body
                 Request.InputStream.Position = 0;
                 string json;
                 using (var reader = new StreamReader(Request.InputStream))
                     json = reader.ReadToEnd();
 
-                // 2. Deserialize into model
                 var model = JsonConvert.DeserializeObject<RegistrationModel>(json);
                 if (model == null)
                     return new HttpStatusCodeResult(400, "Invalid payload");
 
-
-                // ✅ Fetch EventID from DB using EventName
                 var @event = db.EVENTS.FirstOrDefault(e => e.EventName == model.EventName);
                 if (@event == null)
                     return new HttpStatusCodeResult(404, "Event not found");
 
-                // 3. Map to EF entity
                 var entity = new EventRegistration
                 {
                     EventID = @event.EventID,
@@ -584,14 +464,9 @@ namespace WebApplication4.Controllers
                     RegisteredAt = DateTime.Now
                 };
 
-                // 4. Save to database
                 db.EventRegistrations.Add(entity);
                 db.SaveChanges();
 
-                // ✅ 5. Send SMS
-                //SendSmsToStudent(model.PhoneNumber, model.FullName, model.EventName);
-
-                // 5. Return success response
                 return Json(new { success = true });
             }
             catch (DbEntityValidationException ex)
@@ -601,43 +476,37 @@ namespace WebApplication4.Controllers
                     .Select(x => $"Property: {x.PropertyName} Error: {x.ErrorMessage}")
                     .ToList();
 
-                Response.StatusCode = 400;  // Bad Request for validation errors
+                Response.StatusCode = 400;
                 return Json(new { success = false, message = "Validation failed", errors = errorMessages });
             }
             catch (DbUpdateException dbEx)
             {
-                // Unwrap the inner exception to get detailed database error message
                 var sqlMessage = dbEx.InnerException?.InnerException?.Message
                                  ?? dbEx.InnerException?.Message
                                  ?? dbEx.Message;
 
-                Response.StatusCode = 500;  // Internal Server Error for DB update errors
+                Response.StatusCode = 500;
                 return Json(new
                 {
                     success = false,
                     message = "Database update failed",
-                    sqlMessage = sqlMessage  // Send detailed SQL error message
+                    sqlMessage = sqlMessage
                 });
             }
             catch (Exception ex)
             {
                 var innerMessage = ex.InnerException?.Message;
 
-                Response.StatusCode = 500;  // Internal Server Error for other exceptions
+                Response.StatusCode = 500;
                 return Json(new
                 {
                     success = false,
                     message = ex.Message,
-                    innerMessage = innerMessage  // Optionally send inner message
+                    innerMessage = innerMessage
                 });
             }
         }
 
-
-       
-
-
-        // GET: /Clubs/ConcludedEvents
         public ActionResult ConcludedEvents(int? year)
         {
             var query = db.EVENTS
@@ -666,5 +535,27 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        // =======================
+        // 🔹 NEW ACTIONS ADDED
+        // =======================
+
+        // GET: Clubs/Magazine
+        public ActionResult Magazine()
+        {
+            /*
+             * You can later extend this method to:
+             * 1. Fetch magazine issues stored in a MAGAZINE table.
+             * 2. Load magazine PDFs or cover images from the server.
+             * 3. Provide filtering by year/volume.
+             */
+            ViewBag.Title = "Research - Magazine";
+            return View();
+        }
+
+        // GET: Clubs/Newsletters
+        public ActionResult Newsletters()
+        {
+            return View();
+        }
     }
 }

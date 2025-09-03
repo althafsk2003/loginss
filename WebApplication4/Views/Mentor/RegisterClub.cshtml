@@ -141,23 +141,19 @@
 
                 <!-- Right Column -->
                 <div class="col-md-6">
+                    <div class="mb-2">
+                        <label for="ClubEmail" class="form-label">Club Email</label>
+                        <input type="email" name="ClubEmail" id="ClubEmail" class="form-control" placeholder="Enter Club Email" required />
+                        <div class="invalid-feedback">Valid Club Email is required.</div>
+                        <small class="text-muted">This email will be used for club admin login. Default password: clubadmin@123</small>
+                    </div>
 
                     <div class="mb-2">
                         <label for="LogoImage" class="form-label">Club Logo</label>
                         <input type="file" name="LogoImage" id="LogoImage" class="form-control" accept="image/jpeg,image/png,image/gif" required="required" />
                         <div class="invalid-feedback" id="logoImageError">Club Logo is required.</div>
                     </div>
-                    @*                    <div class="mb-2">
-            <label for="TotalClubCommitteeSeats" class="form-label">Total Seats</label>
-            @Html.TextBoxFor(m => m.TotalClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "1", max = "100", id = "TotalClubCommitteeSeats" })
-            <div class="invalid-feedback">Total Seats must be between 1 and 100.</div>
-        </div>
 
-        <div class="mb-2">
-            <label for="AvailableClubCommitteeSeats" class="form-label">Available Seats</label>
-            @Html.TextBoxFor(m => m.AvailableClubCommitteeSeats, new { @class = "form-control", type = "number", required = "required", min = "0", max = "100", id = "AvailableClubCommitteeSeats" })
-            <div class="invalid-feedback" id="availableSeatsError">Available Seats must be between 0 and 100.</div>
-        </div>*@
                     <div class="mb-2">
                         <label class="form-label">Department</label>
                         <input type="text" class="form-control" value="@ViewBag.DepartmentName" readonly />
@@ -173,7 +169,6 @@
         }
     </div>
 </div>
-
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -200,6 +195,25 @@
                 }
             }
 
+            function validateEmail(field) {
+                const value = field.val().trim();
+                const feedback = field.next(".invalid-feedback");
+                field.removeClass("is-invalid");
+                const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                if (!value) {
+                    feedback.text("Club Email is required.");
+                    field.addClass("is-invalid");
+                    return false;
+                } else if (!emailPattern.test(value)) {
+                    feedback.text("Please enter a valid email address.");
+                    field.addClass("is-invalid");
+                    return false;
+                } else {
+                    feedback.text("");
+                    return true;
+                }
+            }
+
             function validateField(field) {
                 const id = field.attr("id");
                 if (id === "ClubName") {
@@ -208,18 +222,19 @@
                     return validateTextInput(field, 10, "Abbreviation");
                 } else if (id === "Description") {
                     return validateTextInput(field, 5000, "Description");
+                } else if (id === "ClubEmail") {
+                    return validateEmail(field);
                 }
                 return true;
             }
 
-            $("#ClubName, #Abbreviation, #Description").on("input blur", function () {
+            $("#ClubName, #Abbreviation, #Description, #ClubEmail").on("input blur", function () {
                 validateField($(this));
             });
 
             form.on("submit", function (e) {
                 let isValid = true;
-
-                ["#ClubName", "#Abbreviation", "#Description"].forEach(selector => {
+                ["#ClubName", "#Abbreviation", "#Description", "#ClubEmail"].forEach(selector => {
                     if (!validateField($(selector))) {
                         isValid = false;
                     }

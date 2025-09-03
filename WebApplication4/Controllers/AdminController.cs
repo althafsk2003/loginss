@@ -176,6 +176,7 @@ namespace WebApplication4.Controllers
         public ActionResult Logout()
         {
             Session.Clear();
+            Session.Abandon();
             return RedirectToAction("Login");
         }
 

@@ -296,6 +296,7 @@
     </style>
 }
 
+
 <div class="container">
     <h2>View Event Requests</h2>
 
@@ -339,9 +340,7 @@
             {
                 <div class="col">
                     <div class="event-card">
-                        <div class="event-card-header">
-                            Event Details
-                        </div>
+                        <div class="event-card-header">Event Details</div>
                         <div class="event-content">
                             @if (!string.IsNullOrEmpty(item.EventPoster))
                             {
@@ -355,7 +354,6 @@
                                 <strong>Event Type:</strong> <span>@item.EventType</span>
                                 <strong>Start Date:</strong> <span>@item.EventStartDateAndTime</span>
                                 <strong>End Date:</strong> <span>@item.EventEndDateAndTime</span>
-
                                 <strong>Club Name:</strong> <span>@ViewBag.ClubNames[(int)item.ClubID]</span>
                                 <strong>University:</strong> <span>ICFAI Foundation for Higher Education</span>
                                 @if (!string.IsNullOrEmpty(item.BudgetDocumentPath))
@@ -370,17 +368,19 @@
                             </div>
                         </div>
                         <div class="event-card-buttons">
-                            <form action="@Url.Action("ForwardEventToHOD", "Mentor", new { eventId = item.EventID, clubId = item.ClubID })" method="post">
+                            <!-- Forward to HOD -->
+                            <form action="@Url.Action("ForwardEventToHOD", "Mentor")" method="post">
                                 @Html.AntiForgeryToken()
+                                <input type="hidden" name="token" value="@item.Token" />
                                 <button type="submit" class="btn btn-success">Request to SCC</button>
                             </form>
 
+                            <!-- Reject Event -->
                             <div style="display: flex; flex-direction: column; align-items: center;">
                                 <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
-
                                 <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
-                                    @Html.AntiForgeryToken() <!-- ✅ Add this line -->
                                     <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..."></textarea>
+                                    <input type="hidden" id="token-@item.EventID" value="@item.Token" />
                                     <button class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
                                 </div>
                             </div>
@@ -392,47 +392,39 @@
     }
 </div>
 
-@Html.AntiForgeryToken()
 @section Scripts {
     <script>
         function toggleRejectBox(eventId) {
             var rejectBox = $("#reject-box-" + eventId);
-
-            if (rejectBox.is(":visible")) {
-                rejectBox.hide();
-            } else {
-                $(".reject-box").hide();
-                rejectBox.show();
-            }
+            $(".reject-box").not(rejectBox).hide();
+            rejectBox.toggle();
         }
 
-function submitRejection(eventId) {
-    var reason = $("#rejection-text-" + eventId).val(); // ✅ Corrected ID
-    var token = $('input[name="__RequestVerificationToken"]').val(); // 🔑 Get the token
+        function submitRejection(eventId) {
+            var reason = $("#rejection-text-" + eventId).val();
+            var token = $("#token-" + eventId).val();
 
-    $.ajax({
-        url: '/Mentor/RejectEventRequest',
-        type: 'POST',
-        data: {
-            eventId: eventId,
-            rejectionReason: reason,  // ✅ Now properly sent
-            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-        },
-        success: function (response) {
-            if (response.success) {
-                alert("Event rejected successfully.");
-                location.reload();
-            } else {
-                alert("Rejection failed: " + response.message);
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error("XHR:", xhr.responseText);
-            alert("Server error occurred: " + xhr.responseText);
+            $.ajax({
+                url: '/Mentor/RejectEventRequest',
+                type: 'POST',
+                data: {
+                    token: token,
+                    rejectionReason: reason,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert("Event rejected successfully.");
+                        location.reload();
+                    } else {
+                        alert("Rejection failed: " + response.message);
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    alert("Server error occurred: " + xhr.responseText);
+                }
+            });
         }
-    });
-}
     </script>
 }
-
-

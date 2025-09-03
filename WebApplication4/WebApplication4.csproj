@@ -320,6 +320,7 @@
     <Compile Include="Models\PostEventViewModel.cs" />
     <Compile Include="Models\RegistrationModel.cs" />
     <Compile Include="Models\save_event_detailsview.cs" />
+    <Compile Include="Models\SecureHelper.cs" />
     <Compile Include="Models\StudentDashboardViewModel.cs" />
     <Compile Include="Models\SUBDEPARTMENT.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -545,6 +546,9 @@
     <Content Include="Views\UniversityAdmin\ClubStatus.cshtml" />
     <Content Include="Views\UniversityAdmin\ManageClubs.cshtml" />
     <Content Include="Views\Director\ViewClubs.cshtml" />
+    <Content Include="Views\Clubs\Magazine.cshtml" />
+    <Content Include="Views\Clubs\Newsletters.cshtml" />
+    <Content Include="Views\Mentor\RejectEventRequest.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

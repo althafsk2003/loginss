@@ -1,17 +1,18 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using PagedList;
+using SendGrid.Helpers.Mail;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
-using Microsoft.Win32;
-using PagedList;
-using SendGrid.Helpers.Mail;
-using AppLogin = WebApplication4.Models.Login;
 using WebApplication4.Models;
+using AppLogin = WebApplication4.Models.Login;
 
 namespace WebApplication4.Controllers
 {
@@ -522,107 +523,220 @@ namespace WebApplication4.Controllers
 
 
 
+// GET: View Event Requests
+public ActionResult ViewEventRequests()
+{
+    if (Session["UserEmail"] == null)
+    {
+        return RedirectToAction("Login", "Admin");
+    }
 
-        // GET: View Event Requests
-        public ActionResult ViewEventRequests()
+    string userEmail = Session["UserEmail"].ToString();
+    var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+
+    if (mentorLogin == null)
+    {
+        return HttpNotFound("Mentor login not found");
+    }
+
+    ViewBag.Clubs = _db.CLUBS
+        .Where(c => c.MentorID == mentorLogin.LoginID && c.ApprovalStatusID == 2)
+        .ToList();
+
+    return View(); // No model initially
+}
+
+// POST: View Event Requests (Filtered)
+[HttpPost]
+public ActionResult ViewEventRequests(int selectedClubId)
+{
+    if (Session["UserEmail"] == null)
+    {
+        return RedirectToAction("Login", "Admin");
+    }
+
+    string userEmail = Session["UserEmail"].ToString();
+    var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+
+    if (mentorLogin == null)
+    {
+        return HttpNotFound("Mentor login not found");
+    }
+
+    ViewBag.Clubs = _db.CLUBS
+        .Where(c => c.MentorID == mentorLogin.LoginID)
+        .ToList();
+
+    var events = _db.EVENTS
+        .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
+        .ToList();
+
+    // Generate token for each event
+    foreach (var ev in events)
+    {
+        ev.Token = SecureHelper.Encrypt($"{ev.EventID}|{ev.ClubID}");
+    }
+
+    // Flag to indicate filtering applied
+    ViewBag.FilterApplied = true;
+
+    // Map Organizer Names
+    var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
+    var loginIdToEmail = _db.Logins
+        .Where(l => loginIds.Contains(l.LoginID))
+        .ToDictionary(l => l.LoginID, l => l.Email);
+
+    var emailToName = _db.ClubRegistrations
+        .Where(cr => loginIdToEmail.Values.Contains(cr.Email))
+        .ToDictionary(cr => cr.Email, cr => cr.FullName);
+
+    ViewBag.OrganizerNames = loginIdToEmail
+        .Where(le => emailToName.ContainsKey(le.Value))
+        .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
+
+    ViewBag.ClubNames = _db.CLUBS.ToDictionary(c => c.ClubID, c => c.ClubName);
+
+    ViewBag.UniversityName = "ICFAI Foundation for Higher Education"; // Hardcoded or fetch dynamically
+    ViewBag.Universities = _db.UNIVERSITies.ToList();
+
+    return View(events);
+}
+
+
+
+
+
+
+        // GET: emailed button -> forward
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult> ForwardEventToHOD(string token, bool fromEmail = true)
         {
-            if (Session["UserEmail"] == null)
+            if (string.IsNullOrEmpty(token))
+                return HttpNotFound("Token missing");
+
+            string plainData;
+            try
             {
-                return RedirectToAction("Login", "Admin");
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return HttpNotFound("Invalid token");
             }
 
-            string userEmail = Session["UserEmail"].ToString();
-            var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+            var parts = plainData.Split('|');
+            if (parts.Length != 2) return HttpNotFound("Invalid token data");
 
-            if (mentorLogin == null)
+            int eventId = Convert.ToInt32(parts[0]);
+            int clubId = Convert.ToInt32(parts[1]);
+
+            var eventToForward = _db.EVENTS.Find(eventId);
+            var club = _db.CLUBS.Find(clubId);
+
+            if (eventToForward == null || club == null)
+                return HttpNotFound("Event or club not found");
+
+            // 🚫 Prevent duplicate actions
+            if (eventToForward.ApprovalStatusID == 3)
+                return Content($"Event '{eventToForward.EventName}' was already rejected. You cannot forward it now.");
+            if (eventToForward.ApprovalStatusID == 4 || eventToForward.ApprovalStatusID == 7)
+                return Content($"Event '{eventToForward.EventName}' has already been forwarded.");
+
+            // 👉 Decide recipient (SubHOD first, else HOD)
+            WebApplication4.Models.Login recipientLogin = null;
+            string recipientRole = "";
+            int newStatus = 0;
+
+            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == club.SubDepartmentID);
+            if (subDept != null && !string.IsNullOrEmpty(subDept.HOD_Email))
             {
-                return HttpNotFound("Mentor login not found");
+                recipientLogin = _db.Logins.FirstOrDefault(l => l.Email == subDept.HOD_Email);
+                recipientRole = "SubHOD";
+                newStatus = 7; // Forwarded to SubHOD
             }
 
-            ViewBag.Clubs = _db.CLUBS
-                .Where(c => c.MentorID == mentorLogin.LoginID && c.ApprovalStatusID == 2)
-                .ToList();
+            if (recipientLogin == null)
+            {
+                var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
+                if (dept != null && !string.IsNullOrEmpty(dept.HOD_Email))
+                {
+                    recipientLogin = _db.Logins.FirstOrDefault(l => l.Email == dept.HOD_Email);
+                    recipientRole = "HOD";
+                    newStatus = 4; // Forwarded to HOD
+                }
+            }
 
-            return View(); // No model is passed initially
+            if (recipientLogin != null)
+            {
+                // ✅ Update approval status depending on recipient
+                eventToForward.ApprovalStatusID = newStatus;
+                _db.SaveChanges();
+
+                // In-app notification
+                _db.Notifications.Add(new Notification
+                {
+                    LoginID = recipientLogin.LoginID,
+                    Message = $"📬 A new event '{eventToForward.EventName}' from club '{club.ClubName}' requires your approval.",
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                });
+                _db.SaveChanges();
+
+                // 🔑 New token for recipient actions
+                string newToken = SecureHelper.Encrypt($"{eventToForward.EventID}|{club.ClubID}");
+
+                // 📧 Email with dynamic buttons (HOD: Approve/Reject; SubHOD: Forward to Director/Reject)
+                var emailSvc = new WebApplication4.Models.EmailService();
+                string emailBody = GenerateEventEmailBody(eventToForward, club, recipientRole, newToken, Request);
+                await emailSvc.SendEmailAsync(
+                    recipientLogin.Email,
+                    $"New Event Approval Needed: {eventToForward.EventName}",
+                    emailBody
+                );
+
+                return Content($"✅ Event '{eventToForward.EventName}' forwarded to {recipientRole} successfully!");
+            }
+
+            return Content("❌ No valid recipient (SubHOD or HOD) found for this event.");
         }
 
-        // POST: View Event Requests (Filtered)
-        [HttpPost]
-        public ActionResult ViewEventRequests(int selectedClubId)
-        {
-            if (Session["UserEmail"] == null)
-            {
-                return RedirectToAction("Login", "Admin");
-            }
 
-            string userEmail = Session["UserEmail"].ToString();
-            var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
 
-            if (mentorLogin == null)
-            {
-                return HttpNotFound("Mentor login not found");
-            }
-
-            ViewBag.Clubs = _db.CLUBS
-                .Where(c => c.MentorID == mentorLogin.LoginID)
-                .ToList();
-
-            var events = _db.EVENTS
-                .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
-                .ToList();
-
-            // Set the FilterApplied flag to true
-            ViewBag.FilterApplied = true;
-
-            // Fetch Organizer Names and Club Names separately and store them in ViewBag
-            var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
-
-            var loginIdToEmail = _db.Logins
-                .Where(l => loginIds.Contains(l.LoginID))
-                .ToDictionary(l => l.LoginID, l => l.Email);
-
-            var emailToName = _db.ClubRegistrations
-                .Where(cr => loginIdToEmail.Values.Contains(cr.Email))
-                .ToDictionary(cr => cr.Email, cr => cr.FullName);
-
-            // Final dictionary: LoginID => FullName
-            ViewBag.OrganizerNames = loginIdToEmail
-                .Where(le => emailToName.ContainsKey(le.Value))
-                .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
-
-            ViewBag.ClubNames = _db.CLUBS
-                .ToDictionary(c => c.ClubID, c => c.ClubName);
-
-            ViewBag.UniversityName = ViewBag.University; // Use ViewBag for university name
-
-            ViewBag.Universities = _db.UNIVERSITies.ToList(); // Setting universities list to ViewBag
-
-            return View(events); // Pass events list as the model
-        }
-
+        // POST: in-app forward (keep if you also want email to be sent when forwarding from the app)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ForwardEventToHOD(int eventId, int clubId)
+        public async Task<ActionResult> ForwardEventToHOD(string token)
         {
             if (Session["UserEmail"] == null)
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
             string mentorEmail = Session["UserEmail"].ToString();
             var mentor = _db.Logins.FirstOrDefault(m => m.Email == mentorEmail);
-            if (mentor == null)
+            if (mentor == null) return HttpNotFound("Mentor login not found.");
+
+            string plainData;
+            try
             {
-                return HttpNotFound("Mentor login not found.");
+                plainData = SecureHelper.Decrypt(token);
             }
+            catch
+            {
+                return HttpNotFound("Invalid token.");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length != 2) return HttpNotFound("Invalid token data.");
+
+            int eventId = Convert.ToInt32(parts[0]);
+            int clubId = Convert.ToInt32(parts[1]);
 
             var eventToForward = _db.EVENTS.Find(eventId);
-            if (eventToForward == null)
-            {
-                return HttpNotFound("Event not found");
-            }
+            if (eventToForward == null) return HttpNotFound("Event not found");
 
-            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubId);
+            var club = _db.CLUBS.Find(clubId);
             if (club == null)
             {
                 TempData["ErrorMessage"] = "Club not found.";
@@ -632,7 +746,7 @@ namespace WebApplication4.Controllers
             WebApplication4.Models.Login recipientLogin = null;
             string recipientRole = "";
 
-            // First check if club belongs to a sub-department
+            // Sub-dept first
             var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == club.SubDepartmentID);
             if (subDept != null && !string.IsNullOrEmpty(subDept.HOD_Email))
             {
@@ -640,143 +754,242 @@ namespace WebApplication4.Controllers
                 recipientRole = "SubHOD";
             }
 
-            // If SubHOD not found or not assigned, fallback to Department HOD
             if (recipientLogin == null)
             {
                 var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
-                if (dept == null || string.IsNullOrEmpty(dept.HOD_Email))
+                if (dept != null && !string.IsNullOrEmpty(dept.HOD_Email))
                 {
-                    TempData["ErrorMessage"] = "No HOD or SubHOD found for the club.";
-                    return RedirectToAction("ViewEventRequests");
+                    recipientLogin = _db.Logins.FirstOrDefault(l => l.Email == dept.HOD_Email);
+                    recipientRole = "HOD";
                 }
-
-                recipientLogin = _db.Logins.FirstOrDefault(l => l.Email == dept.HOD_Email);
-                recipientRole = "HOD";
             }
 
             if (recipientLogin == null)
             {
-                TempData["ErrorMessage"] = "Recipient login not found.";
+                TempData["ErrorMessage"] = "No HOD or SubHOD found.";
                 return RedirectToAction("ViewEventRequests");
             }
 
-            // Mark event as pending HOD/SubHOD approval
-            eventToForward.ApprovalStatusID = 4;
+            eventToForward.ApprovalStatusID = 4; // Pending
+            _db.SaveChanges();
 
-            try
+            // Notify organizer
+            if (eventToForward.EventOrganizerID != null)
             {
-                _db.SaveChanges();
-
-                // Notify event organizer
-                if (eventToForward.EventOrganizerID != null)
+                _db.Notifications.Add(new Notification
                 {
-                    var organizerNotification = new Notification
-                    {
-                        LoginID = eventToForward.EventOrganizerID,
-                        Message = $"✅ Your event '{eventToForward.EventName}' has been forwarded to the {recipientRole} for approval.",
-                        IsRead = false,
-                        StartDate = DateTime.Now,
-                        EndDate = DateTime.Now.AddDays(7),
-                        CreatedDate = DateTime.Now
-                    };
-                    _db.Notifications.Add(organizerNotification);
-                }
-
-                // Notify the recipient (HOD or SubHOD)
-                var recipientNotification = new Notification
-                {
-                    LoginID = recipientLogin.LoginID,
-                    Message = $"📬 A new event '{eventToForward.EventName}' from club '{club.ClubName}' requires your approval.",
+                    LoginID = eventToForward.EventOrganizerID,
+                    Message = $"✅ Your event '{eventToForward.EventName}' has been forwarded to the {recipientRole} for approval.",
                     IsRead = false,
                     StartDate = DateTime.Now,
                     EndDate = DateTime.Now.AddDays(7),
                     CreatedDate = DateTime.Now
-                };
-                _db.Notifications.Add(recipientNotification);
-
-                _db.SaveChanges();
-                TempData["SuccessMessage"] = $"Event forwarded to {recipientRole} successfully!";
+                });
             }
-            catch (Exception ex)
+
+            // Notify recipient
+            _db.Notifications.Add(new Notification
             {
-                TempData["ErrorMessage"] = "An error occurred while forwarding the event: " + ex.Message;
-            }
+                LoginID = recipientLogin.LoginID,
+                Message = $"📬 A new event '{eventToForward.EventName}' from club '{club.ClubName}' requires your approval.",
+                IsRead = false,
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(7),
+                CreatedDate = DateTime.Now
+            });
 
+            _db.SaveChanges();
+
+            // 📧 (optional) email to HOD/SubHOD from the app flow as well
+            string newToken = SecureHelper.Encrypt($"{eventToForward.EventID}|{club.ClubID}");
+            var emailSvc = new WebApplication4.Models.EmailService();
+            string emailBody = GenerateEventEmailBody(eventToForward, club, recipientRole, newToken, Request);
+            await emailSvc.SendEmailAsync(
+                recipientLogin.Email,
+                $"New Event Approval Needed: {eventToForward.EventName}",
+                emailBody
+            );
+
+            TempData["SuccessMessage"] = $"Event forwarded to {recipientRole} successfully!";
             return RedirectToAction("ViewEventRequests");
         }
 
 
+        // Helper: builds the HTML email with the right buttons per role
+        private string GenerateEventEmailBody(EVENT ev, CLUB club, string recipientRole, string token, HttpRequestBase request)
+        {
+            // Absolute URLs for buttons
+            string scheme = request?.Url?.Scheme ?? "https";
+            // HOD receives Approve + Reject
+            // SubHOD receives Forward to Director + Reject
+            string primaryHref;
+            string secondaryHref;
+            string primaryText;
+            string secondaryText;
+
+            if (recipientRole == "HOD")
+            {
+                primaryHref = Url.Action("EventsForApproval", "HOD", new { token }, scheme);
+                secondaryHref = Url.Action("RejectEvent", "HOD", new { token }, scheme);
+                primaryText = "Approve";
+                secondaryText = "Reject";
+            }
+            else
+            {
+                // SubHOD
+                primaryHref = Url.Action("ForwardToDirector", "SubHOD", new { token }, scheme);
+                secondaryHref = Url.Action("RejectEvent", "SubHOD", new { token }, scheme);
+                primaryText = "Forward to Director";
+                secondaryText = "Reject";
+            }
+
+            // Build poster/budget absolute URLs (if you store relative paths)
+            string baseUrl = $"{scheme}://{request?.Url?.Host}{(request?.Url?.IsDefaultPort == false ? ":" + request.Url.Port : "")}";
+            string posterUrl = string.IsNullOrWhiteSpace(ev.EventPoster) ? null : (ev.EventPoster.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? ev.EventPoster : baseUrl + ev.EventPoster);
+            string budgetUrl = string.IsNullOrWhiteSpace(ev.BudgetDocumentPath) ? null : (ev.BudgetDocumentPath.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? ev.BudgetDocumentPath : baseUrl + ev.BudgetDocumentPath);
+
+            return $@"
+<div style='font-family:Arial,sans-serif;font-size:14px;color:#000;line-height:1.5;'>
+  <h3 style='margin:0 0 8px 0;'>Event approval required</h3>
+  <p><b>Club:</b> {HttpUtility.HtmlEncode(club.ClubName)}</p>
+  <p><b>Event:</b> {HttpUtility.HtmlEncode(ev.EventName)}</p>
+  <p><b>Description:</b> {HttpUtility.HtmlEncode(ev.EventDescription)}</p>
+  <p><b>Dates:</b> {ev.EventStartDateAndTime} – {ev.EventEndDateAndTime}</p>
+  <p><b>Venue:</b> {HttpUtility.HtmlEncode(ev.Venue)}</p>
+  <p><b>Budget:</b> {ev.EventBudget}</p>
+  {(budgetUrl != null ? $"<p><b>Budget Document:</b> <a href='{budgetUrl}'>View</a></p>" : "")}
+
+  <div style='margin-top:16px;'>
+    <a href='{primaryHref}' style='padding:10px 14px;background:#1e7e34;color:#fff;text-decoration:none;border-radius:4px;margin-right:8px;display:inline-block;'>{primaryText}</a>
+    <a href='{secondaryHref}' style='padding:10px 14px;background:#dc3545;color:#fff;text-decoration:none;border-radius:4px;display:inline-block;'>{secondaryText}</a>
+  </div>
+
+  <div style='display:none;font-size:1px;line-height:1px'>&nbsp;</div>
+</div>";
+        }
+
+
+
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult RejectEventRequest(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return HttpNotFound("Token missing");
+
+            string plainData;
+            try
+            {
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return HttpNotFound("Invalid token");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length != 2) return HttpNotFound("Invalid token data");
+
+            int eventId = Convert.ToInt32(parts[0]);
+            var ev = _db.EVENTS.Find(eventId);
+            if (ev == null) return HttpNotFound("Event not found");
+
+            // 🚫 Prevent duplicate actions
+            if (ev.ApprovalStatusID == 4)
+                return Content($"Event '{ev.EventName}' has already been forwarded. You cannot reject it now.");
+            if (ev.ApprovalStatusID == 3)
+                return Content($"Event '{ev.EventName}' is already rejected.");
+
+            // ✅ Send token & event to view so mentor can enter reason
+            ev.Token = token;
+            return View("RejectEventRequest", ev);
+        }
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RejectEventRequest(int eventId, string rejectionReason)
+        public async Task<ActionResult> RejectEventRequest(string token, string rejectionReason)
         {
             try
             {
                 if (Session["UserEmail"] == null)
-                {
-                    if (Request.IsAjaxRequest())
-                        return Json(new { success = false, message = "Session expired. Please login again." });
+                    return Json(new { success = false, message = "Session expired. Please login again." });
 
-                    return RedirectToAction("Login", "Admin");
+                // ✅ Decrypt token
+                string plainData;
+                try
+                {
+                    plainData = SecureHelper.Decrypt(token);
                 }
+                catch
+                {
+                    return Json(new { success = false, message = "Invalid token." });
+                }
+
+                var parts = plainData.Split('|');
+                if (parts.Length != 2) return Json(new { success = false, message = "Invalid token data." });
+
+                int eventId = Convert.ToInt32(parts[0]);
 
                 var ev = _db.EVENTS.FirstOrDefault(e => e.EventID == eventId);
+                if (ev == null) return Json(new { success = false, message = "Event not found!" });
 
-                if (ev == null)
-                {
-                    if (Request.IsAjaxRequest())
-                        return Json(new { success = false, message = "Event not found!" });
-
-                    TempData["ErrorMessage"] = "Event not found!";
-                    return RedirectToAction("ViewEventRequests");
-                }
-
+                // ✅ Update event as Rejected
                 ev.ApprovalStatusID = 3; // Rejected
-
-                if (string.IsNullOrWhiteSpace(rejectionReason))
-                    rejectionReason = "No specific reason provided.";
-
-                ev.RejectionReason = rejectionReason; // ✅ Add this line to save the reason
+                ev.RejectionReason = string.IsNullOrWhiteSpace(rejectionReason)
+                    ? "No specific reason provided."
+                    : rejectionReason;
 
                 _db.SaveChanges();
 
-
-                if (ev.EventOrganizerID == null)
+                // ✅ In-app notification
+                if (ev.EventOrganizerID != null)
                 {
-                    if (Request.IsAjaxRequest())
-                        return Json(new { success = false, message = "Club Admin (Organizer) ID not found. Notification not sent." });
+                    _db.Notifications.Add(new Notification
+                    {
+                        LoginID = ev.EventOrganizerID,
+                        Message = $"❌ Your event '{ev.EventName}' was rejected.\nReason: {ev.RejectionReason}",
+                        IsRead = false,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(7),
+                        CreatedDate = DateTime.Now
+                    });
 
-                    TempData["ErrorMessage"] = "Club Admin (Organizer) ID not found. Notification not sent.";
-                    return RedirectToAction("ViewEventRequests");
+                    _db.SaveChanges();
                 }
 
-                var notification = new Notification
+                // ✅ Get Club Admin email from Logins table using ClubID
+                var clubLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.ClubID);
+                if (clubLogin != null && !string.IsNullOrEmpty(clubLogin.Email))
                 {
-                    LoginID = ev.EventOrganizerID,
-                    Message = $"❌ Your event '{ev.EventName}' was rejected.\nReason: {rejectionReason}",
-                    IsRead = false,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(7),
-                    CreatedDate = DateTime.Now
-                };
+                    var emailService = new EmailService();
 
-                _db.Notifications.Add(notification);
-                _db.SaveChanges();
+                    string subject = $"Event '{ev.EventName}' Rejected";
+                    string body = $@"
+        <p>Your event <strong>{ev.EventName}</strong> has been 
+           <span style='color:red;font-weight:bold;'>rejected</span>.</p>
+        <p><strong>Reason:</strong> {ev.RejectionReason}</p>
+        <br/>
+        <p>Regards,<br/>University Event Management System</p>";
 
-                if (Request.IsAjaxRequest())
-                {
-                    return Json(new { success = true });
+                    await emailService.SendEmailAsync(clubLogin.Email, subject, body);
                 }
 
-                TempData["SuccessMessage"] = $"Event '{ev.EventName}' rejected successfully! Notification sent to club admin.";
-                return RedirectToAction("ViewEventRequests");
+
+
+                return Json(new { success = true, message = "Event rejected and email sent to club admin." });
             }
             catch (Exception ex)
             {
-                // Return error to AJAX for debugging
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+
 
 
         // GET: Mentor/AwaitingConfirmation

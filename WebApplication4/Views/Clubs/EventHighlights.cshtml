@@ -732,74 +732,58 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<style>
+    /* Put Magnific Popup above everything (back-to-top, headers, etc.) */
+    .mfp-bg, .mfp-wrap {
+        z-index: 200000 !important;
+    }
+    /* Force a visible, fixed close button */
+    .mfp-close {
+        display: block !important;
+        position: fixed !important;
+        right: 16px !important;
+        top: 16px !important;
+        font-size: 32px !important;
+        line-height: 1 !important;
+        opacity: 1 !important;
+    }
+    /* (Optional) keep your back-to-top below popup */
+    #btn-back-to-top {
+        z-index: 9998;
+    }
+</style>
+
 <script>
-    $(document).ready(function () {
-        // Image popup with zoom effect
-        $('.image-popup').magnificPopup({
+    $(function () {
+        // Attach to the gallery container via delegate (more robust with duplicated items)
+        $('.gallery-container').magnificPopup({
+            delegate: 'a.image-popup',
             type: 'image',
-            closeOnContentClick: true,
-            closeBtnInside: false,
-            fixedContentPos: true,
+            gallery: { enabled: true, navigateByImgClick: true, preload: [0, 1] },
             mainClass: 'mfp-with-zoom',
-            image: {
-                verticalFit: true
-            },
             zoom: {
                 enabled: true,
                 duration: 400,
-                easing: 'ease-in-out',
-                opener: function (element) {
-                    return element.find('img');
-                }
-            }
+                opener: function (el) { return el.find('img'); }
+            },
+
+            // ✅ closing behaviors
+            closeOnContentClick: false,
+            closeOnBgClick: true,
+            enableEscapeKey: true,
+            showCloseBtn: true,
+            closeBtnInside: false,              // put the × outside the figure (reliable)
+            closeMarkup: '<button title="%title%" type="button" class="mfp-close">&times;</button>',
+            fixedContentPos: true
         });
 
-        // Auto-scroll gallery with pause on hover
-        const gallery = $('.gallery-container');
-        let scrollInterval;
-
-        function startAutoScroll() {
-            scrollInterval = setInterval(function () {
-                const scrollLeft = gallery.scrollLeft();
-                const maxScroll = gallery[0].scrollWidth - gallery.width();
-
-                if (scrollLeft >= maxScroll / 2) {
-                    gallery.scrollLeft(0);
-                } else {
-                    gallery.scrollLeft(scrollLeft + 1);
-                }
-            }, 30);
-        }
-
-        function stopAutoScroll() {
-            clearInterval(scrollInterval);
-        }
-
-        startAutoScroll();
-
-        gallery.hover(
-            function () { stopAutoScroll(); },
-            function () { startAutoScroll(); }
-        );
-
-        // Animate elements on scroll
-        function animateOnScroll() {
-            $('.animate__animated').each(function () {
-                const elementTop = $(this).offset().top;
-                const elementBottom = elementTop + $(this).outerHeight();
-                const viewportTop = $(window).scrollTop();
-                const viewportBottom = viewportTop + $(window).height();
-
-                if (elementBottom > viewportTop && elementTop < viewportBottom) {
-                    $(this).addClass('animate__fadeIn');
-                }
-            });
-        }
-
-        $(window).on('scroll', animateOnScroll);
-        animateOnScroll();
+        // Hard fallback for ESC if anything else intercepts it
+        $(document).on('keydown.mfpForceClose', function (e) {
+            if (e.key === 'Escape') { $.magnificPopup.close(); }
+        });
     });
 </script>
+
 
 <!-- Back to Top Button -->
 <button type="button" id="btn-back-to-top" title="Go to top">

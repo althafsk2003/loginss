@@ -86,82 +86,66 @@ namespace WebApplication4.Controllers
                     dept.createdDate = DateTime.Now;
                     dept.IsActive = true;
                     dept.IsActiveDate = DateTime.Now;
-                    dept.HOD = dept.HOD;
-                    dept.DirectorName = dept.DirectorName;
 
                     _db.DEPARTMENTs.Add(dept);
                     await _db.SaveChangesAsync(); // Save to get DepartmentID
 
-                    if (dept.HasDirector == true)
+                    if (dept.HasDirector == true && !string.IsNullOrWhiteSpace(dept.DirectorEmail))
                     {
-                        // ✅ Create Director Login
-                        var directorLogin = new Models.Login
+                        var directorLogin = new WebApplication4.Models.Login
                         {
                             Email = dept.DirectorEmail,
-                            PasswordHash = "Director@123", // You should hash passwords ideally
+                            PasswordHash = "Director@123",
                             Role = "Director",
                             IsActive = true,
                             DepartmentID = dept.DepartmentID,
-                            UniversityID = dept.Universityid,
+                            UniversityID = universityID,
                             CreatedDate = DateTime.Now
                         };
 
                         _db.Logins.Add(directorLogin);
+                        await _db.SaveChangesAsync();
 
+                        Debug.WriteLine($"Director added: {dept.DirectorEmail}");
 
-
-                        // ✅ Email to Director
-                        string subject = "Welcome Director!";
-                        string body = $"Hello {dept.DirectorName},<br/><br/>" +
-                                      $"You have been added as the Director of <strong>{dept.DepartmentName}</strong>.<br/>" +
-                                      $"<strong>Username:</strong> {dept.DirectorEmail}<br/>" +
-                                      $"<strong>Password:</strong> Director@123<br/><br/>" +
-                                      $"Please login and change your password.";
-
-                        await _emailService.SendEmailAsync(dept.DirectorEmail, subject, body);
+                        await _emailService.SendEmailAsync(dept.DirectorEmail, "Welcome Director!", $"Hello {dept.DirectorName}, ...");
                     }
-                    else
+
+                    if (!string.IsNullOrWhiteSpace(dept.HOD_Email))
                     {
-                        // ✅ Create HOD Login
-                        var hodLogin = new Models.Login
+                        var hodLogin = new WebApplication4.Models.Login
                         {
                             Email = dept.HOD_Email,
                             PasswordHash = "Hod@123",
                             Role = "HOD",
                             IsActive = true,
                             DepartmentID = dept.DepartmentID,
-                            UniversityID = dept.Universityid,
+                            UniversityID = universityID,
                             CreatedDate = DateTime.Now
                         };
 
                         _db.Logins.Add(hodLogin);
+                        await _db.SaveChangesAsync();
 
+                        Debug.WriteLine($"HOD added: {dept.HOD_Email}");
 
-
-                        // ✅ Email to HOD
-                        string subject = "Welcome HOD!";
-                        string body = $"Hello {dept.HOD},<br/><br/>" +
-                                      $"You have been added as the HOD of <strong>{dept.DepartmentName}</strong>.<br/>" +
-                                      $"<strong>Username:</strong> {dept.HOD_Email}<br/>" +
-                                      $"<strong>Password:</strong> Hod@123<br/><br/>" +
-                                      $"Please login and change your password.";
-
-                        await _emailService.SendEmailAsync(dept.HOD_Email, subject, body);
+                        await _emailService.SendEmailAsync(dept.HOD_Email, "Welcome HOD!", $"Hello {dept.HOD}, ...");
                     }
-
-                    await _db.SaveChangesAsync();
                 }
+
 
                 TempData["SuccessMessage"] = "Departments and logins added successfully!";
                 return RedirectToAction("ManageDepartments");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in AddDepartment: {ex.Message}");
+                Debug.WriteLine($"Error in AddDepartment: {ex.Message}");
                 ViewBag.ErrorMessage = "An error occurred while adding the departments.";
                 return View(Departments);
             }
         }
+
+
 
 
 
