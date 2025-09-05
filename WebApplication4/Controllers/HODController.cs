@@ -1,18 +1,19 @@
-﻿using System;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using System.Data.Entity;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using WebApplication4.Models;
-using System.Drawing;
 using System.Windows.Documents;
 using System.Xml.Linq;
+using WebApplication4.Filters;
+using WebApplication4.Models;
 
 namespace WebApplication4.Controllers
 {
@@ -84,79 +85,128 @@ namespace WebApplication4.Controllers
             return View();
         }
 
-        // ✅ Add Mentor - GET method
+        // ✅ Add Mentor - GET
         [HttpGet]
-        // GET: HOD/AddMentor
         public ActionResult AddMentor()
         {
-            var model = new USER();
-            model.DepartmentID = GetDepartmentID(); // Automatically set department
+            var model = new USER
+            {
+                DepartmentID = GetDepartmentID() // Auto-assign department
+            };
             return View(model);
         }
-
+        // ✅ Add Mentor - POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> AddMentor(USER model, HttpPostedFileBase Photo)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                model.DepartmentID = GetDepartmentID(); // Auto-assign department
-                model.UserType = "Mentor";
+                // Collect all validation errors
+                ViewBag.Errors = ModelState.Values
+                                   .SelectMany(v => v.Errors)
+                                   .Select(e => e.ErrorMessage)
+                                   .ToList();
+                return View(model);
             }
 
             try
             {
-                if (Photo != null && Photo.ContentLength > 0)
-                {
-                    string uploadDir = Server.MapPath("~/Uploads/");
-                    if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
-
-                    string fileName = Path.GetFileName(Photo.FileName);
-                    string path = Path.Combine(uploadDir, fileName);
-                    Photo.SaveAs(path);
-                    model.PhotoPath = "~/Uploads/" + fileName;
-                }
-
+                // Auto-fill mentor defaults
+                model.DepartmentID = GetDepartmentID();
+                model.Userrole = "Mentor";        // correct: role = Mentor
+                model.UserType = "Campus";        // default, unless chosen in form
                 model.RegistrationDate = DateTime.Now;
                 model.IsActiveDate = DateTime.Now;
                 model.IsActive = true;
-                model.Userrole = "Mentor";
-                model.DepartmentID = GetDepartmentID();
 
+                // ✅ Photo upload
+                if (Photo != null && Photo.ContentLength > 0)
+                {
+                    string uploadDir = Server.MapPath("~/Uploads/");
+                    if (!Directory.Exists(uploadDir))
+                        Directory.CreateDirectory(uploadDir);
+
+                    string fileName = Guid.NewGuid() + Path.GetExtension(Photo.FileName);
+                    string path = Path.Combine(uploadDir, fileName);
+
+                    Photo.SaveAs(path);
+                    model.PhotoPath = "/Uploads/" + fileName; // ✅ use web path
+                }
+
+                // ✅ Save USER
                 _db.USERs.Add(model);
-                await _db.SaveChangesAsync();
 
-                var login = new Models.Login
+                // ✅ Create login with plain text password
+                string defaultPassword = "Mentor@123";
+                // Get department info
+                var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == model.DepartmentID);
+
+                Login login = new Models.Login
                 {
                     Email = model.Email,
-                    PasswordHash = "Mentor@123", // For testing only
+                    PasswordHash = defaultPassword,
                     Role = "Mentor",
                     CreatedDate = DateTime.Now,
                     IsActive = true,
-                    DepartmentID = GetDepartmentID()
+                    DepartmentID = model.DepartmentID,
+                    UniversityID = department?.Universityid ?? 0  // ✅ set UniversityID here
                 };
 
                 _db.Logins.Add(login);
-                await _db.SaveChangesAsync();
 
-                string subject = "Welcome to Our Platform!";
-                string body = $"Hello {model.FirstName},<br/><br/>" +
-                              $"You have been successfully added as a mentor. Your login credentials are:<br/>" +
-                              $"<strong>Email:</strong> {model.Email}<br/>" +
-                              $"<strong>Password:</strong> Mentor@123<br/><br/>" +
-                              "Please change your password after login.";
+                // ✅ Save both with logging
+                try
+                {
+                    int rows = await _db.SaveChangesAsync();
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] SaveChangesAsync affected {rows} rows");
 
-                await _emailService.SendEmailAsync(model.Email, subject, body);
+                    if (rows == 0)
+                    {
+                        ViewBag.Errors = new List<string> { "No records were saved. Please check your data." };
+                        return View(model);
+                    }
+                }
+                catch (System.Data.Entity.Validation.DbEntityValidationException valEx)
+                {
+                    // EF validation errors
+                    var errors = valEx.EntityValidationErrors
+                        .SelectMany(e => e.ValidationErrors)
+                        .Select(e => e.PropertyName + ": " + e.ErrorMessage)
+                        .ToList();
+
+                    ViewBag.Errors = errors;
+                    return View(model);
+                }
+
+                // ✅ Try sending email
+                try
+                {
+                    string subject = "Welcome to Our Platform!";
+                    string body = $"Hello {model.FirstName},<br/><br/>" +
+                                  $"You have been successfully added as a mentor. Your login credentials are:<br/>" +
+                                  $"<strong>Email:</strong> {model.Email}<br/>" +
+                                  $"<strong>Password:</strong> {defaultPassword}<br/><br/>" +
+                                  "Please change your password after login.";
+
+                    await _emailService.SendEmailAsync(model.Email, subject, body);
+                }
+                catch (Exception emailEx)
+                {
+                    System.Diagnostics.Debug.WriteLine("[DEBUG] Email send failed: " + emailEx.Message);
+                }
 
                 TempData["SuccessMessage"] = "Mentor added successfully.";
                 return RedirectToAction("AddMentor", "HOD");
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "Error: " + ex.Message;
+                ViewBag.Errors = new List<string> { "Error saving mentor: " + ex.Message };
+                System.Diagnostics.Debug.WriteLine("[DEBUG] Exception: " + ex.ToString());
                 return View(model);
             }
         }
+
 
         private int GetDepartmentID()
         {
@@ -164,9 +214,9 @@ namespace WebApplication4.Controllers
             {
                 return Convert.ToInt32(Session["DepartmentID"]);
             }
-
             throw new Exception("Department ID not found in session. HOD must be logged in.");
         }
+
 
         // MANAGE MENTORS (ALL - ACTIVE + INACTIVE)
         public ActionResult ManageMentors()
@@ -716,59 +766,285 @@ namespace WebApplication4.Controllers
             return View();
         }
 
-        [HttpPost]
-        public ActionResult RejectEvent(int eventId, string rejectionReason)
+
+
+
+
+
+
+
+        // ===========================
+        // GET: Reject Event (HOD email link)
+        // ===========================
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult RejectEvent(string token)
         {
-            // Load event with club
+            if (string.IsNullOrEmpty(token))
+                return HttpNotFound("Token missing");
+
+            string plainData;
+            try
+            {
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return HttpNotFound("Invalid token");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length < 1)
+                return HttpNotFound("Invalid token data");
+
+            int eventId = Convert.ToInt32(parts[0]);
+
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
-            if (ev == null || ev.CLUB == null)
-                return HttpNotFound();
+            if (ev == null)
+                return HttpNotFound("Event not found");
 
-            // Update event status
-            ev.RejectionReason = rejectionReason;
-            ev.ApprovalStatusID = 3;
+            if (ev.ApprovalStatusID == 2)
+                return Content($"Event '{ev.EventName}' has already been approved.");
+            if (ev.ApprovalStatusID == 3)
+                return Content($"Event '{ev.EventName}' has already been rejected.");
 
-            // Notification message
-            string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected., go to manage events to view more 0000000000\nReason: {rejectionReason}";
+            ViewBag.Token = token; // pass token to form
+            return View("RejectEvent", ev);
+        }
 
-            // ✅ Notify mentor using MentorID directly
-            var mentorNotification = new Notification
+        // ===========================
+        // POST: Reject Event (HOD dashboard or email)
+        // ===========================
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryTokenIfNoToken] // custom attribute for token-less dashboard
+        public async Task<ActionResult> RejectEvent(int? eventId, string rejectionReason, string token = null)
+        {
+            try
             {
-                LoginID = ev.CLUB.MentorID,
-                Message = message,
-                IsRead = false,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
-                CreatedDate = DateTime.Now
-            };
-            _db.Notifications.Add(mentorNotification);
+                int evtId;
 
-            // ✅ Find ClubAdmin LoginID via ClubRegistrations table
-            var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
-            if (clubReg != null)
-            {
-                var clubAdminEmail = clubReg.Email; // adjust property name as needed
-
-                var login = _db.Logins.FirstOrDefault(l => l.Email == clubAdminEmail);
-                if (login != null)
+                // Determine event ID from token or dashboard
+                if (!string.IsNullOrEmpty(token))
                 {
-                    var clubAdminNotification = new Notification
+                    string plainData;
+                    try
                     {
-                        LoginID = login.LoginID,
+                        plainData = SecureHelper.Decrypt(token);
+                    }
+                    catch
+                    {
+                        return Json(new { success = false, message = "Invalid token." });
+                    }
+
+                    var parts = plainData.Split('|');
+                    if (parts.Length < 1)
+                        return Json(new { success = false, message = "Invalid token data." });
+
+                    evtId = Convert.ToInt32(parts[0]);
+                }
+                else if (eventId.HasValue)
+                {
+                    evtId = eventId.Value;
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Missing event information." });
+                }
+
+                // Fetch event with club info
+                var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
+                if (ev == null || ev.CLUB == null)
+                    return Json(new { success = false, message = "Event not found." });
+
+                // Prevent duplicate rejection
+                if (ev.ApprovalStatusID == 2)
+                    return Json(new { success = false, message = $"Event '{ev.EventName}' has already been approved." });
+                if (ev.ApprovalStatusID == 3)
+                    return Json(new { success = false, message = $"Event '{ev.EventName}' has already been rejected." });
+
+                // Update event
+                ev.ApprovalStatusID = 3;
+                ev.RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? "No reason provided." : rejectionReason;
+
+                string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected by HOD.\nReason: {ev.RejectionReason}";
+                var emailService = new EmailService();
+                var emailTasks = new List<Task>();
+
+                // 1️⃣ Notify Mentor
+                if (ev.CLUB.MentorID != null)
+                {
+                    var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
+                    if (mentorLogin != null)
+                    {
+                        _db.Notifications.Add(new Notification
+                        {
+                            LoginID = mentorLogin.LoginID,
+                            Message = message,
+                            IsRead = false,
+                            StartDate = DateTime.Now,
+                            EndDate = DateTime.Now.AddDays(7),
+                            CreatedDate = DateTime.Now
+                        });
+
+                        if (!string.IsNullOrEmpty(mentorLogin.Email))
+                            emailTasks.Add(emailService.SendEmailAsync(mentorLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                    }
+                }
+
+                // 2️⃣ Notify Club Admin
+                var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
+                if (clubAdminLogin != null)
+                {
+                    _db.Notifications.Add(new Notification
+                    {
+                        LoginID = clubAdminLogin.LoginID,
                         Message = message,
                         IsRead = false,
                         StartDate = DateTime.Now,
                         EndDate = DateTime.Now.AddDays(7),
                         CreatedDate = DateTime.Now
-                    };
-                    _db.Notifications.Add(clubAdminNotification);
+                    });
+
+                    if (!string.IsNullOrEmpty(clubAdminLogin.Email))
+                        emailTasks.Add(emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                }
+
+                // Save changes
+                _db.SaveChanges();
+
+                // Send emails in parallel
+                if (emailTasks.Any())
+                    await Task.WhenAll(emailTasks);
+
+                // Return response based on flow
+                if (!string.IsNullOrEmpty(token))
+                    return Json(new { success = true, message = "Event rejected successfully and notifications sent!" });
+                else
+                {
+                    TempData["Message"] = "Event rejected successfully.";
+                    return RedirectToAction("EventsForApproval");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(token))
+                    return Json(new { success = false, message = ex.Message });
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("EventsForApproval");
+            }
+        }
+
+
+
+
+
+        // ===========================
+        // Approve Event (HOD dashboard or email)
+        // ===========================
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<ActionResult> ApproveEvent(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return Content("❌ Invalid link.");
+
+            string plainData;
+            try
+            {
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return Content("❌ Invalid or expired token.");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length < 1)
+                return Content("❌ Invalid token data.");
+
+            int evtId = Convert.ToInt32(parts[0]);
+            var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
+            if (ev == null || ev.CLUB == null)
+                return Content("❌ Event not found.");
+
+            // Prevent duplicate approval
+            if (ev.ApprovalStatusID == 2)
+                return Content("✅ Event already approved.");
+            if (ev.ApprovalStatusID == 3)
+                return Content("❌ Event already rejected.");
+
+            // Full approval via email link
+            decimal proposedBudget = 0;
+            decimal.TryParse(ev.EventBudget, out proposedBudget);
+            ev.ApprovedAmount = proposedBudget.ToString();
+            ev.ApprovalStatusID = 2; // fully approved
+
+            _db.SaveChanges();
+
+            // Send notifications + emails to mentor and club admin
+            await SendHODApprovalNotificationsAndEmails(ev, false, proposedBudget);
+
+            return Content($"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) fully approved by HOD.");
+        }
+
+
+        private async Task SendHODApprovalNotificationsAndEmails(EVENT ev, bool budgetReduced, decimal finalBudget)
+        {
+            string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
+            string notifMsg = budgetReduced
+                ? baseMsg + $"was approved with reduced budget ₹{finalBudget:N0}. Mentor please confirm."
+                : baseMsg + "has been fully approved.";
+
+            var emailService = new EmailService();
+
+            // --- Mentor ---
+            if (ev.CLUB.MentorID != null)
+            {
+                var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
+                if (mentorLogin != null)
+                {
+                    _db.Notifications.Add(new Notification
+                    {
+                        LoginID = mentorLogin.LoginID,
+                        Message = notifMsg,
+                        IsRead = false,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(7),
+                        CreatedDate = DateTime.Now
+                    });
+
+                    if (!string.IsNullOrEmpty(mentorLogin.Email))
+                        await emailService.SendEmailAsync(mentorLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
                 }
             }
 
+            // --- Club Admin (via CLUB.ClubID → Logins table) ---
+            var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
+            if (clubAdminLogin != null)
+            {
+                _db.Notifications.Add(new Notification
+                {
+                    LoginID = clubAdminLogin.LoginID,
+                    Message = notifMsg,
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                });
+
+                if (!string.IsNullOrEmpty(clubAdminLogin.Email))
+                    await emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
+            }
+
+
+
             _db.SaveChanges();
-            TempData["Message"] = "Event rejected and notifications sent!";
-            return RedirectToAction("EventsForApproval", new { id = eventId });
         }
+
+
 
         // Step 4: POST Action Method
         [HttpPost]

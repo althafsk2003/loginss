@@ -234,14 +234,12 @@ namespace WebApplication1.Controllers
                     Debug.WriteLine($"mentorFullName = '{mentorFullName}'");
 
                     // Token generation
-                    string plainData = $"{newEvent.EventID}|{club.ClubID}";
-                    Debug.WriteLine($"plainData = '{plainData}'");
-
+                    // Token generation (with source = email)
+                    string plainData = $"{newEvent.EventID}|{club.ClubID}|email";
                     string encryptedToken = SecureHelper.Encrypt(plainData);
-                    Debug.WriteLine($"SecureHelper.Encrypt(plainData) = '{encryptedToken}'");
 
                     string token = !string.IsNullOrEmpty(encryptedToken) ? encryptedToken : "defaultToken";
-                    Debug.WriteLine($"token = '{token}'");
+
 
 
                     // Base URL (use PC's local IP for mobile testing)
@@ -288,7 +286,7 @@ namespace WebApplication1.Controllers
     </div>
 
     <div style='margin-top:15px;'>
-        <a href='{forwardUrl}' style='padding:10px 15px; background-color:#28a745; color:#fff; text-decoration:none; margin-right:10px; display:inline-block;'>Forward to HOD</a>
+        <a href='{forwardUrl}' style='padding:10px 15px; background-color:#28a745; color:#fff; text-decoration:none; margin-right:10px; display:inline-block;'>Forward to SCC</a>
         <a href='{rejectUrl}' style='padding:10px 15px; background-color:#dc3545; color:#fff; text-decoration:none; display:inline-block;'>Reject Event</a>
     </div>
     <!-- Invisible spacer to prevent Gmail collapse -->
@@ -1071,45 +1069,3 @@ namespace WebApplication1.Controllers
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

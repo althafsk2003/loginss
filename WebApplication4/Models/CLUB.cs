@@ -47,6 +47,9 @@ namespace WebApplication4.Models
         public Nullable<bool> IsActive { get; set; }
         public int ApprovalStatusID { get; set; }
         public Nullable<int> SubDepartmentID { get; set; }
+        public string ClubHeadName { get; set; }
+        public string ClubHeadEmail { get; set; }
+        public string ClubHeadMobile { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual ApprovalStatusTable ApprovalStatusTable1 { get; set; }

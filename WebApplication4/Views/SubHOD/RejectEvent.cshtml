@@ -1,0 +1,33 @@
+﻿@model WebApplication4.Models.EVENT
+@{
+    Layout = "~/Views/Shared/_SubHODLayout.cshtml";
+}
+
+<h3>Reject Event: @Model.EventName</h3>
+<p>Please enter reason for rejection:</p>
+
+<form id="rejectForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="token" value="@Model.Token" />
+    <textarea name="rejectionReason" class="form-control" required></textarea>
+    <button type="submit" class="btn btn-danger mt-2">Reject</button>
+</form>
+
+<div id="resultMessage"></div>
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+$("#rejectForm").on("submit", function(e) {
+    e.preventDefault();
+    $.post("@Url.Action("RejectEvent", "SubHOD")", $(this).serialize(), function(res){
+        if(res.success){
+            $("#resultMessage").html("<div class='alert alert-success'>Event rejected successfully.</div>");
+            $("#rejectForm").hide();
+        } else {
+            $("#resultMessage").html("<div class='alert alert-danger'>" + res.message + "</div>");
+        }
+    });
+});
+    </script>
+}

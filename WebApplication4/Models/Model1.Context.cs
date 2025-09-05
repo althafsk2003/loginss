@@ -39,5 +39,6 @@ namespace WebApplication4.Models
         public virtual DbSet<SUBDEPARTMENT> SUBDEPARTMENTs { get; set; }
         public virtual DbSet<UNIVERSITY> UNIVERSITies { get; set; }
         public virtual DbSet<USER> USERs { get; set; }
+        public virtual DbSet<EventVideo> EventVideos { get; set; }
     }
 }

@@ -245,6 +245,7 @@
     <Compile Include="Controllers\stuloginController.cs" />
     <Compile Include="Controllers\SubHODController.cs" />
     <Compile Include="Controllers\UniversityAdminController.cs" />
+    <Compile Include="Filters\ValidateAntiForgeryTokenIfNoTokenAttribute.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -289,6 +290,9 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\EventRegistrationViewModel.cs" />
+    <Compile Include="Models\EventVideo.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\EventWinner.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -549,6 +553,9 @@
     <Content Include="Views\Clubs\Magazine.cshtml" />
     <Content Include="Views\Clubs\Newsletters.cshtml" />
     <Content Include="Views\Mentor\RejectEventRequest.cshtml" />
+    <Content Include="Views\SubHOD\RejectEvent.cshtml" />
+    <Content Include="Views\Director\DirectorRejectEvent.cshtml" />
+    <Content Include="Views\HOD\RejectEvent.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

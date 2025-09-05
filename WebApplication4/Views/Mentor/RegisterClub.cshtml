@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* Form Styling */
     .form-control {
         position: relative;
         border: 1px solid #ced4da;
@@ -15,39 +14,12 @@
 
         .form-control:focus {
             border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 0 5px rgba(0,123,255,0.3);
         }
-
-        .form-control.is-valid {
-            border-color: #ced4da;
-            background-image: none;
-        }
-
-            .form-control.is-valid:focus {
-                border-color: #007bff;
-                box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
-            }
 
         .form-control.is-invalid {
             border-color: #dc3545;
-            background-image: none;
         }
-
-            .form-control.is-invalid::after {
-                content: "\f06a";
-                font-family: "Font Awesome 6 Free";
-                font-weight: 900;
-                color: #dc3545;
-                position: absolute;
-                right: 10px;
-                top: 50%;
-                transform: translateY(-50%);
-                font-size: 14px;
-            }
-
-            .form-control.is-invalid:focus {
-                box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
-            }
 
     .invalid-feedback {
         font-size: 0.85rem;
@@ -62,15 +34,10 @@
         opacity: 1;
     }
 
-    .form-control[type="file"].is-invalid::after {
-        top: 50%;
-        right: 10px;
-    }
-
     .card {
         border: none;
         border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .btn-primary {
@@ -142,15 +109,27 @@
                 <!-- Right Column -->
                 <div class="col-md-6">
                     <div class="mb-2">
+                        <label for="ClubHeadName" class="form-label">Club Head Name</label>
+                        @Html.TextBoxFor(m => m.ClubHeadName, new { @class = "form-control", required = "required", maxlength = "100", id = "ClubHeadName", placeholder = "Enter Club Head Name" })
+                        <div class="invalid-feedback">Club Head Name is required (max 100 characters).</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="ClubHeadMobile" class="form-label">Club Head Mobile</label>
+                        @Html.TextBoxFor(m => m.ClubHeadMobile, new { @class = "form-control", required = "required", maxlength = "15", id = "ClubHeadMobile", placeholder = "Enter Mobile Number" })
+                        <div class="invalid-feedback">Valid mobile number is required (10-15 digits).</div>
+                    </div>
+
+                    <div class="mb-2">
                         <label for="ClubEmail" class="form-label">Club Email</label>
-                        <input type="email" name="ClubEmail" id="ClubEmail" class="form-control" placeholder="Enter Club Email" required />
+                        <input type="email" name="ClubHeadEmail" id="ClubEmail" class="form-control" placeholder="Enter Club Email" required />
                         <div class="invalid-feedback">Valid Club Email is required.</div>
                         <small class="text-muted">This email will be used for club admin login. Default password: clubadmin@123</small>
                     </div>
 
                     <div class="mb-2">
                         <label for="LogoImage" class="form-label">Club Logo</label>
-                        <input type="file" name="LogoImage" id="LogoImage" class="form-control" accept="image/jpeg,image/png,image/gif" required="required" />
+                        <input type="file" name="LogoImage" id="LogoImage" class="form-control" accept="image/jpeg,image/png,image/gif" required />
                         <div class="invalid-feedback" id="logoImageError">Club Logo is required.</div>
                     </div>
 
@@ -173,78 +152,61 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function () {
-            const form = $("#clubForm");
+$(document).ready(function () {
+    const form = $("#clubForm");
 
-            function validateTextInput(field, maxLength, fieldName) {
-                const value = field.val().trim();
-                const feedback = field.next(".invalid-feedback");
-                field.removeClass("is-invalid");
+    function validateTextInput(field, maxLength, fieldName) {
+        const value = (field.val() ?? "").trim();
+        const feedback = field.next(".invalid-feedback");
+        field.removeClass("is-invalid");
+        if (!value) { feedback.text(fieldName + " is required."); field.addClass("is-invalid"); return false; }
+        if (value.length > maxLength) { feedback.text(`${fieldName} cannot exceed ${maxLength} characters.`); field.addClass("is-invalid"); return false; }
+        feedback.text(""); return true;
+    }
 
-                if (!value) {
-                    feedback.text(fieldName + " is required.");
-                    field.addClass("is-invalid");
-                    return false;
-                } else if (value.length > maxLength) {
-                    feedback.text(`${fieldName} cannot exceed ${maxLength} characters.`);
-                    field.addClass("is-invalid");
-                    return false;
-                } else {
-                    feedback.text("");
-                    return true;
-                }
-            }
+    function validateEmail(field) {
+        const value = (field.val() ?? "").trim();
+        const feedback = field.next(".invalid-feedback");
+        field.removeClass("is-invalid");
+        const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+        if (!value) { feedback.text("Club Email is required."); field.addClass("is-invalid"); return false; }
+        if (!emailPattern.test(value)) { feedback.text("Enter a valid email address."); field.addClass("is-invalid"); return false; }
+        feedback.text(""); return true;
+    }
 
-            function validateEmail(field) {
-                const value = field.val().trim();
-                const feedback = field.next(".invalid-feedback");
-                field.removeClass("is-invalid");
-                const emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
-                if (!value) {
-                    feedback.text("Club Email is required.");
-                    field.addClass("is-invalid");
-                    return false;
-                } else if (!emailPattern.test(value)) {
-                    feedback.text("Please enter a valid email address.");
-                    field.addClass("is-invalid");
-                    return false;
-                } else {
-                    feedback.text("");
-                    return true;
-                }
-            }
+    function validateMobile(field) {
+        const value = (field.val() ?? "").trim();
+        const feedback = field.next(".invalid-feedback");
+        field.removeClass("is-invalid");
+        const phonePattern = /^[0-9]{10,15}$/;
+        if (!value) { feedback.text("Club Head Mobile is required."); field.addClass("is-invalid"); return false; }
+        if (!phonePattern.test(value)) { feedback.text("Enter valid mobile number (10-15 digits)."); field.addClass("is-invalid"); return false; }
+        feedback.text(""); return true;
+    }
 
-            function validateField(field) {
-                const id = field.attr("id");
-                if (id === "ClubName") {
-                    return validateTextInput(field, 100, "Club Name");
-                } else if (id === "Abbreviation") {
-                    return validateTextInput(field, 10, "Abbreviation");
-                } else if (id === "Description") {
-                    return validateTextInput(field, 5000, "Description");
-                } else if (id === "ClubEmail") {
-                    return validateEmail(field);
-                }
-                return true;
-            }
+    function validateField(field) {
+        switch(field.attr("id")) {
+            case "ClubName": return validateTextInput(field, 100, "Club Name");
+            case "Abbreviation": return validateTextInput(field, 10, "Abbreviation");
+            case "Description": return validateTextInput(field, 5000, "Description");
+            case "ClubEmail": return validateEmail(field);
+            case "ClubHeadName": return validateTextInput(field, 100, "Club Head Name");
+            case "ClubHeadMobile": return validateMobile(field);
+            default: return true;
+        }
+    }
 
-            $("#ClubName, #Abbreviation, #Description, #ClubEmail").on("input blur", function () {
-                validateField($(this));
-            });
+    $("#ClubName, #Abbreviation, #Description, #ClubEmail, #ClubHeadName, #ClubHeadMobile").on("input blur", function () {
+        validateField($(this));
+    });
 
-            form.on("submit", function (e) {
-                let isValid = true;
-                ["#ClubName", "#Abbreviation", "#Description", "#ClubEmail"].forEach(selector => {
-                    if (!validateField($(selector))) {
-                        isValid = false;
-                    }
-                });
-
-                if (!isValid) {
-                    e.preventDefault();
-                    form.addClass("was-validated");
-                }
-            });
+    form.on("submit", function (e) {
+        let isValid = true;
+        ["#ClubName", "#Abbreviation", "#Description", "#ClubEmail", "#ClubHeadName", "#ClubHeadMobile"].forEach(selector => {
+            if (!validateField($(selector))) isValid = false;
         });
+        if (!isValid) { e.preventDefault(); form.addClass("was-validated"); }
+    });
+});
     </script>
 }

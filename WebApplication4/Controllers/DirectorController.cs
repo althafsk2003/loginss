@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Data.Entity;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using WebApplication4.Filters;
 using WebApplication4.Models;
 
 namespace WebApplication4.Controllers
@@ -594,56 +595,268 @@ namespace WebApplication4.Controllers
 
         }
 
-        [HttpPost]
-        public ActionResult DirectorRejectEvent(int eventId, string rejectionReason)
+
+
+
+
+
+        // ===========================
+        // GET: Reject Event (Director email link)
+        // ===========================
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult DirectorRejectEvent(string token)
         {
+            if (string.IsNullOrEmpty(token))
+                return HttpNotFound("Token missing");
+
+            string plainData;
+            try
+            {
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return HttpNotFound("Invalid token");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length < 2)
+                return HttpNotFound("Invalid token data");
+
+            int eventId = Convert.ToInt32(parts[0]);
+
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
-            if (ev == null || ev.CLUB == null)
-                return HttpNotFound();
+            if (ev == null)
+                return HttpNotFound("Event not found");
 
-            ev.RejectionReason = rejectionReason;
-            ev.ApprovalStatusID = 3;
+            // Prevent rejection if already approved or rejected
+            if (ev.ApprovalStatusID == 2)
+                return Content($"Event '{ev.EventName}' has already been approved.");
+            if (ev.ApprovalStatusID == 3)
+                return Content($"Event '{ev.EventName}' has already been rejected.");
 
-            string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected by Director.\nReason: {rejectionReason}";
+            ViewBag.Token = token; // pass token to form
+            return View("DirectorRejectEvent", ev);
+        }
 
-            var mentorNotification = new Notification
+        // ===========================
+        // POST: Reject Event (Director dashboard or email)
+        // ===========================
+        [HttpPost]
+        [AllowAnonymous] // allow both flows
+        [ValidateAntiForgeryTokenIfNoToken] // custom attribute we'll define below
+        public async Task<ActionResult> DirectorRejectEvent(int? eventId, string rejectionReason, string token = null)
+        {
+            try
             {
-                LoginID = ev.CLUB.MentorID,
-                Message = message,
-                IsRead = false,
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
-                CreatedDate = DateTime.Now
-            };
-            _db.Notifications.Add(mentorNotification);
+                int evtId;
 
-            var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
-            if (clubReg != null)
-            {
-                var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == clubReg.Email);
-                if (clubAdmin != null)
+                if (!string.IsNullOrEmpty(token))
+                {
+                    // Email link flow
+                    string plainData;
+                    try
+                    {
+                        plainData = SecureHelper.Decrypt(token);
+                    }
+                    catch
+                    {
+                        return Json(new { success = false, message = "Invalid token." });
+                    }
+
+                    var parts = plainData.Split('|');
+                    if (parts.Length < 1)
+                        return Json(new { success = false, message = "Invalid token data." });
+
+                    evtId = Convert.ToInt32(parts[0]);
+                }
+                else if (eventId.HasValue)
+                {
+                    // In-app dashboard flow
+                    evtId = eventId.Value;
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Missing event information." });
+                }
+
+                // Fetch event with minimal required data
+                var ev = _db.EVENTS
+                    .Include(e => e.CLUB)
+                    .FirstOrDefault(e => e.EventID == evtId);
+
+                if (ev == null || ev.CLUB == null)
+                    return Json(new { success = false, message = "Event not found." });
+
+                // Prevent rejection if already approved or rejected
+                if (ev.ApprovalStatusID == 2)
+                    return Json(new { success = false, message = $"Event '{ev.EventName}' has already been approved." });
+                if (ev.ApprovalStatusID == 3)
+                    return Json(new { success = false, message = $"Event '{ev.EventName}' is already rejected." });
+
+                // Update event
+                ev.ApprovalStatusID = 3;
+                ev.RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? "No reason provided." : rejectionReason;
+
+                string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected by Director.\nReason: {ev.RejectionReason}";
+                var emailService = new EmailService();
+                var emailTasks = new List<Task>();
+
+                // 1️⃣ Notify Mentor
+                if (ev.CLUB.MentorID != null)
+                {
+                    var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
+                    if (mentorLogin != null)
+                    {
+                        _db.Notifications.Add(new Notification
+                        {
+                            LoginID = mentorLogin.LoginID,
+                            Message = message,
+                            IsRead = false,
+                            StartDate = DateTime.Now,
+                            EndDate = DateTime.Now.AddDays(7),
+                            CreatedDate = DateTime.Now
+                        });
+
+                        if (!string.IsNullOrEmpty(mentorLogin.Email))
+                            emailTasks.Add(emailService.SendEmailAsync(mentorLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                    }
+                }
+
+                // 2️⃣ Notify Club Admin
+                var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
+                if (clubAdminLogin != null)
                 {
                     _db.Notifications.Add(new Notification
                     {
-                        LoginID = clubAdmin.LoginID,
+                        LoginID = clubAdminLogin.LoginID,
                         Message = message,
                         IsRead = false,
                         StartDate = DateTime.Now,
                         EndDate = DateTime.Now.AddDays(7),
                         CreatedDate = DateTime.Now
                     });
+
+                    if (!string.IsNullOrEmpty(clubAdminLogin.Email))
+                        emailTasks.Add(emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                }
+
+                // 3️⃣ Notify SubHOD via SUBDEPARTMENT
+                if (ev.CLUB.SubDepartmentID != null && ev.CLUB.SubDepartmentID != 0)
+                {
+                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.SubDepartmentID == ev.CLUB.SubDepartmentID);
+                    if (subDept != null && !string.IsNullOrEmpty(subDept.HOD_Email))
+                    {
+                        var subHODLogin = _db.Logins.FirstOrDefault(l => l.Email == subDept.HOD_Email);
+                        if (subHODLogin != null)
+                        {
+                            _db.Notifications.Add(new Notification
+                            {
+                                LoginID = subHODLogin.LoginID,
+                                Message = message,
+                                IsRead = false,
+                                StartDate = DateTime.Now,
+                                EndDate = DateTime.Now.AddDays(7),
+                                CreatedDate = DateTime.Now
+                            });
+
+                            emailTasks.Add(emailService.SendEmailAsync(subHODLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                        }
+                    }
+                }
+
+                // ✅ Save everything in one go
+                _db.SaveChanges();
+
+                // ✅ Send all emails in parallel
+                if (emailTasks.Any())
+                    await Task.WhenAll(emailTasks);
+
+                // Decide response
+                if (!string.IsNullOrEmpty(token))
+                    return Content("✅ Event rejected successfully.");
+                else
+                {
+                    TempData["Message"] = "Event rejected successfully.";
+                    return RedirectToAction("EventsForDirectorApproval");
                 }
             }
+            catch (Exception ex)
+            {
+                if (!string.IsNullOrEmpty(token))
+                    return Content("❌ Error: " + ex.Message);
 
-            _db.SaveChanges();
-            TempData["Message"] = "Event rejected by Director and notifications sent!";
-            return RedirectToAction("EventsForDirectorApproval");
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("EventsForDirectorApproval");
+            }
         }
+
+
+
+
+
+
+
+        // ============================
+        // Director Approve Event (GET via email link)
+        // ============================
+        [HttpGet]
+        [AllowAnonymous] // allow approval without login for email flow
+        public async Task<ActionResult> DirectorApproveEvent(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return Content("❌ Invalid link.");
+
+            string plainData;
+            try
+            {
+                plainData = SecureHelper.Decrypt(token);
+            }
+            catch
+            {
+                return Content("❌ Invalid or expired token.");
+            }
+
+            var parts = plainData.Split('|');
+            if (parts.Length < 1)
+                return Content("❌ Invalid token data.");
+
+            int evtId = Convert.ToInt32(parts[0]);
+
+            var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
+            if (ev == null || ev.CLUB == null)
+                return Content("❌ Event not found.");
+
+            // prevent duplicate approval
+            if (ev.ApprovalStatusID == 2)
+                return Content("✅ Event already approved.");
+            if (ev.ApprovalStatusID == 3)
+                return Content("❌ Event already rejected.");
+
+            // full approval (no budget reduction in email flow)
+            decimal proposedBudget = 0;
+            decimal.TryParse(ev.EventBudget, out proposedBudget);
+
+            ev.ApprovedAmount = proposedBudget.ToString();
+            ev.ApprovalStatusID = 2;
+            _db.SaveChanges();
+
+            // Send notifications + emails
+            await SendDirectorApprovalNotificationsAndEmails(ev, false, proposedBudget);
+
+            return Content($"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) was fully approved by Director.");
+        }
+
+
+        // ============================
+        // Director Approve Event (POST in-app dashboard)
+        // ============================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DirectorApproveEvent(int eventId,
-                                          decimal? approvedAmount,
-                                          HttpPostedFileBase signedDocument)
+        public async Task<ActionResult> DirectorApproveEvent(int eventId,
+                                                  decimal? approvedAmount,
+                                                  HttpPostedFileBase signedDocument)
         {
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
             if (ev == null) return HttpNotFound("Event not found.");
@@ -659,6 +872,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("EventsForDirectorApproval", new { id = eventId });
             }
 
+            // Save signed document
             string uploadsRoot = Server.MapPath("~/uploads");
             Directory.CreateDirectory(uploadsRoot);
 
@@ -668,6 +882,7 @@ namespace WebApplication4.Controllers
 
             ev.EventFormPath = "/uploads/" + fileName;
 
+            // Budget handling
             decimal proposedBudget = 0;
             decimal.TryParse(ev.EventBudget, out proposedBudget);
 
@@ -683,55 +898,92 @@ namespace WebApplication4.Controllers
 
             _db.SaveChanges();
 
-            string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
-            if (budgetReduced)
-            {
-                _db.Notifications.Add(new Notification
-                {
-                    LoginID = ev.CLUB.MentorID,
-                    Message = baseMsg + $"was approved by Director with reduced budget ₹{finalBudget:N0}.",
-                    IsRead = false,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(7),
-                    CreatedDate = DateTime.Now
-                });
-            }
-            else
-            {
-                _db.Notifications.Add(new Notification
-                {
-                    LoginID = ev.CLUB.MentorID,
-                    Message = baseMsg + "has been fully approved by Director.",
-                    IsRead = false,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(7),
-                    CreatedDate = DateTime.Now
-                });
+            // Send notifications + emails
+            await SendDirectorApprovalNotificationsAndEmails(ev, budgetReduced, finalBudget);
 
-                var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
-                if (clubReg != null)
+            TempData["Message"] = "Event approved by Director successfully.";
+            return RedirectToAction("EventsForDirectorApproval", new { id = eventId });
+        }
+
+
+        // ============================
+        // Shared Method: Notifications + Emails
+        // ============================
+        private async Task SendDirectorApprovalNotificationsAndEmails(EVENT ev, bool budgetReduced, decimal finalBudget)
+        {
+            string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
+            string notifMsg = budgetReduced
+                ? baseMsg + $"was approved by Director with reduced budget ₹{finalBudget:N0}."
+                : baseMsg + "has been fully approved by Director.";
+
+            var emailService = new EmailService();
+
+            // --- Mentor ---
+            if (ev.CLUB.MentorID != null)
+            {
+                var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
+                if (mentorLogin != null)
                 {
-                    var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == clubReg.Email);
-                    if (clubAdmin != null)
+                    _db.Notifications.Add(new Notification
+                    {
+                        LoginID = mentorLogin.LoginID,
+                        Message = notifMsg,
+                        IsRead = false,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now.AddDays(7),
+                        CreatedDate = DateTime.Now
+                    });
+
+                    if (!string.IsNullOrEmpty(mentorLogin.Email))
+                        await emailService.SendEmailAsync(mentorLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
+                }
+            }
+
+            // --- SubHOD ---
+            if (ev.CLUB.SubDepartmentID != null && ev.CLUB.SubDepartmentID != 0)
+            {
+                var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.SubDepartmentID == ev.CLUB.SubDepartmentID);
+                if (subDept != null && !string.IsNullOrEmpty(subDept.HOD_Email))
+                {
+                    var subHODLogin = _db.Logins.FirstOrDefault(l => l.Email == subDept.HOD_Email);
+                    if (subHODLogin != null)
                     {
                         _db.Notifications.Add(new Notification
                         {
-                            LoginID = clubAdmin.LoginID,
-                            Message = baseMsg + "is now fully approved by Director.",
+                            LoginID = subHODLogin.LoginID,
+                            Message = notifMsg,
                             IsRead = false,
                             StartDate = DateTime.Now,
                             EndDate = DateTime.Now.AddDays(7),
                             CreatedDate = DateTime.Now
                         });
+
+                        await emailService.SendEmailAsync(subHODLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
                     }
                 }
             }
 
-            _db.SaveChanges();
+            // --- Club Admin ---
+            var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
+            if (clubAdminLogin != null)
+            {
+                _db.Notifications.Add(new Notification
+                {
+                    LoginID = clubAdminLogin.LoginID,
+                    Message = notifMsg,
+                    IsRead = false,
+                    StartDate = DateTime.Now,
+                    EndDate = DateTime.Now.AddDays(7),
+                    CreatedDate = DateTime.Now
+                });
 
-            TempData["Message"] = "Event approved by Director successfully.";
-            return RedirectToAction("EventsForDirectorApproval", new { id = eventId });
+                if (!string.IsNullOrEmpty(clubAdminLogin.Email))
+                    await emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
+            }
+
+            _db.SaveChanges();
         }
+
 
 
     }

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="ApprovalStatusTable">
           <Key>
             <PropertyRef Name="ApprovalStatusID" />
@@ -49,6 +49,9 @@
           <Property Name="IsActive" Type="bit" />
           <Property Name="ApprovalStatusID" Type="int" Nullable="false" />
           <Property Name="SubDepartmentID" Type="int" />
+          <Property Name="ClubHeadName" Type="nvarchar" MaxLength="100" />
+          <Property Name="ClubHeadEmail" Type="nvarchar" MaxLength="100" />
+          <Property Name="ClubHeadMobile" Type="nvarchar" MaxLength="15" />
         </EntityType>
         <EntityType Name="Comments">
           <Key>
@@ -137,6 +140,15 @@
           <Property Name="ApprovedAmount" Type="nvarchar" MaxLength="255" />
           <Property Name="RejectionReason" Type="nvarchar" MaxLength="500" />
           <Property Name="Venue" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="EventVideos">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EventID" Type="int" Nullable="false" />
+          <Property Name="VideoPath" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="UploadedDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="EventWinners">
           <Key>
@@ -1407,6 +1419,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_EventVideos_EVENTS">
+          <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
+          <End Role="EventVideos" Type="Self.EventVideos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENTS">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventVideos">
+              <PropertyRef Name="EventID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Logins_CLUBS">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="Logins" Type="Self.Logins" Multiplicity="*" />
@@ -1502,6 +1526,7 @@
           <EntitySet Name="EventPhotos" EntityType="Self.EventPhotos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EventRegistrations" EntityType="Self.EventRegistrations" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EVENTS" EntityType="Self.EVENTS" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EventVideos" EntityType="Self.EventVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EventWinners" EntityType="Self.EventWinners" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Logins" EntityType="Self.Logins" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Notifications" EntityType="Self.Notifications" Schema="dbo" store:Type="Tables" />
@@ -1900,6 +1925,10 @@
             <End Role="Comments" EntitySet="Comments" />
             <End Role="Comments1" EntitySet="Comments" />
           </AssociationSet>
+          <AssociationSet Name="FK_EventVideos_EVENTS" Association="Self.FK_EventVideos_EVENTS">
+            <End Role="EVENTS" EntitySet="EVENTS" />
+            <End Role="EventVideos" EntitySet="EventVideos" />
+          </AssociationSet>
           <AssociationSet Name="FK_Logins_CLUBS" Association="Self.FK_Logins_CLUBS">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="Logins" EntitySet="Logins" />
@@ -1929,8 +1958,7 @@
             <End Role="USER" EntitySet="USER" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="dummyclubsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -2060,6 +2088,9 @@
           <NavigationProperty Name="EVENTS6" Relationship="Self.FK__EVENTS__ClubID__5CA1C101" FromRole="CLUBS" ToRole="EVENTS" />
           <NavigationProperty Name="SUBDEPARTMENT" Relationship="Self.FK_CLUBS_SubDepartment" FromRole="CLUBS" ToRole="SUBDEPARTMENT" />
           <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_CLUBS" FromRole="CLUBS" ToRole="Logins" />
+          <Property Name="ClubHeadName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="ClubHeadEmail" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="ClubHeadMobile" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Comment">
           <Key>
@@ -2214,6 +2245,7 @@
           <NavigationProperty Name="EventWinners4" Relationship="Self.FK__EventWinn__Event__681373AD" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventWinners5" Relationship="Self.FK__EventWinn__Event__690797E6" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventWinners6" Relationship="Self.FK__EventWinn__Event__69FBBC1F" FromRole="EVENTS" ToRole="EventWinners" />
+          <NavigationProperty Name="EventVideos" Relationship="dummyclubsModel.FK_EventVideos_EVENTS" FromRole="EVENT" ToRole="EventVideo" />
         </EntityType>
         <EntityType Name="EventWinner">
           <Key>
@@ -4067,7 +4099,34 @@
             <End Role="SUBDEPARTMENT" EntitySet="SUBDEPARTMENTs" />
             <End Role="USER" EntitySet="USERs" />
           </AssociationSet>
+          <EntitySet Name="EventVideos" EntityType="dummyclubsModel.EventVideo" />
+          <AssociationSet Name="FK_EventVideos_EVENTS" Association="dummyclubsModel.FK_EventVideos_EVENTS">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventVideo" EntitySet="EventVideos" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="EventVideo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventID" Type="Int32" Nullable="false" />
+          <Property Name="VideoPath" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK_EventVideos_EVENTS" FromRole="EventVideo" ToRole="EVENT" />
+        </EntityType>
+        <Association Name="FK_EventVideos_EVENTS">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventVideo" Role="EventVideo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventVideo">
+              <PropertyRef Name="EventID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4106,6 +4165,9 @@
           <EntitySetMapping Name="CLUBS">
             <EntityTypeMapping TypeName="dummyclubsModel.CLUB">
               <MappingFragment StoreEntitySet="CLUBS">
+                <ScalarProperty Name="ClubHeadMobile" ColumnName="ClubHeadMobile" />
+                <ScalarProperty Name="ClubHeadEmail" ColumnName="ClubHeadEmail" />
+                <ScalarProperty Name="ClubHeadName" ColumnName="ClubHeadName" />
                 <ScalarProperty Name="ClubID" ColumnName="ClubID" />
                 <ScalarProperty Name="ClubName" ColumnName="ClubName" />
                 <ScalarProperty Name="Abbreviation" ColumnName="Abbreviation" />
@@ -4311,6 +4373,16 @@
                 <ScalarProperty Name="District" ColumnName="District" />
                 <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
                 <ScalarProperty Name="SubDepartmentID" ColumnName="SubDepartmentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventVideos">
+            <EntityTypeMapping TypeName="dummyclubsModel.EventVideo">
+              <MappingFragment StoreEntitySet="EventVideos">
+                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
+                <ScalarProperty Name="VideoPath" ColumnName="VideoPath" />
+                <ScalarProperty Name="EventID" ColumnName="EventID" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

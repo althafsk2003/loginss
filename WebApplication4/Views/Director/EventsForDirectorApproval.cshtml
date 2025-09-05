@@ -141,6 +141,8 @@
                         <td colspan="6">
                             @using (Html.BeginForm("DirectorRejectEvent", "Director", FormMethod.Post))
                             {
+                                @Html.AntiForgeryToken() <!-- Add this line -->
+
                                 @Html.Hidden("eventId", ev.EventID)
 
                                 <div class="action-form">

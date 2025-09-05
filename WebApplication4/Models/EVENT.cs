@@ -33,6 +33,7 @@ namespace WebApplication4.Models
             this.EventWinners4 = new HashSet<EventWinner>();
             this.EventWinners5 = new HashSet<EventWinner>();
             this.EventWinners6 = new HashSet<EventWinner>();
+            this.EventVideos = new HashSet<EventVideo>();
         }
     
         public Nullable<int> ClubID { get; set; }
@@ -116,5 +117,7 @@ namespace WebApplication4.Models
         public virtual ICollection<EventWinner> EventWinners5 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EventWinner> EventWinners6 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<EventVideo> EventVideos { get; set; }
     }
 }

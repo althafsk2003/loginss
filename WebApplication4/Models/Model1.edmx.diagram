@@ -124,6 +124,8 @@
         <AssociationConnector Association="dummyclubsModel.FK_Logins_SubDepartment" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Logins_University" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_USER_SubDepartment" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="dummyclubsModel.EventVideo" Width="1.5" PointX="10.5" PointY="35" />
+        <AssociationConnector Association="dummyclubsModel.FK_EventVideos_EVENTS" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

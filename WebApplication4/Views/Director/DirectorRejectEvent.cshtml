@@ -1,0 +1,43 @@
+﻿@model WebApplication4.Models.EVENT
+@{
+    Layout = "~/Views/Shared/DirectorLayout.cshtml";
+}
+
+<h3>Reject Event: @Model.EventName</h3>
+<p>Please enter reason for rejection:</p>
+
+<form id="rejectForm">
+    <input type="hidden" name="token" value="@ViewBag.Token" />
+
+    <textarea name="rejectionReason" class="form-control" placeholder="Enter reason here..." required></textarea>
+
+    <button type="submit" class="btn btn-danger mt-3">Reject Event</button>
+</form>
+
+<div id="resultMessage" class="mt-3"></div>
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+$("#rejectForm").on("submit", function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: "@Url.Action("DirectorRejectEvent", "Director")",
+        type: "POST",
+        data: $(this).serialize(),
+        success: function(res) {
+            $("#rejectForm").hide();
+            if (res.success) {
+                $("#resultMessage").html("<div class='alert alert-success'>✅ Event rejected successfully and notifications sent!</div>");
+            } else {
+                $("#resultMessage").html("<div class='alert alert-danger'>❌ " + res.message + "</div>");
+            }
+        },
+        error: function() {
+            $("#resultMessage").html("<div class='alert alert-danger'>❌ Something went wrong. Please try again.</div>");
+        }
+    });
+});
+    </script>
+}
