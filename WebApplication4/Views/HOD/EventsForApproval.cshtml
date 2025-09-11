@@ -76,6 +76,7 @@ else
                     <td>
                         @using (Html.BeginForm("RejectEvent", "HOD", FormMethod.Post))
                         {
+                            @Html.AntiForgeryToken() <!-- Add this line -->
                             @Html.Hidden("eventId", ev.EventID)
                             <input type="text"
                                    name="rejectionReason"
@@ -88,6 +89,7 @@ else
                             </button>
                         }
                     </td>
+
                 </tr>
             }
         </tbody>

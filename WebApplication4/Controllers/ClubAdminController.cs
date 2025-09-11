@@ -27,8 +27,7 @@ namespace WebApplication1.Controllers
 
             string userEmail = Session["UserEmail"].ToString();
 
-            var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
-
+            var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "ClubAdmin");
             if (clubAdmin == null)
             {
                 return HttpNotFound("Club Admin not found");
@@ -39,7 +38,6 @@ namespace WebApplication1.Controllers
 
             // ✅ Get club using ClubID directly from the login
             var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubAdmin.ClubID && c.IsActive == true);
-
             if (club == null)
             {
                 return HttpNotFound("Associated club not found for this Club Admin.");
@@ -51,14 +49,12 @@ namespace WebApplication1.Controllers
             var notifications = _db.Notifications
                                     .Where(n => n.LoginID == loginId && (n.IsRead ?? false) == false && n.EndDate > DateTime.Now)
                                     .ToList();
-
             ViewBag.Notifications = notifications;
 
             // ✅ Info for dashboard
-            ViewBag.ClubAdminName = club.ClubName; // This is fine even if it's ClubName, you can rename label in View
+            ViewBag.ClubAdminName = club.ClubName;
             ViewBag.ClubName = club.ClubName;
-            ViewBag.ClubAdminPhoto = club.LogoImagePath;
-
+            ViewBag.ClubAdminPhoto = club.LogoImagePath; // used in view to display logo
             ViewBag.University = _db.UNIVERSITies
                                     .FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME;
 
@@ -78,6 +74,54 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+        //
+        // ============================================
+        // 🔹 New Method: Upload & Save Club Logo
+        // ============================================
+        [HttpPost]
+        public ActionResult UploadClubLogo(HttpPostedFileBase ClubLogo)
+        {
+            if (Session["UserEmail"] == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+
+            string userEmail = Session["UserEmail"].ToString();
+            var clubAdmin = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "ClubAdmin");
+
+            if (clubAdmin == null)
+            {
+                return HttpNotFound("Club Admin not found");
+            }
+
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubAdmin.ClubID && c.IsActive == true);
+            if (club == null)
+            {
+                return HttpNotFound("Associated club not found.");
+            }
+
+            if (ClubLogo != null && ClubLogo.ContentLength > 0)
+            {
+                string fileName = Path.GetFileName(ClubLogo.FileName);
+                string folderPath = Server.MapPath("~/Uploads/ClubLogos/");
+
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                string filePath = Path.Combine(folderPath, fileName);
+                ClubLogo.SaveAs(filePath);
+
+                // Save relative path in DB
+                club.LogoImagePath = "/Uploads/ClubLogos/" + fileName;
+                _db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
 
 
 
@@ -92,7 +136,7 @@ namespace WebApplication1.Controllers
             string userEmail = Session["UserEmail"].ToString();
 
             // Get login record for club admin
-            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
+            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "ClubAdmin");
             if (loginRecord == null)
             {
                 return HttpNotFound("Club Admin not found");
@@ -151,7 +195,7 @@ namespace WebApplication1.Controllers
                 return View(model);
             }
 
-            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "Club Admin");
+            var loginRecord = _db.Logins.FirstOrDefault(l => l.Email == userEmail && l.Role == "ClubAdmin");
             if (loginRecord == null)
             {
                 TempData["ErrorMessage"] = "Club Admin not found.";

@@ -108,7 +108,7 @@ namespace WebApplication4.Controllers
                         Session["UserEmail"] = user.Email;
                         return RedirectToAction("Index", "Mentor");
                     }
-                    else if (user.Role == "Club Admin")
+                    else if (user.Role == "ClubAdmin")
                     {
                         Session["UserID"] = user.LoginID;
                         Session["UserEmail"] = user.Email;

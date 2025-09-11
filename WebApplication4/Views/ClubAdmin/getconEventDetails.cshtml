@@ -6,6 +6,7 @@
 }
 
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
 @if (ViewBag.SuccessMessage != null)
 {
     <div class="alert alert-success">
@@ -19,9 +20,6 @@
         @ViewBag.ErrorMessage
     </div>
 }
-
-
-
 
 <div class="container mx-auto mt-8 px-4 max-w-4xl">
     <h2 class="text-3xl font-bold text-gray-800 mb-6">Event Details</h2>
@@ -48,7 +46,6 @@
                 </div>
             }
         </div>
-
         <input type="hidden" id="deletedPhotoIds" name="DeletedPhotoIds" />
 
         <!-- Add New Photos -->
@@ -76,7 +73,6 @@
                 </div>
             }
         </div>
-
         <input type="hidden" id="deletedWinnerIds" name="DeletedWinnerIds" />
 
         <!-- Add New Winners -->
@@ -89,7 +85,6 @@
                 <button type="button" class="remove-winner bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
             </div>
         </div>
-
         <button type="button" id="addWinner" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Another Winner</button>
 
         <!-- Upload Brochure -->
@@ -98,12 +93,40 @@
             <input type="file" name="Brochure" class="w-full p-2 border rounded-md" />
         </div>
 
+        <!-- Existing Videos -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Existing Event Videos</h4>
+        <div id="existingVideos" class="space-y-4">
+            @foreach (var video in Model.EventVideos)
+            {
+                <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                    <video width="200" controls>
+                        <source src="@video.VideoPath" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <span class="text-gray-600">Uploaded on: @video.UploadedDate.ToString("dd-MM-yyyy")</span>
+                    <button type="button" class="remove-existing-video bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" data-videoid="@video.Id">Remove</button>
+                </div>
+            }
+        </div>
+        <input type="hidden" id="deletedVideoIds" name="DeletedVideoIds" />
+
+        <!-- Add New Videos -->
+        <h4 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Add New Event Videos</h4>
+        <div id="videoUploadContainer" class="space-y-4">
+            <div class="video-field flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <input type="file" name="EventVideos" class="flex-1 p-2 border rounded-md" accept="video/*" />
+                <button type="button" class="remove-video bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+            </div>
+        </div>
+        <button type="button" id="addMoreVideos" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Another Video</button>
+
         <button type="submit" class="mt-6 bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600">Save Details</button>
     </form>
 </div>
 
+<!-- Existing JS for photos and winners -->
 <script>
-    // Manage deleted photo IDs
+    // Deleted photos
     const deletedPhotoIds = [];
     document.getElementById("existingPhotos").addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-existing-photo")) {
@@ -113,7 +136,7 @@
         }
     });
 
-    // Manage deleted winner IDs
+    // Deleted winners
     const deletedWinnerIds = [];
     document.getElementById("existingWinners").addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-existing-winner")) {
@@ -123,7 +146,7 @@
         }
     });
 
-    // Add more photo fields
+    // Add photo
     document.getElementById("addMorePhotos").addEventListener("click", function () {
         const container = document.getElementById("photoUploadContainer");
         const newField = document.createElement("div");
@@ -135,14 +158,13 @@
         container.appendChild(newField);
     });
 
-    // Remove dynamic photo field
     document.getElementById("photoUploadContainer").addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-photo")) {
             e.target.closest(".photo-field").remove();
         }
     });
 
-    // Add more winner fields
+    // Add winner
     document.getElementById("addWinner").addEventListener("click", function () {
         const container = document.getElementById("winnerContainer");
         const winnerIndex = container.children.length;
@@ -157,120 +179,61 @@
         container.appendChild(newField);
     });
 
-    // Remove dynamic winner field
     document.getElementById("winnerContainer").addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-winner")) {
             e.target.closest(".winner-field").remove();
         }
     });
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Helper for showing error message
-        function showError(input, message) {
-            let msg = input.parentElement.querySelector(".validation-message");
-            if (!msg) {
-                msg = document.createElement("div");
-                msg.className = "text-red-500 text-sm mt-1 validation-message";
-                input.parentElement.appendChild(msg);
-            }
-            msg.textContent = message;
+
+    // ================= Video Upload JS =================
+    const deletedVideoIds = [];
+    document.getElementById("existingVideos").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-existing-video")) {
+            deletedVideoIds.push(e.target.getAttribute("data-videoid"));
+            document.getElementById("deletedVideoIds").value = deletedVideoIds.join(",");
+            e.target.closest("div").remove();
+        }
+    });
+
+    document.getElementById("addMoreVideos").addEventListener("click", function () {
+        const container = document.getElementById("videoUploadContainer");
+
+        // Limit number of videos
+        if (container.children.length >= 5) {
+            alert("Maximum 5 videos allowed.");
+            return;
         }
 
-        function clearError(input) {
-            const msg = input.parentElement.querySelector(".validation-message");
-            if (msg) msg.textContent = "";
+        const newField = document.createElement("div");
+        newField.className = "video-field flex items-center space-x-4 p-4 bg-gray-50 rounded-lg";
+        newField.innerHTML = `
+            <input type="file" name="EventVideos" class="flex-1 p-2 border rounded-md" accept="video/*" />
+            <button type="button" class="remove-video bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Remove</button>
+        `;
+        container.appendChild(newField);
+    });
+
+    document.getElementById("videoUploadContainer").addEventListener("click", function (e) {
+        if (e.target.classList.contains("remove-video")) {
+            e.target.closest(".video-field").remove();
         }
+    });
 
-        function validateText(input, fieldName) {
-            if (!input.value.trim()) {
-                showError(input, `${fieldName} is required.`);
-                return false;
+    document.getElementById("videoUploadContainer").addEventListener("change", function (e) {
+        if (e.target.type === "file") {
+            const file = e.target.files[0];
+            if (file) {
+                const maxSizeMB = 50;
+                if (file.size > maxSizeMB * 1024 * 1024) {
+                    alert(`Video "${file.name}" exceeds ${maxSizeMB}MB limit.`);
+                    e.target.value = "";
+                }
+                const validTypes = ["video/mp4", "video/webm", "video/ogg"];
+                if (!validTypes.includes(file.type)) {
+                    alert(`Invalid video format for "${file.name}". Only MP4, WEBM, OGG allowed.`);
+                    e.target.value = "";
+                }
             }
-            clearError(input);
-            return true;
         }
-
-        function validateFile(input, label) {
-            const file = input.files[0];
-            if (!file) return true; // Skip empty optional fields
-
-            const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "application/pdf"];
-            if (!validTypes.includes(file.type)) {
-                showError(input, `${label} must be an image (JPG, PNG, WEBP) or PDF.`);
-                return false;
-            }
-
-            if (file.size > 1024 * 1024) {
-                showError(input, `${label} must be ≤ 1MB.`);
-                return false;
-            }
-
-            clearError(input);
-            return true;
-        }
-
-        // Initial validations
-        document.querySelectorAll("#winnerContainer input[type='text']").forEach(input => {
-            input.addEventListener("input", function () {
-                const placeholder = input.getAttribute("placeholder");
-                validateText(input, placeholder);
-            });
-        });
-
-        document.getElementById("photoUploadContainer").addEventListener("change", function (e) {
-            if (e.target.type === "file") {
-                validateFile(e.target, "Event Photo");
-            }
-        });
-
-        document.querySelector("input[name='Brochure']").addEventListener("change", function () {
-            validateFile(this, "Brochure");
-        });
-
-        // Validate on submit
-        document.querySelector("form").addEventListener("submit", function (e) {
-            let valid = true;
-
-            // Validate winners
-            document.querySelectorAll("#winnerContainer input[type='text']").forEach(input => {
-                const placeholder = input.getAttribute("placeholder");
-                if (!validateText(input, placeholder)) valid = false;
-            });
-
-            // Validate photos
-            document.querySelectorAll("#photoUploadContainer input[type='file']").forEach(input => {
-                if (!validateFile(input, "Event Photo")) valid = false; 
-            });
-
-            // Validate brochure
-            const brochure = document.querySelector("input[name='Brochure']");
-            if (!validateFile(brochure, "Brochure")) valid = false;
-
-            if (!valid) e.preventDefault(); 
-        });
-
-        // Validate dynamically added winners
-        document.getElementById("addWinner").addEventListener("click", function () {
-            setTimeout(() => {
-                const newInputs = document.querySelectorAll("#winnerContainer .winner-field:last-child input[type='text']");
-                newInputs.forEach(input => {
-                    input.addEventListener("input", function () {
-                        const placeholder = input.getAttribute("placeholder");
-                        validateText(input, placeholder);
-                    });
-                });
-            }, 10);
-        });
-
-        // Validate dynamically added photo fields
-        document.getElementById("addMorePhotos").addEventListener("click", function () {
-            setTimeout(() => {
-                const lastInput = document.querySelector("#photoUploadContainer .photo-field:last-child input[type='file']");
-                lastInput.addEventListener("change", function () {
-                    validateFile(this, "Event Photo");
-                });
-            }, 10);
-        });
     });
 </script>

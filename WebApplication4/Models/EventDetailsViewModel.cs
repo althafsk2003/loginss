@@ -7,13 +7,10 @@ namespace WebApplication4.Models
 {
     public class EventDetailsViewModel
     {
-
         public EVENT Event { get; set; }
-        public List<EventPhoto> EventPhotos { get; set; }
-        public List<EventWinner> EventWinners { get; set; }
+        public List<EventPhoto> EventPhotos { get; set; } = new List<EventPhoto>();
+        public List<EventWinner> EventWinners { get; set; } = new List<EventWinner>();
+        public List<EventVideo> EventVideos { get; set; } = new List<EventVideo>(); // initialize
+    }
 
-        //public List<EventWinner> Winners { get; set; }  // Add the Winners list for new winners to be added
-    
-
-}
 }

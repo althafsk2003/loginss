@@ -264,7 +264,7 @@ namespace WebApplication4.Controllers
                 {
                     Email = club.ClubHeadEmail, // ✅ use same email
                     PasswordHash = "clubadmin@123",
-                    Role = "Club Admin",
+                    Role = "ClubAdmin",
                     DepartmentID = club.DepartmentID,
                     SubDepartmentID = club.SubDepartmentID,
                     UniversityID = mentor.UniversityID,
