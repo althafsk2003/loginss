@@ -63,6 +63,7 @@ namespace WebApplication4.Models
         public string ApprovedAmount { get; set; }
         public string RejectionReason { get; set; }
         public string Venue { get; set; }
+        public Nullable<System.DateTime> LastAlertSentDate { get; set; }
     
         public virtual ApprovalStatusTable ApprovalStatusTable { get; set; }
         public virtual ApprovalStatusTable ApprovalStatusTable1 { get; set; }

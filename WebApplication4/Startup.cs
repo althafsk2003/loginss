@@ -21,11 +21,10 @@ namespace WebApplication4
 
 
             RecurringJob.AddOrUpdate(
-                "PendingEventAlertServiceJob",                           // Unique job id
+                "PendingEventAlertServiceJob",
                 () => new WakeupServices.PendingEventAlertService().SendPendingEventAlerts(),
-                Cron.Minutely
+                "0 */3 * * *" // every 3 hours
             );
-
 
             // Start Hangfire server
             app.UseHangfireServer();

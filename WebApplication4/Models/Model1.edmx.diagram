@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="bbe41bb4539243768536f5e115d10362" Name="Diagram1">
+      <Diagram DiagramId="bbe41bb4539243768536f5e115d10362" Name="Diagram1" ZoomLevel="80">
         <EntityTypeShape EntityType="dummyclubsModel.ApprovalStatusTable" Width="1.5" PointX="0.75" PointY="18.125" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.ClubRegistration" Width="1.5" PointX="3" PointY="16.625" IsExpanded="true" />
         <EntityTypeShape EntityType="dummyclubsModel.CLUB" Width="1.5" PointX="6" PointY="15.25" IsExpanded="true" />
@@ -126,6 +126,19 @@
         <AssociationConnector Association="dummyclubsModel.FK_Logins_SubDepartment" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_Logins_University" ManuallyRouted="false" />
         <AssociationConnector Association="dummyclubsModel.FK_USER_SubDepartment" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="dummyclubsModel.AggregatedCounter" Width="1.5" PointX="6.375" PointY="7.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Counter" Width="1.5" PointX="6.375" PointY="10.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Hash" Width="1.5" PointX="11.375" PointY="0.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Job" Width="1.5" PointX="3.375" PointY="2.125" />
+        <EntityTypeShape EntityType="dummyclubsModel.JobParameter" Width="1.5" PointX="5.625" PointY="4.125" />
+        <EntityTypeShape EntityType="dummyclubsModel.JobQueue" Width="1.5" PointX="11.375" PointY="3.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.List" Width="1.5" PointX="13.375" PointY="0.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Schema" Width="1.5" PointX="8.375" PointY="0.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Server" Width="1.5" PointX="13.375" PointY="3.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.Set" Width="1.5" PointX="13.375" PointY="6.75" />
+        <EntityTypeShape EntityType="dummyclubsModel.State" Width="1.5" PointX="5.625" PointY="1.125" />
+        <AssociationConnector Association="dummyclubsModel.FK_HangFire_JobParameter_Job" />
+        <AssociationConnector Association="dummyclubsModel.FK_HangFire_State_Job" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -19,11 +19,15 @@ namespace WebApplication4.WakeupServices
             // Pending statuses: 1 = Pending Mentor, 4 = Pending SCC/HOD, 7 = Pending Director
             int[] pendingStatuses = { 1, 4, 7 };
 
-            // Fetch events pending > 32 hours
+            // Fetch events pending > 32 hours AND not alerted in the last hour
+            // Fetch events pending > 48 hours AND not alerted in the last 3 hours
             var pendingEvents = _db.EVENTS
                 .Where(e => pendingStatuses.Contains(e.ApprovalStatusID)
-                            && DbFunctions.DiffHours(e.EventCreatedDate, now) >= 0)
+                            && DbFunctions.DiffHours(e.EventCreatedDate, now) >= 48
+                            && (e.LastAlertSentDate == null ||
+                                DbFunctions.DiffHours(e.LastAlertSentDate, now) >= 3))
                 .ToList();
+
 
             foreach (var ev in pendingEvents)
             {
@@ -36,6 +40,10 @@ namespace WebApplication4.WakeupServices
                     if (!string.IsNullOrEmpty(recipientEmail))
                     {
                         await SendAlertAsync(ev, recipientEmail, recipientRole);
+
+                        // ✅ Update last alert time
+                        ev.LastAlertSentDate = now;
+                        await _db.SaveChangesAsync();
                     }
                 }
                 catch (Exception ex)
@@ -129,7 +137,6 @@ namespace WebApplication4.WakeupServices
         private async Task SendAlertAsync(EVENT ev, string recipientEmail, string recipientRole)
         {
             string subject = $"Pending Event Alert: {ev.EventName}";
-
             var links = GenerateActionLinks(ev, recipientRole);
 
             string body = $@"
@@ -143,14 +150,13 @@ namespace WebApplication4.WakeupServices
         <a href='{links.primaryHref}' style='padding:8px 12px; background-color:green; color:white; text-decoration:none;'>{links.primaryText}</a>
         <a href='{links.secondaryHref}' style='padding:8px 12px; background-color:red; color:white; text-decoration:none;'>{links.secondaryText}</a>
     </p>
-    <p>This event has been pending for more than 32 hours.</p>
+<p>This event has been pending for more than 48 hours.</p>
 </div>";
 
             var emailService = new EmailService();
             await emailService.SendEmailAsync(recipientEmail, subject, body);
         }
 
-        // Generate action links for email buttons
         // Generate action links for email buttons
         private (string primaryHref, string secondaryHref, string primaryText, string secondaryText) GenerateActionLinks(EVENT ev, string recipientRole)
         {
@@ -165,7 +171,6 @@ namespace WebApplication4.WakeupServices
             switch (recipientRole)
             {
                 case "Mentor":
-                    // Mentor should only see Forward + Reject
                     primaryHref = $"{baseUrl}/Mentor/ForwardEventToHOD?token={token}";
                     secondaryHref = $"{baseUrl}/Mentor/RejectEventRequest?token={token}";
                     primaryText = "Forward to HOD";
@@ -192,21 +197,9 @@ namespace WebApplication4.WakeupServices
                     primaryText = "Approve";
                     secondaryText = "Reject";
                     break;
-
-                default:
-                    break;
             }
 
             return (primaryHref, secondaryHref, primaryText, secondaryText);
-        }
-
-
-
-        // Check if the next approver after Mentor is HOD or SubHOD
-        private bool IsNextApproverHOD(EVENT ev)
-        {
-            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
-            return club == null || club.SubDepartmentID == null;
         }
     }
 }

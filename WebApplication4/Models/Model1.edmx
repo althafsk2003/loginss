@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="dummyclubsModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="ApprovalStatusTable">
           <Key>
             <PropertyRef Name="ApprovalStatusID" />
@@ -140,6 +140,7 @@
           <Property Name="ApprovedAmount" Type="nvarchar" MaxLength="255" />
           <Property Name="RejectionReason" Type="nvarchar" MaxLength="500" />
           <Property Name="Venue" Type="nvarchar" MaxLength="255" />
+          <Property Name="LastAlertSentDate" Type="datetime" />
         </EntityType>
         <EntityType Name="EventVideos">
           <Key>
@@ -242,6 +243,111 @@
           <Property Name="District" Type="varchar" MaxLength="255" />
           <Property Name="DepartmentID" Type="int" />
           <Property Name="SubDepartmentID" Type="int" />
+        </EntityType>
+        <EntityType Name="AggregatedCounter">
+          <Key>
+            <PropertyRef Name="Key" />
+          </Key>
+          <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Value" Type="bigint" Nullable="false" />
+          <Property Name="ExpireAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Counter">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Value" Type="int" Nullable="false" />
+          <Property Name="ExpireAt" Type="datetime" />
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Hash">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Field" />
+          </Key>
+          <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Field" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+          <Property Name="ExpireAt" Type="datetime2" Precision="7" />
+        </EntityType>
+        <EntityType Name="Job">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="StateId" Type="bigint" />
+          <Property Name="StateName" Type="nvarchar" MaxLength="20" />
+          <Property Name="InvocationData" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Arguments" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="ExpireAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="JobParameter">
+          <Key>
+            <PropertyRef Name="JobId" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="JobId" Type="bigint" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="40" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="JobQueue">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="Queue" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="JobId" Type="bigint" Nullable="false" />
+          <Property Name="Queue" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="FetchedAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="List">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="Key" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Value" Type="nvarchar(max)" />
+          <Property Name="ExpireAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Schema">
+          <Key>
+            <PropertyRef Name="Version" />
+          </Key>
+          <Property Name="Version" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Server">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Data" Type="nvarchar(max)" />
+          <Property Name="LastHeartbeat" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Set">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Value" />
+          </Key>
+          <Property Name="Key" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Score" Type="float" Nullable="false" />
+          <Property Name="Value" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="ExpireAt" Type="datetime" />
+        </EntityType>
+        <EntityType Name="State">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="JobId" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="JobId" Type="bigint" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Reason" Type="nvarchar" MaxLength="100" />
+          <Property Name="CreatedAt" Type="datetime" Nullable="false" />
+          <Property Name="Data" Type="nvarchar(max)" />
         </EntityType>
         <Association Name="FK__ClubRegis__Appro__17036CC0">
           <End Role="ApprovalStatusTable" Type="Self.ApprovalStatusTable" Multiplicity="0..1" />
@@ -1431,6 +1537,34 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_HangFire_JobParameter_Job">
+          <End Role="Job" Type="Self.Job" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="JobParameter" Type="Self.JobParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Job">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="JobParameter">
+              <PropertyRef Name="JobId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HangFire_State_Job">
+          <End Role="Job" Type="Self.Job" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="State" Type="Self.State" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Job">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="State">
+              <PropertyRef Name="JobId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_Logins_CLUBS">
           <End Role="CLUBS" Type="Self.CLUBS" Multiplicity="0..1" />
           <End Role="Logins" Type="Self.Logins" Multiplicity="*" />
@@ -1533,6 +1667,17 @@
           <EntitySet Name="SUBDEPARTMENT" EntityType="Self.SUBDEPARTMENT" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UNIVERSITY" EntityType="Self.UNIVERSITY" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="USER" EntityType="Self.USER" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AggregatedCounter" EntityType="Self.AggregatedCounter" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Counter" EntityType="Self.Counter" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Hash" EntityType="Self.Hash" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Job" EntityType="Self.Job" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="JobParameter" EntityType="Self.JobParameter" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="JobQueue" EntityType="Self.JobQueue" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="List" EntityType="Self.List" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Schema" EntityType="Self.Schema" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Server" EntityType="Self.Server" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="Set" EntityType="Self.Set" Schema="HangFire" store:Type="Tables" />
+          <EntitySet Name="State" EntityType="Self.State" Schema="HangFire" store:Type="Tables" />
           <AssociationSet Name="FK__ClubRegis__Appro__17036CC0" Association="Self.FK__ClubRegis__Appro__17036CC0">
             <End Role="ApprovalStatusTable" EntitySet="ApprovalStatusTable" />
             <End Role="ClubRegistrations" EntitySet="ClubRegistrations" />
@@ -1929,6 +2074,14 @@
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventVideos" EntitySet="EventVideos" />
           </AssociationSet>
+          <AssociationSet Name="FK_HangFire_JobParameter_Job" Association="Self.FK_HangFire_JobParameter_Job">
+            <End Role="Job" EntitySet="Job" />
+            <End Role="JobParameter" EntitySet="JobParameter" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HangFire_State_Job" Association="Self.FK_HangFire_State_Job">
+            <End Role="Job" EntitySet="Job" />
+            <End Role="State" EntitySet="State" />
+          </AssociationSet>
           <AssociationSet Name="FK_Logins_CLUBS" Association="Self.FK_Logins_CLUBS">
             <End Role="CLUBS" EntitySet="CLUBS" />
             <End Role="Logins" EntitySet="Logins" />
@@ -1958,8 +2111,7 @@
             <End Role="USER" EntitySet="USER" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="dummyclubsModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -2247,6 +2399,7 @@
           <NavigationProperty Name="EventWinners5" Relationship="Self.FK__EventWinn__Event__6CD828CA" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventWinners6" Relationship="Self.FK__EventWinn__Event__6DCC4D03" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventVideos" Relationship="Self.FK_EventVideos_EVENTS" FromRole="EVENTS" ToRole="EventVideos" />
+          <Property Name="LastAlertSentDate" Type="DateTime" Precision="3" />
         </EntityType>
         <EntityType Name="EventVideo">
           <Key>
@@ -4127,7 +4280,163 @@
             <End Role="SUBDEPARTMENT" EntitySet="SUBDEPARTMENTs" />
             <End Role="USER" EntitySet="USERs" />
           </AssociationSet>
+          <EntitySet Name="AggregatedCounters" EntityType="dummyclubsModel.AggregatedCounter" />
+          <EntitySet Name="Counters" EntityType="dummyclubsModel.Counter" />
+          <EntitySet Name="Hashes" EntityType="dummyclubsModel.Hash" />
+          <EntitySet Name="Jobs" EntityType="dummyclubsModel.Job" />
+          <EntitySet Name="JobParameters" EntityType="dummyclubsModel.JobParameter" />
+          <EntitySet Name="JobQueues" EntityType="dummyclubsModel.JobQueue" />
+          <EntitySet Name="Lists" EntityType="dummyclubsModel.List" />
+          <EntitySet Name="Schemata" EntityType="dummyclubsModel.Schema" />
+          <EntitySet Name="Servers" EntityType="dummyclubsModel.Server" />
+          <EntitySet Name="Sets" EntityType="dummyclubsModel.Set" />
+          <EntitySet Name="States" EntityType="dummyclubsModel.State" />
+          <AssociationSet Name="FK_HangFire_JobParameter_Job" Association="dummyclubsModel.FK_HangFire_JobParameter_Job">
+            <End Role="Job" EntitySet="Jobs" />
+            <End Role="JobParameter" EntitySet="JobParameters" />
+          </AssociationSet>
+          <AssociationSet Name="FK_HangFire_State_Job" Association="dummyclubsModel.FK_HangFire_State_Job">
+            <End Role="Job" EntitySet="Jobs" />
+            <End Role="State" EntitySet="States" />
+          </AssociationSet>
         </EntityContainer>
+        <EntityType Name="AggregatedCounter">
+          <Key>
+            <PropertyRef Name="Key" />
+          </Key>
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="Int64" Nullable="false" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="Counter">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="Int32" Nullable="false" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="3" />
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+        </EntityType>
+        <EntityType Name="Hash">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Field" />
+          </Key>
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Field" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="7" />
+        </EntityType>
+        <EntityType Name="Job">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="StateId" Type="Int64" />
+          <Property Name="StateName" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="InvocationData" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Arguments" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="JobParameters" Relationship="dummyclubsModel.FK_HangFire_JobParameter_Job" FromRole="Job" ToRole="JobParameter" />
+          <NavigationProperty Name="States" Relationship="dummyclubsModel.FK_HangFire_State_Job" FromRole="Job" ToRole="State" />
+        </EntityType>
+        <EntityType Name="JobParameter">
+          <Key>
+            <PropertyRef Name="JobId" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="JobId" Type="Int64" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="40" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Job" Relationship="dummyclubsModel.FK_HangFire_JobParameter_Job" FromRole="JobParameter" ToRole="Job" />
+        </EntityType>
+        <EntityType Name="JobQueue">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="Queue" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="JobId" Type="Int64" Nullable="false" />
+          <Property Name="Queue" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="FetchedAt" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="List">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="Key" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="Schema">
+          <Key>
+            <PropertyRef Name="Version" />
+          </Key>
+          <Property Name="Version" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Server">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Data" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="LastHeartbeat" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="Set">
+          <Key>
+            <PropertyRef Name="Key" />
+            <PropertyRef Name="Value" />
+          </Key>
+          <Property Name="Key" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Score" Type="Double" Nullable="false" />
+          <Property Name="Value" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="ExpireAt" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="State">
+          <Key>
+            <PropertyRef Name="Id" />
+            <PropertyRef Name="JobId" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="JobId" Type="Int64" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Reason" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Data" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Job" Relationship="dummyclubsModel.FK_HangFire_State_Job" FromRole="State" ToRole="Job" />
+        </EntityType>
+        <Association Name="FK_HangFire_JobParameter_Job">
+          <End Type="dummyclubsModel.Job" Role="Job" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="dummyclubsModel.JobParameter" Role="JobParameter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Job">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="JobParameter">
+              <PropertyRef Name="JobId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_HangFire_State_Job">
+          <End Type="dummyclubsModel.Job" Role="Job" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="dummyclubsModel.State" Role="State" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Job">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="State">
+              <PropertyRef Name="JobId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4248,6 +4557,7 @@
           <EntitySetMapping Name="EVENTS">
             <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
               <MappingFragment StoreEntitySet="EVENTS">
+                <ScalarProperty Name="LastAlertSentDate" ColumnName="LastAlertSentDate" />
                 <ScalarProperty Name="ClubID" ColumnName="ClubID" />
                 <ScalarProperty Name="EventID" ColumnName="EventID" />
                 <ScalarProperty Name="EventName" ColumnName="EventName" />
@@ -4384,6 +4694,115 @@
                 <ScalarProperty Name="District" ColumnName="District" />
                 <ScalarProperty Name="DepartmentID" ColumnName="DepartmentID" />
                 <ScalarProperty Name="SubDepartmentID" ColumnName="SubDepartmentID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AggregatedCounters">
+            <EntityTypeMapping TypeName="dummyclubsModel.AggregatedCounter">
+              <MappingFragment StoreEntitySet="AggregatedCounter">
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Counters">
+            <EntityTypeMapping TypeName="dummyclubsModel.Counter">
+              <MappingFragment StoreEntitySet="Counter">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Hashes">
+            <EntityTypeMapping TypeName="dummyclubsModel.Hash">
+              <MappingFragment StoreEntitySet="Hash">
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Field" ColumnName="Field" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Jobs">
+            <EntityTypeMapping TypeName="dummyclubsModel.Job">
+              <MappingFragment StoreEntitySet="Job">
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Arguments" ColumnName="Arguments" />
+                <ScalarProperty Name="InvocationData" ColumnName="InvocationData" />
+                <ScalarProperty Name="StateName" ColumnName="StateName" />
+                <ScalarProperty Name="StateId" ColumnName="StateId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="JobParameters">
+            <EntityTypeMapping TypeName="dummyclubsModel.JobParameter">
+              <MappingFragment StoreEntitySet="JobParameter">
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="JobId" ColumnName="JobId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="JobQueues">
+            <EntityTypeMapping TypeName="dummyclubsModel.JobQueue">
+              <MappingFragment StoreEntitySet="JobQueue">
+                <ScalarProperty Name="FetchedAt" ColumnName="FetchedAt" />
+                <ScalarProperty Name="Queue" ColumnName="Queue" />
+                <ScalarProperty Name="JobId" ColumnName="JobId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Lists">
+            <EntityTypeMapping TypeName="dummyclubsModel.List">
+              <MappingFragment StoreEntitySet="List">
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Schemata">
+            <EntityTypeMapping TypeName="dummyclubsModel.Schema">
+              <MappingFragment StoreEntitySet="Schema">
+                <ScalarProperty Name="Version" ColumnName="Version" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Servers">
+            <EntityTypeMapping TypeName="dummyclubsModel.Server">
+              <MappingFragment StoreEntitySet="Server">
+                <ScalarProperty Name="LastHeartbeat" ColumnName="LastHeartbeat" />
+                <ScalarProperty Name="Data" ColumnName="Data" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Sets">
+            <EntityTypeMapping TypeName="dummyclubsModel.Set">
+              <MappingFragment StoreEntitySet="Set">
+                <ScalarProperty Name="ExpireAt" ColumnName="ExpireAt" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="Key" ColumnName="Key" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="States">
+            <EntityTypeMapping TypeName="dummyclubsModel.State">
+              <MappingFragment StoreEntitySet="State">
+                <ScalarProperty Name="Data" ColumnName="Data" />
+                <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+                <ScalarProperty Name="Reason" ColumnName="Reason" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="JobId" ColumnName="JobId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

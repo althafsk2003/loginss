@@ -267,6 +267,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AggregatedCounter.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ApprovalStatusTable.cs">
       <DependentUpon>Model1.tt</DependentUpon>
@@ -287,6 +290,9 @@
     </Compile>
     <Compile Include="Models\CommentDto.cs" />
     <Compile Include="Models\ConcludedEventsViewModel.cs" />
+    <Compile Include="Models\Counter.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\DEPARTMENT.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -315,6 +321,21 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\GroupMember.cs" />
+    <Compile Include="Models\Hash.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Job.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\JobParameter.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\JobQueue.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\List.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Login.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -342,7 +363,19 @@
     <Compile Include="Models\PostEventViewModel.cs" />
     <Compile Include="Models\RegistrationModel.cs" />
     <Compile Include="Models\save_event_detailsview.cs" />
+    <Compile Include="Models\Schema.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\SecureHelper.cs" />
+    <Compile Include="Models\Server.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Set.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Models\State.cs">
+      <DependentUpon>Model1.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\StudentDashboardViewModel.cs" />
     <Compile Include="Models\SUBDEPARTMENT.cs">
       <DependentUpon>Model1.tt</DependentUpon>

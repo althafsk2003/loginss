@@ -40,5 +40,16 @@ namespace WebApplication4.Models
         public virtual DbSet<SUBDEPARTMENT> SUBDEPARTMENTs { get; set; }
         public virtual DbSet<UNIVERSITY> UNIVERSITies { get; set; }
         public virtual DbSet<USER> USERs { get; set; }
+        public virtual DbSet<AggregatedCounter> AggregatedCounters { get; set; }
+        public virtual DbSet<Counter> Counters { get; set; }
+        public virtual DbSet<Hash> Hashes { get; set; }
+        public virtual DbSet<Job> Jobs { get; set; }
+        public virtual DbSet<JobParameter> JobParameters { get; set; }
+        public virtual DbSet<JobQueue> JobQueues { get; set; }
+        public virtual DbSet<List> Lists { get; set; }
+        public virtual DbSet<Schema> Schemata { get; set; }
+        public virtual DbSet<Server> Servers { get; set; }
+        public virtual DbSet<Set> Sets { get; set; }
+        public virtual DbSet<State> States { get; set; }
     }
 }
