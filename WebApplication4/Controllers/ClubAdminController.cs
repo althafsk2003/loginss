@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using WebApplication4.Controllers;
 using WebApplication4.Models;
 
 
 namespace WebApplication1.Controllers
 {
-    public class ClubAdminController : Controller
+    public class ClubAdminController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities(); // Database context // Database context
 
@@ -730,61 +731,42 @@ namespace WebApplication1.Controllers
         }
 
 
+        // GET: Concluded Events
         public ActionResult ConcludedEvents()
         {
-            // Check if the user is logged in
             if (Session["UserEmail"] == null)
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
-            // Get logged-in user's email
             string userEmail = Session["UserEmail"].ToString();
-
-            // Fetch Club Admin details
             var clubAdmin = _db.Logins.FirstOrDefault(c => c.Email == userEmail);
+            if (clubAdmin == null) return HttpNotFound("Club Admin not found");
 
-            if (clubAdmin == null)
-            {
-                return HttpNotFound("Club Admin not found");
-            }
-
-            // Get the ClubID for the logged-in club admin
-            int clubId = clubAdmin.ClubID ?? 0; // Handle null case if necessary
-
+            int clubId = clubAdmin.ClubID ?? 0;
             var today = DateTime.Today;
 
-            // Step 1: Find events where end date < today but status is not yet 'Concluded', filtered by ClubID
+            // Update events that ended
             var eventsToUpdate = _db.EVENTS
                 .Where(e => e.EventEndDateAndTime < today && e.EventStatus != "Concluded" && e.ClubID == clubId)
                 .ToList();
 
-            // Step 2: Update their status
             foreach (var ev in eventsToUpdate)
-            {
                 ev.EventStatus = "Concluded";
-            }
 
-            // Save changes to database
             _db.SaveChanges();
 
-            // Step 3: Fetch all concluded events for the club admin's club
+            // Return all concluded events
             var concludedEvents = _db.EVENTS
                 .Where(e => e.EventStatus == "Concluded" && e.ClubID == clubId)
                 .ToList();
 
-            // Send to view
             return View(concludedEvents);
         }
 
-        // GET: Event/Details/5 (Display Event Details and Form to Add Photos & Winners)
+        // GET: Concluded Event Details
         public ActionResult getconEventDetails(int id)
         {
             var eventDetails = _db.EVENTS.Find(id);
-            if (eventDetails == null)
-            {
-                return HttpNotFound();
-            }
+            if (eventDetails == null) return HttpNotFound();
 
             var eventPhotos = _db.EventPhotos.Where(e => e.EventId == id).ToList();
             var eventWinners = _db.EventWinners.Where(w => w.EventId == id).ToList();
@@ -799,107 +781,26 @@ namespace WebApplication1.Controllers
             return View(model);
         }
 
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]  // Ensure the anti-forgery token is validated
-        public ActionResult SaveEventDetails(EventDetailsViewModel model, HttpPostedFileBase Brochure, IEnumerable<HttpPostedFileBase> EventPhotos)
-        {
-            // Retrieve event details based on the EventID
-            var eventDetails = _db.EVENTS.FirstOrDefault(e => e.EventID == model.Event.EventID);
-            if (eventDetails == null)
-            {
-                // Handle case where event details could not be found (optional)
-                return HttpNotFound("Event not found");
-            }
-
-            // Set up the paths for brochures and photos inside wwwroot (without 'images' folder)
-            string brochureDirectory = Server.MapPath("~/wwwroot/UploadedBrochures/");
-            string photoDirectory = Server.MapPath("~/wwwroot/Images/");
-
-            // Create directories if they do not exist
-            if (!Directory.Exists(brochureDirectory))
-            {
-                Directory.CreateDirectory(brochureDirectory);
-            }
-
-            if (!Directory.Exists(photoDirectory))
-            {
-                Directory.CreateDirectory(photoDirectory);
-            }
-
-            // Save Brochure if provided
-            if (Brochure != null && Brochure.ContentLength > 0)
-            {
-                var brochurePath = Path.Combine(brochureDirectory, Path.GetFileName(Brochure.FileName));
-                Brochure.SaveAs(brochurePath);
-                eventDetails.EventBrochure = "/UploadedBrochures/" + Path.GetFileName(Brochure.FileName);
-            }
-
-            // Update Winners: Remove old winners, then add new ones
-            var existingWinners = _db.EventWinners.Where(w => w.EventId == eventDetails.EventID).ToList();
-            foreach (var winner in existingWinners)
-            {
-                _db.EventWinners.Remove(winner);
-            }
-
-            foreach (var winner in model.EventWinners)
-            {
-                winner.EventId = eventDetails.EventID; // Set EventId for each winner
-                _db.EventWinners.Add(winner);
-            }
-
-            // Save Photos: Remove old photos, then add new ones
-            var existingPhotos = _db.EventPhotos.Where(p => p.EventId == eventDetails.EventID).ToList();
-            foreach (var photo in existingPhotos)
-            {
-                _db.EventPhotos.Remove(photo);
-            }
-
-            foreach (var photo in EventPhotos)
-            {
-                if (photo != null && photo.ContentLength > 0)
-                {
-                    var photoPath = Path.Combine(photoDirectory, Path.GetFileName(photo.FileName));
-                    photo.SaveAs(photoPath);
-
-                    // Save photo info in database
-                    var eventPhoto = new EventPhoto
-                    {
-                        EventId = eventDetails.EventID,
-                        PhotoPath = "/Images/" + Path.GetFileName(photo.FileName),
-                        UploadedDate = DateTime.Now
-                    };
-                    _db.EventPhotos.Add(eventPhoto);
-                }
-            }
-
-            // Save changes to the database
-            _db.SaveChanges();
-
-            // Redirect back to the event details page
-            return RedirectToAction("EventDetails", new { eventId = eventDetails.EventID });
-        }*/
-
+        // GET: Upload Event Details
         [HttpGet]
         public ActionResult SaveEventDetails(int id)
         {
-            var model = new save_event_detailsview
-            {
-                EventId = id
-            };
+            var model = new save_event_detailsview { EventId = id };
             return View(model);
         }
 
-
+        // POST: Save Event Details → Pending Mentor Approval
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SaveEventDetails(
-     int EventId,
-     HttpPostedFileBase Brochure,
-     IEnumerable<HttpPostedFileBase> EventPhotos,
-     List<EventWinner> Winners,
-     string DeletedPhotoIds,
-     string DeletedWinnerIds
- )
+            int EventId,
+            HttpPostedFileBase Brochure,
+            IEnumerable<HttpPostedFileBase> EventPhotos,
+            IEnumerable<HttpPostedFileBase> EventVideos,
+            List<EventWinner> Winners,
+            string DeletedPhotoIds,
+            string DeletedWinnerIds
+        )
         {
             var evnt = _db.EVENTS.Find(EventId);
             if (evnt == null)
@@ -908,55 +809,89 @@ namespace WebApplication1.Controllers
                 return View("EventDetails");
             }
 
-            // Handle Brochure Upload
+            // --- Brochure Upload ---
             if (Brochure != null && Brochure.ContentLength > 0)
             {
-                string brochureDirectory = Server.MapPath("~/wwwroot/UploadedBrochures/");
-                if (!Directory.Exists(brochureDirectory))
-                    Directory.CreateDirectory(brochureDirectory);
+                string brochureDir = Server.MapPath("~/wwwroot/UploadedBrochures/");
+                if (!Directory.Exists(brochureDir)) Directory.CreateDirectory(brochureDir);
 
                 if (!string.IsNullOrEmpty(evnt.EventBrochure))
                 {
                     var oldBrochurePath = Server.MapPath(evnt.EventBrochure);
-                    if (System.IO.File.Exists(oldBrochurePath))
-                    {
-                        System.IO.File.Delete(oldBrochurePath);
-                    }
+                    if (System.IO.File.Exists(oldBrochurePath)) System.IO.File.Delete(oldBrochurePath);
                 }
 
                 string brochureFileName = Path.GetFileName(Brochure.FileName);
-                string brochurePath = Path.Combine(brochureDirectory, brochureFileName);
+                string brochurePath = Path.Combine(brochureDir, brochureFileName);
                 Brochure.SaveAs(brochurePath);
+
                 evnt.EventBrochure = "/wwwroot/UploadedBrochures/" + brochureFileName;
+
+                // Set brochure approval status for mentor
+                evnt.BrochureApprovalStatusID = 1; // Pending
+                evnt.BrochureApprovedByID = null;
+                evnt.BrochureApprovedDate = null;
             }
 
-            // Handle New Photos
+            // --- Photos Upload ---
             if (EventPhotos != null)
             {
+                string photoDir = Server.MapPath("~/wwwroot/Images/");
+                if (!Directory.Exists(photoDir)) Directory.CreateDirectory(photoDir);
+
                 foreach (var photo in EventPhotos)
                 {
                     if (photo != null && photo.ContentLength > 0)
                     {
-                        string photoDirectory = Server.MapPath("~/wwwroot/Images/");
-                        if (!Directory.Exists(photoDirectory))
-                            Directory.CreateDirectory(photoDirectory);
-
                         string photoFileName = Path.GetFileName(photo.FileName);
-                        string photoPath = Path.Combine(photoDirectory, photoFileName);
+                        string photoPath = Path.Combine(photoDir, photoFileName);
                         photo.SaveAs(photoPath);
 
                         var eventPhoto = new EventPhoto
                         {
                             EventId = EventId,
-                            PhotoPath = "/wwwroot/Images/" + photoFileName,
-                            UploadedDate = DateTime.Now
+                            Path = "/wwwroot/Images/" + photoFileName,
+                            UploadedDate = DateTime.Now,
+                            MediaType = "Photo",
+                            ApprovalStatusID = 1, // Pending
+                            ApprovedByID = null,
+                            ApprovedDate = null
                         };
                         _db.EventPhotos.Add(eventPhoto);
                     }
                 }
             }
 
-            // Handle Deleted Photos
+            // --- Videos Upload ---
+            if (EventVideos != null)
+            {
+                string videoDir = Server.MapPath("~/wwwroot/Videos/");
+                if (!Directory.Exists(videoDir)) Directory.CreateDirectory(videoDir);
+
+                foreach (var video in EventVideos)
+                {
+                    if (video != null && video.ContentLength > 0)
+                    {
+                        string videoFileName = Path.GetFileName(video.FileName);
+                        string videoPath = Path.Combine(videoDir, videoFileName);
+                        video.SaveAs(videoPath);
+
+                        var eventVideo = new EventPhoto
+                        {
+                            EventId = EventId,
+                            Path = "/wwwroot/Videos/" + videoFileName,
+                            UploadedDate = DateTime.Now,
+                            MediaType = "Video",
+                            ApprovalStatusID = 1, // Pending
+                            ApprovedByID = null,
+                            ApprovedDate = null
+                        };
+                        _db.EventPhotos.Add(eventVideo);
+                    }
+                }
+            }
+
+            // --- Delete Photos if needed ---
             if (!string.IsNullOrEmpty(DeletedPhotoIds))
             {
                 var ids = DeletedPhotoIds.Split(',').Select(int.Parse).ToList();
@@ -964,7 +899,7 @@ namespace WebApplication1.Controllers
                 _db.EventPhotos.RemoveRange(photosToDelete);
             }
 
-            // Handle New Winners
+            // --- Winners Upload (Pending Mentor Approval) ---
             if (Winners != null)
             {
                 foreach (var winner in Winners)
@@ -972,12 +907,15 @@ namespace WebApplication1.Controllers
                     if (!string.IsNullOrEmpty(winner.WinnerName))
                     {
                         winner.EventId = EventId;
+                        winner.ApprovalStatusID = 1;  // Pending
+                        winner.ApprovedByID = null;
+                        winner.ApprovedDate = null;
                         _db.EventWinners.Add(winner);
                     }
                 }
             }
 
-            // Handle Deleted Winners
+            // --- Delete Winners if needed ---
             if (!string.IsNullOrEmpty(DeletedWinnerIds))
             {
                 var ids = DeletedWinnerIds.Split(',').Select(int.Parse).ToList();
@@ -987,10 +925,8 @@ namespace WebApplication1.Controllers
 
             _db.SaveChanges();
 
-            // Set success message in ViewBag
-            ViewBag.SuccessMessage = "Event details updated successfully!";
+            ViewBag.SuccessMessage = "Event details uploaded successfully! Pending mentor approval.";
 
-            // Rebuild view model for the same view
             var model = new EventDetailsViewModel
             {
                 Event = evnt,
@@ -998,7 +934,7 @@ namespace WebApplication1.Controllers
                 EventWinners = _db.EventWinners.Where(w => w.EventId == EventId).ToList()
             };
 
-            return View("getconEventDetails", model); // Stay on same view
+            return View("getconEventDetails", model);
         }
 
 

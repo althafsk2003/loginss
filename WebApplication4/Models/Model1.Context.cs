@@ -30,10 +30,8 @@ namespace WebApplication4.Models
         public virtual DbSet<CLUB> CLUBS { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<DEPARTMENT> DEPARTMENTs { get; set; }
-        public virtual DbSet<EventPhoto> EventPhotos { get; set; }
         public virtual DbSet<EventRegistration> EventRegistrations { get; set; }
         public virtual DbSet<EVENT> EVENTS { get; set; }
-        public virtual DbSet<EventVideo> EventVideos { get; set; }
         public virtual DbSet<EventWinner> EventWinners { get; set; }
         public virtual DbSet<Login> Logins { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
@@ -51,5 +49,6 @@ namespace WebApplication4.Models
         public virtual DbSet<Server> Servers { get; set; }
         public virtual DbSet<Set> Sets { get; set; }
         public virtual DbSet<State> States { get; set; }
+        public virtual DbSet<EventPhoto> EventPhotos { get; set; }
     }
 }

@@ -11,14 +11,14 @@ using System.Data.Entity; // ✅ Required for Include()
 
 namespace WebApplication4.Controllers
 {
-    public class SubHODController : Controller
+    public class SubHODController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
                                                                            // GET: SubHOD
         public ActionResult Index()
         {
-            if (Session["UserRole"]?.ToString() != "SubHOD")
+            if (Session["Role"]?.ToString() != "SubHOD")
             {
                 return RedirectToAction("Login", "Admin");
             }
@@ -106,91 +106,126 @@ namespace WebApplication4.Controllers
 
             try
             {
-                // ✅ Save uploaded photo
+                if (string.IsNullOrEmpty(model.Email))
+                    throw new Exception("Email is required.");
+
+                int? deptId = null;
+                int? universityId = null;
+
+                // Assign DepartmentID and UniversityID from SubDepartment
+                if (model.SubDepartmentID != null)
+                {
+                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == model.SubDepartmentID);
+                    if (subDept != null)
+                    {
+                        deptId = subDept.DepartmentID;
+                        model.DepartmentID = deptId;
+
+                        var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == deptId);
+                        universityId = dept?.Universityid;
+                    }
+                }
+
+                // Handle photo upload
                 if (Photo != null && Photo.ContentLength > 0)
                 {
                     string uploadDir = Server.MapPath("~/Uploads/");
                     if (!Directory.Exists(uploadDir))
                         Directory.CreateDirectory(uploadDir);
 
-                    string fileName = Path.GetFileName(Photo.FileName);
+                    string fileName = Guid.NewGuid() + Path.GetExtension(Photo.FileName);
                     string path = Path.Combine(uploadDir, fileName);
                     Photo.SaveAs(path);
                     model.PhotoPath = "~/Uploads/" + fileName;
                 }
 
-                // ✅ Set mentor user properties
-                model.RegistrationDate = DateTime.Now;
-                model.IsActiveDate = DateTime.Now;
-                model.IsActive = true;
-                model.Userrole = "Mentor";
-                model.UserType = "Campus";
-                model.SubscriptionStatus = "Normal";
+                // Check if user exists
+                var existingUser = _db.USERs.FirstOrDefault(u => u.Email.ToLower() == model.Email.ToLower());
+                var existingLogin = _db.Logins.FirstOrDefault(l => l.Email.ToLower() == model.Email.ToLower());
 
-                // ✅ Assign DepartmentID from SubDepartment
-                if (model.SubDepartmentID != null)
+                if (existingUser != null)
                 {
-                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == model.SubDepartmentID);
-                    if (subDept != null)
-                    {
-                        model.DepartmentID = subDept.DepartmentID; // <-- assign here
-                    }
+                    // Update existing USER
+                    existingUser.FirstName = model.FirstName;
+                    existingUser.LastName = model.LastName;
+                    existingUser.MobileNumber = model.MobileNumber;
+                    existingUser.PhotoPath = model.PhotoPath ?? existingUser.PhotoPath;
+                    existingUser.IsActive = true;
+                    existingUser.UserType = model.UserType ?? existingUser.UserType;
+                    existingUser.RegistrationDate = DateTime.Now;
+                    existingUser.IsActiveDate = DateTime.Now;
+                    existingUser.SubDepartmentID = model.SubDepartmentID;
+                    existingUser.DepartmentID = deptId;
+
+                    // Update roles
+                    var roles = existingUser.Userrole?.Split(',').Select(r => r.Trim()).ToList() ?? new List<string>();
+                    if (!roles.Contains("Mentor"))
+                        roles.Add("Mentor");
+                    existingUser.Userrole = string.Join(",", roles);
+                }
+                else
+                {
+                    // New USER
+                    model.Userrole = "Mentor";
+                    model.UserType = "Campus";
+                    model.RegistrationDate = DateTime.Now;
+                    model.IsActiveDate = DateTime.Now;
+                    model.IsActive = true;
+
+                    _db.USERs.Add(model);
                 }
 
-                _db.USERs.Add(model);
-                await _db.SaveChangesAsync();
-
-                // ✅ Fetch UniversityID and DepartmentID using SubDepartmentID
-                int? universityId = null;
-                int? departmentId = null;
-
-                if (model.SubDepartmentID != null)
+                if (existingLogin != null)
                 {
-                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.SubDepartmentID == model.SubDepartmentID);
-                    if (subDept != null)
-                    {
-                        departmentId = subDept.DepartmentID;
+                    // Update existing Login
+                    var loginRoles = existingLogin.Role?.Split(',').Select(r => r.Trim()).ToList() ?? new List<string>();
+                    if (!loginRoles.Contains("Mentor"))
+                        loginRoles.Add("Mentor");
 
-                        var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == departmentId);
-                        universityId = dept?.Universityid;
-                    }
+                    existingLogin.Role = string.Join(",", loginRoles);
+                    existingLogin.DepartmentID = deptId;
+                    existingLogin.UniversityID = universityId;
+                    existingLogin.SubDepartmentID = model.SubDepartmentID;
+                }
+                else
+                {
+                    // New Login
+                    var login = new Login
+                    {
+                        Email = model.Email,
+                        PasswordHash = "Mentor@123", // Use hashed password in production
+                        Role = "Mentor",
+                        CreatedDate = DateTime.Now,
+                        IsActive = true,
+                        DepartmentID = deptId,
+                        UniversityID = universityId,
+                        SubDepartmentID = model.SubDepartmentID
+                    };
+                    _db.Logins.Add(login);
                 }
 
-                // ✅ Create login record with SubDepartmentID, DepartmentID, and UniversityID
-                var login = new Models.Login
-                {
-                    Email = model.Email,
-                    PasswordHash = "Mentor@123", // Note: Use hash in production
-                    Role = "Mentor",
-                    CreatedDate = DateTime.Now,
-                    IsActive = true,
-                    SubDepartmentID = model.SubDepartmentID,
-                    DepartmentID = departmentId,
-                    UniversityID = universityId
-                };
-
-                _db.Logins.Add(login);
+                // Save all changes
                 await _db.SaveChangesAsync();
 
-                // ✅ Send welcome email
-                string subject = "Welcome to Our Platform!";
-                string body = $"Hello {model.FirstName},<br/><br/>" +
-                              $"You have been successfully added as a <strong>Mentor</strong>.<br/>" +
-                              $"<strong>Login Email:</strong> {model.Email}<br/>" +
-                              $"<strong>Temporary Password:</strong> Mentor@123<br/><br/>" +
-                              $"<em>Please change your password after logging in for security purposes.</em><br/><br/>" +
-                              $"Thank you!";
-                await _emailService.SendEmailAsync(model.Email, subject, body);
+                // Send welcome email (optional)
+                try
+                {
+                    string subject = "Welcome to Our Platform!";
+                    string body = $"Hello {model.FirstName},<br/><br/>" +
+                                  $"You have been added/updated as a <strong>Mentor</strong>.<br/>" +
+                                  $"<strong>Login Email:</strong> {model.Email}<br/>" +
+                                  $"<strong>Temporary Password:</strong> Mentor@123<br/><br/>" +
+                                  $"<em>Please change your password after logging in.</em>";
+                    await _emailService.SendEmailAsync(model.Email, subject, body);
+                }
+                catch { /* log if needed */ }
 
-                // ✅ Success message
-                TempData["SuccessMessage"] = $"Mentor added successfully. " +
-                                             $"Login credentials have been sent to <strong>{model.Email}</strong>.";
-
+                TempData["SuccessMessage"] = $"Mentor details saved successfully. Login info sent to <strong>{model.Email}</strong>.";
                 return RedirectToAction("AddMentor", "SubHOD");
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "Error: " + ex.Message;
+                ViewBag.ErrorMessage = "Error: " + ex.Message + " " + ex.InnerException?.Message;
 
                 // Repopulate dropdown on exception
                 string email = Session["UserEmail"]?.ToString();
@@ -202,6 +237,8 @@ namespace WebApplication4.Controllers
                 return View(model);
             }
         }
+
+
 
         public ActionResult ManageMentors()
         {

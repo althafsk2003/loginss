@@ -129,9 +129,20 @@
 
     <!-- Header -->
     <div class="header bg-primary text-white py-3">
-        <i class="fas fa-bars hamburger"></i>
-        <h2>University Admin Dashboard</h2>
-        <div style="width: 24px;"></div> <!-- Placeholder for symmetry -->
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Left: Hamburger -->
+                <i class="fas fa-bars hamburger"></i>
+
+                <!-- Center: Heading -->
+                <h2 class="mb-0 text-center flex-grow-1">University Admin Dashboard</h2>
+
+                <!-- Right: Role Switcher -->
+                <div>
+                    @Html.Partial("_RoleSwitcher", Session["UserRoles"] as List<string>)
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Sidebar Popup -->

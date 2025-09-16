@@ -26,13 +26,13 @@ using System.Drawing.Imaging;
 namespace WebApplication4.Controllers
 {
 
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
 
 
-        // GET: Login Page
+        // GET: Login
         public ActionResult Login()
         {
             return View();
@@ -41,144 +41,180 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public ActionResult Login(LoginViewModel model, string CaptchaInput)
         {
-            // Validate CAPTCHA
             string captchaStored = Session["Captcha"] as string;
-            if (captchaStored == null || CaptchaInput == null || !captchaStored.Equals(CaptchaInput, StringComparison.OrdinalIgnoreCase))
+            if (captchaStored == null || CaptchaInput == null ||
+                !captchaStored.Equals(CaptchaInput, StringComparison.OrdinalIgnoreCase))
             {
                 ViewBag.Message = "Invalid CAPTCHA. Please try again.";
                 return View(model);
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(model);
+
+            var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username && u.PasswordHash == model.Password);
+            if (user == null)
             {
-                var user = _db.Logins.FirstOrDefault(u => u.Email == model.Username && u.PasswordHash == model.Password);
-
-                if (user != null)
-                {
-                    // Store basic session info
-                    Session["UserID"] = user.LoginID;
-                    Session["UserRole"] = user.Role;
-                    Session["UserEmail"] = user.Email;
-
-                    if (user.Role == "Admin")
-                    {
-                        Session["User1Email"] = user.Email;
-                        return RedirectToAction("Index", "Admin");
-                    }
-                    else if (user.Role == "UniversityAdministrator")
-                    {
-                        var university = _db.UNIVERSITies.FirstOrDefault(u => u.Email == user.Email);
-                        if (university != null)
-                        {
-                            Session["UniversityID"] = university.UniversityID;
-                            Session["UniversityName"] = university.UniversityNAME;
-                            Session["UniversityLocation"] = university.Location;
-                            return RedirectToAction("Index", "UniversityAdmin");
-                        }
-                        else
-                        {
-                            ViewBag.Message = "No university assigned to this administrator.";
-                        }
-                    }
-                    else if (user.Role == "HOD")
-                    {
-                        var department = _db.DEPARTMENTs.FirstOrDefault(d => d.HOD_Email == user.Email);
-                        Session["UserRole"] = "HOD";
-
-                        if (department != null)
-                        {
-                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
-                            Session["DepartmentID"] = department.DepartmentID;
-                            Session["DepartmentName"] = department.DepartmentName;
-                            Session["UniversityID"] = university?.UniversityID;
-                            Session["UniversityName"] = university?.UniversityNAME;
-
-                            return RedirectToAction("Index", "HOD");
-                        }
-                        else
-                        {
-                            ViewBag.Message = "No department assigned to this HOD.";
-                        }
-                    }
-                    else if (user.Role == "Mentor")
-                    {
-                        Session["UniversityID"] = user.UniversityID;
-                        Session["UserID"] = user.LoginID;
-                        Session["UserRole"] = user.Role;
-                        Session["UserEmail"] = user.Email;
-                        return RedirectToAction("Index", "Mentor");
-                    }
-                    else if (user.Role == "ClubAdmin")
-                    {
-                        Session["UserID"] = user.LoginID;
-                        Session["UserEmail"] = user.Email;
-                        return RedirectToAction("Index", "ClubAdmin");
-                    }
-                    else if (user.Role == "Director")
-                    {
-                        var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DirectorEmail == user.Email);
-                        if (department != null)
-                        {
-                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
-
-                            Session["UserRole"] = "Director";
-                            Session["DepartmentID"] = department.DepartmentID;
-                            Session["DepartmentName"] = department.DepartmentName;
-                            Session["UniversityID"] = university?.UniversityID;
-                            Session["UniversityName"] = university?.UniversityNAME;
-
-                            return RedirectToAction("Index", "Director");
-                        }
-                        else
-                        {
-                            ViewBag.Message = "No department assigned to this Director.";
-                        }
-                    }
-                    else if (user.Role == "SUBHOD")
-                    {
-                        var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.HOD_Email == user.Email);
-                        if (subDept != null)
-                        {
-                            var mainDept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == subDept.DepartmentID);
-                            var university = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == mainDept.Universityid);
-
-                            Session["UserRole"] = "SubHOD";
-                            Session["SubHOD_LoginID"] = user.LoginID; // ✅ REQUIRED
-                            Session["SubDepartmentID"] = subDept.SubDepartmentID;
-                            Session["SubDepartmentName"] = subDept.SubDepartmentName;
-                            Session["DepartmentID"] = mainDept?.DepartmentID;
-                            Session["DepartmentName"] = mainDept?.DepartmentName;
-                            Session["UniversityID"] = university?.UniversityID;
-                            Session["UniversityName"] = university?.UniversityNAME;
-
-                            return RedirectToAction("Index", "SubHOD");
-                        }
-                        else
-                        {
-                            ViewBag.Message = "No sub-department assigned to this Sub HOD.";
-                        }
-                    }
-                    else
-                    {
-                        ViewBag.Message = "Access Denied! Invalid Role.";
-                    }
-                }
-                else
-                {
-                    ViewBag.Message = "Invalid email or password.";
-                }
+                ViewBag.Message = "Invalid email or password.";
+                return View(model);
             }
 
-            return View(model);
+            // Split roles safely
+            var roles = user.Role
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(r => r.Trim())
+                .ToList();
+
+            Session["UserID"] = user.LoginID;
+            Session["UserEmail"] = user.Email;
+            Session["UserRoles"] = roles;
+
+            // default role = first
+            var activeRole = roles[0];
+            return LoginAsRole(activeRole, user.Email, user.LoginID);
         }
 
-        // Logout Action
+
+        [HttpPost]
+        public ActionResult SwitchRole(string role)
+        {
+            /*var roles = Session["CurrentRole"] as List<string>;*/
+            var email = Session["UserEmail"]?.ToString();
+            var loginId = (int?)Session["UserID"];
+          /*  System.Diagnostics.Debug.WriteLine($"Userrole" + roles);*/
+            System.Diagnostics.Debug.WriteLine($"UserEmail" + email);
+            System.Diagnostics.Debug.WriteLine($"UserID" + loginId);
+
+            if (role == null || email == null || loginId == null )
+            {
+                // Safety fallback
+                return RedirectToAction("Login", "Admin");
+            }
+
+            // Call LoginAsRole to set all role-specific session variables
+            return LoginAsRole(role, email, loginId.Value);
+        }
+
+
+
         public ActionResult Logout()
         {
             Session.Clear();
             Session.Abandon();
             return RedirectToAction("Login");
         }
+
+        /// <summary>
+        /// This method fills all Session values based on the selected role and redirects.
+        /// </summary>
+        private ActionResult LoginAsRole(string role, string email, int loginId)
+        {
+            // --- 1️⃣ Clean inputs ---
+            role = role?.Trim();
+            email = email?.Trim().ToLower(); // normalize email
+            System.Diagnostics.Debug.WriteLine($"Method Hit");
+            System.Diagnostics.Debug.WriteLine($"UserRole='{role}'");
+            System.Diagnostics.Debug.WriteLine($"UserEmail='{email}'");
+            System.Diagnostics.Debug.WriteLine($"UserID={loginId}");
+
+            // --- 2️⃣ Set common session values ---
+            Session["Role"] = role;
+            Session["CurrentRole"] = role;
+            Session["UserEmail"] = email;
+            Session["UserID"] = loginId;
+
+            // --- 3️⃣ Role-based redirection ---
+            switch (role?.ToLower())
+            {
+                case "admin":
+                    return RedirectToAction("Index", "Admin");
+
+                case "universityadministrator":
+                    var university = _db.UNIVERSITies.FirstOrDefault(u => u.Email.ToLower() == email);
+                    if (university == null)
+                    {
+                        TempData["Message"] = "No university assigned to this administrator.";
+                        return RedirectToAction("Login");
+                    }
+                    Session["UniversityID"] = university.UniversityID;
+                    Session["UniversityName"] = university.UniversityNAME;
+                    Session["UniversityLocation"] = university.Location;
+                    return RedirectToAction("Index", "UniversityAdmin");
+
+                case "hod":
+                    var department = _db.DEPARTMENTs.FirstOrDefault(d => d.HOD_Email.ToLower() == email);
+                    if (department == null)
+                    {
+                        TempData["Message"] = "No department assigned to this HOD.";
+                        return RedirectToAction("Login");
+                    }
+                    var uniHod = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == department.Universityid);
+                    Session["DepartmentID"] = department.DepartmentID;
+                    Session["DepartmentName"] = department.DepartmentName;
+                    Session["UniversityID"] = uniHod?.UniversityID;
+                    Session["UniversityName"] = uniHod?.UniversityNAME;
+                    return RedirectToAction("Index", "HOD");
+
+                case "mentor":
+                    var mentor = _db.Logins.FirstOrDefault(l => l.Email == email);
+                    System.Diagnostics.Debug.WriteLine($"Entered mentor case");
+                    if (mentor == null)
+                    {
+                        TempData["Message"] = "Mentor not found.";
+                        return RedirectToAction("Login");
+                    }
+                    Session["UniversityID"] = mentor.UniversityID;
+                    Session["UserRole"] = "Mentor";
+                    return RedirectToAction("Index", "Mentor");
+
+                case "clubadmin":
+                    return RedirectToAction("Index", "ClubAdmin");
+
+                case "director":
+                    var dirDept = _db.DEPARTMENTs.FirstOrDefault(d => d.DirectorEmail.ToLower() == email);
+                    if (dirDept == null)
+                    {
+                        TempData["Message"] = "No department assigned to this Director.";
+                        return RedirectToAction("Login");
+                    }
+                    var uniDir = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == dirDept.Universityid);
+                    Session["DepartmentID"] = dirDept.DepartmentID;
+                    Session["DepartmentName"] = dirDept.DepartmentName;
+                    Session["UniversityID"] = uniDir?.UniversityID;
+                    Session["UniversityName"] = uniDir?.UniversityNAME;
+                    return RedirectToAction("Index", "Director");
+
+                case "subhod":
+                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(s => s.HOD_Email.ToLower() == email);
+                    if (subDept == null)
+                    {
+                        TempData["Message"] = "No sub-department assigned to this Sub HOD.";
+                        return RedirectToAction("Login");
+                    }
+                    var mainDept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == subDept.DepartmentID);
+                    var uniSub = _db.UNIVERSITies.FirstOrDefault(u => u.UniversityID == mainDept.Universityid);
+
+                    Session["Role"] = "SubHOD";
+                    Session["CurrentRole"] = "SubHOD";
+                    Session["SubHOD_LoginID"] = loginId;
+                    Session["UserEmail"] = email;
+                    Session["SubDepartmentID"] = subDept.SubDepartmentID;
+                    Session["SubDepartmentName"] = subDept.SubDepartmentName;
+                    Session["DepartmentID"] = mainDept?.DepartmentID;
+                    Session["DepartmentName"] = mainDept?.DepartmentName;
+                    Session["UniversityID"] = uniSub?.UniversityID;
+                    Session["UniversityName"] = uniSub?.UniversityNAME;
+
+                    return RedirectToAction("Index", "SubHOD");
+
+                default:
+                    TempData["Message"] = "Access Denied! Invalid Role.";
+                    return RedirectToAction("Login");
+            }
+        }
+
+
+
+
 
         // Add Mentor Action
         //public ActionResult AddMentor()
@@ -1615,7 +1651,7 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
                         // Pull related data from event photos and winners
                         EventPhotos = _db.EventPhotos
                             .Where(p => p.EventId == e.EventID)
-                            .Select(p => p.PhotoPath)
+                            .Select(p => p.Path)
                             .ToList(),
 
                         Winners = _db.EventWinners
@@ -1698,7 +1734,7 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
 
                             foreach (var photo in photos)
                             {
-                                var path = Server.MapPath(photo.PhotoPath);
+                                var path = Server.MapPath(photo.Path);
                                 if (System.IO.File.Exists(path))
                                 {
                                     iTextSharp.text.Image img = iTextSharp.text.Image.GetInstance(path);
@@ -1772,7 +1808,7 @@ public ActionResult VerifyOTP(VerifyOTPViewModel model)
 
         private string GenerateCaptchaText(int length)
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*?/~";
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             var random = new Random();
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());

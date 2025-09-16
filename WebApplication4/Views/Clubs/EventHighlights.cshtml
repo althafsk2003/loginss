@@ -3,12 +3,10 @@
     Layout = "~/Views/Shared/_ClubsLayout.cshtml";
     ViewBag.Title = "Event Highlights";
 }
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css" />
-
 <style>
     :root {
         --primary: #E96C20;
@@ -19,20 +17,17 @@
         --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     body {
         font-family: 'Inter', sans-serif;
         background: linear-gradient(135deg, #f8fafc 0%, #e5e7eb 100%);
         color: var(--text-dark);
         overflow-x: hidden;
     }
-
     .container {
         max-width: 1400px;
         margin: 0 auto;
         padding: 1rem 0.5rem;
     }
-
     /* Event Banner */
     .event-banner {
         height: 400px;
@@ -44,18 +39,15 @@
         position: relative;
         animation: fadeInZoom 1.2s ease;
     }
-
         .event-banner img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.8s ease;
         }
-
         .event-banner:hover img {
             transform: scale(1.15);
         }
-
     /* Event Header */
     .event-header {
         display: flex;
@@ -63,7 +55,6 @@
         margin-bottom: 2rem;
         align-items: flex-start;
     }
-
     .event-poster {
         width: 300px;
         height: 450px;
@@ -74,17 +65,14 @@
         position: relative;
         transition: var(--transition);
     }
-
         .event-poster img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
         .event-poster:hover {
             transform: translateY(-10px) rotate(2deg);
         }
-
     .event-title {
         font-size: 3.5rem;
         font-weight: 800;
@@ -95,7 +83,6 @@
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         animation: bounceIn 1.2s ease;
     }
-
     .event-date {
         display: inline-flex;
         align-items: center;
@@ -108,11 +95,9 @@
         box-shadow: var(--shadow-xl);
         animation: slideInLeft 1s ease;
     }
-
     .event-description {
         max-width: 950px;
     }
-
         .event-description p {
             font-size: 1.3rem;
             line-height: 2.2;
@@ -127,11 +112,9 @@
             animation-delay: calc(var(--order) * 0.4s);
             transition: transform 0.3s ease;
         }
-
             .event-description p:hover {
                 transform: scale(1.02);
             }
-
     /* Centered Winners Section */
     .winners-section {
         margin: 2rem auto;
@@ -140,7 +123,6 @@
         padding: 1.5rem 0;
         position: relative;
     }
-
     .section-title {
         font-size: 2.5rem;
         font-weight: 700;
@@ -149,7 +131,6 @@
         display: inline-block;
         animation: fadeInDown 1.2s ease;
     }
-
         .section-title:after {
             content: '';
             position: absolute;
@@ -162,7 +143,6 @@
             border-radius: 3px;
             animation: pulse 1.5s infinite alternate;
         }
-
     .winners-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -170,7 +150,6 @@
         perspective: 1000px;
         margin: 0 auto;
     }
-
     .winner-card {
         background: white;
         border-radius: 12px;
@@ -184,7 +163,6 @@
         transform-style: preserve-3d;
         text-align: center;
     }
-
         .winner-card:before {
             content: '';
             position: absolute;
@@ -198,20 +176,16 @@
             z-index: -1;
             transform: translateZ(-1px);
         }
-
         .winner-card:hover {
             transform: translateY(-8px) rotateX(5deg);
         }
-
             .winner-card:hover:before {
                 opacity: 0.85;
             }
-
             .winner-card:hover .winner-name,
             .winner-card:hover .winner-desc {
                 color: var(--text-light);
             }
-
     .winner-name {
         font-size: 1.3rem;
         font-weight: 700;
@@ -219,7 +193,6 @@
         color: var(--text-dark);
         transition: var(--transition);
     }
-
     .winner-prize {
         font-size: 1.1rem;
         font-weight: 600;
@@ -229,14 +202,12 @@
         -webkit-text-fill-color: transparent;
         letter-spacing: 1px;
     }
-
     .winner-desc {
         font-size: 0.95rem;
         color: #4b5563;
         transition: var(--transition);
         line-height: 1.6;
     }
-
     /* Enhanced Auto-Scrolling Gallery */
     .gallery-section {
         margin: 2rem 0;
@@ -244,13 +215,11 @@
         overflow: hidden;
         padding: 1.5rem 0;
     }
-
     .gallery-container {
         display: flex;
         gap: 1rem;
         padding: 0.5rem 0;
     }
-
     .gallery-item {
         min-width: 500px;
         height: 350px;
@@ -261,215 +230,175 @@
         flex-shrink: 0;
         transition: var(--transition);
     }
-
         .gallery-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s ease;
         }
-
         .gallery-item:hover {
             transform: scale(1.08);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
-
             .gallery-item:hover img {
                 transform: scale(1.15);
             }
-
     /* Modal Zoom Effect */
     .mfp-with-zoom .mfp-container,
     .mfp-with-zoom.mfp-bg {
         opacity: 0;
         transition: all 0.4s ease-out;
     }
-
     .mfp-with-zoom.mfp-ready .mfp-container {
         opacity: 1;
     }
-
     .mfp-with-zoom.mfp-ready.mfp-bg {
         opacity: 0.85;
     }
-
     .mfp-with-zoom.mfp-removing .mfp-container,
     .mfp-with-zoom.mfp-removing.mfp-bg {
         opacity: 0;
     }
-
     /* Animations */
     @@keyframes fadeInZoom {
         from {
             opacity: 0;
             transform: scale(0.9);
         }
-
         to {
             opacity: 1;
             transform: scale(1);
         }
     }
-
     @@keyframes fadeInDown {
         from {
             opacity: 0;
             transform: translateY(-30px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-
     @@keyframes fadeInUp {
         from {
             opacity: 0;
             transform: translateY(30px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-
     @@keyframes slideInLeft {
         from {
             opacity: 0;
             transform: translateX(-50px);
         }
-
         to {
             opacity: 1;
             transform: translateX(0);
         }
     }
-
     @@keyframes bounceIn {
         0% {
             opacity: 0;
             transform: scale(0.9);
         }
-
         50% {
             transform: scale(1.05);
         }
-
         100% {
             opacity: 1;
             transform: scale(1);
         }
     }
-
     @@keyframes flipInY {
         from {
             transform: perspective(400px) rotateY(90deg);
             opacity: 0;
         }
-
         to {
             transform: perspective(400px) rotateY(0deg);
             opacity: 1;
         }
     }
-
     @@keyframes pulse {
         from {
             width: 60px;
         }
-
         to {
             width: 80px;
         }
     }
-
     @@keyframes scroll {
         0% {
             transform: translateX(0);
         }
-
         100% {
             transform: translateX(calc(-500px * var(--item-count)));
         }
     }
-
     .gallery-scroll {
         animation: scroll 60s linear infinite;
     }
-
     /* Modal Styling for Brochure */
     .modal-content {
         animation: fadeInZoom 0.4s ease;
     }
-
     .brochure-section img:hover {
         transform: scale(1.05);
     }
-
     .brochure-section iframe {
         transition: var(--transition);
     }
-
     .brochure-section .btn-outline-primary {
         border-color: var(--primary);
         color: var(--primary);
         transition: var(--transition);
     }
-
         .brochure-section .btn-outline-primary:hover {
             background: var(--primary-gradient);
             color: var(--text-light);
         }
-
     /* Responsive */
     @@media (max-width: 1200px) {
         .event-title {
             font-size: 3rem;
         }
-
         .gallery-item {
             min-width: 400px;
             height: 300px;
         }
     }
-
     @@media (max-width: 992px) {
         .event-header {
             flex-direction: column;
         }
-
         .event-poster {
             width: 100%;
             height: 400px;
         }
-
         .winners-grid {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         }
     }
-
     @@media (max-width: 768px) {
         .event-title {
             font-size: 2.5rem;
         }
-
         .event-description p {
             font-size: 1.1rem;
         }
-
         .gallery-item {
             min-width: 300px;
             height: 250px;
         }
-
         .winner-card {
             padding: 1rem;
         }
     }
 </style>
-
 <div class="container">
     <!-- Event Banner -->
     <div class="event-banner">
@@ -482,7 +411,6 @@
             <img src="https://via.placeholder.com/1400x400?text=Event+Banner" alt="Event Banner" />
         }
     </div>
-
     <!-- Event Header with Poster and Description -->
     <div class="event-header">
         <div class="event-poster">
@@ -505,18 +433,15 @@
                 @{
                     string[] descriptionLines = Model.EventDescription
                         .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
                     int order = 0;
                     int maxLinesToShow = 5;
                     int linesShown = 0;
-
                     foreach (var line in descriptionLines)
                     {
                         if (linesShown >= maxLinesToShow)
                         {
                             break;
                         }
-
                         if (line.TrimEnd().EndsWith(":"))
                         {
                             <p style="--order: @order" class="bold-heading">@line</p>
@@ -529,17 +454,14 @@
                         {
                             <p style="--order: @order">@line</p>
                         }
-
                         order++;
                         linesShown++;
                     }
                 }
-
                 <!-- Read More Button -->
                 <button type="button" class="btn btn-outline-primary mt-2 me-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
                     Read More
                 </button>
-
                 <!-- View Brochure Button -->
                 @if (!string.IsNullOrEmpty(Model.EventBrochure))
                 {
@@ -550,7 +472,6 @@
             </div>
         </div>
     </div>
-
     <!-- Brochure Modal -->
     <div class="modal fade" id="brochureModal" tabindex="-1" aria-labelledby="brochureModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -599,32 +520,26 @@
             </div>
         </div>
     </div>
-
-    <!-- Read More Button -->
-    <!--<button type="button" class="btn btn-outline-primary mt-2" data-bs-toggle="modal" data-bs-target="#descriptionModal">
-            Read More
-        </button>
-    </div>
-            </div>
-        </div>-->
-    <!-- Gallery Section with Auto-Scrolling -->
+    <!-- Gallery Section with Conditional Auto-Scrolling -->
     <div class="gallery-section">
         <h2 class="section-title"><i class="bi bi-images me-2"></i> Event Gallery</h2>
-        @if (Model.EventPhotos != null && Model.EventPhotos.Any())
+        @if (Model.EventPhotos != null && Model.EventPhotos.Any(p => p.MediaType.Equals("Photo", StringComparison.OrdinalIgnoreCase) && p.ApprovedByID.HasValue))
         {
+            var approvedPhotos = Model.EventPhotos
+                .Where(p => p.MediaType.Equals("Photo", StringComparison.OrdinalIgnoreCase) && p.ApprovedByID.HasValue)
+                .ToList();
+            var displayPhotos = new List<WebApplication4.Models.EventPhoto>(approvedPhotos);
+            // Duplicate items only if more than 2 photos
+            if (approvedPhotos.Count > 2)
+            {
+                displayPhotos.AddRange(approvedPhotos);
+            }
             <div style="overflow: hidden;">
-                <div class="gallery-container gallery-scroll" style="--item-count: @Model.EventPhotos.Count">
-                    @foreach (var photo in Model.EventPhotos)
+                <div class="gallery-container @(approvedPhotos.Count > 2 ? "gallery-scroll" : "")" style="--item-count: @displayPhotos.Count">
+                    @foreach (var photo in displayPhotos)
                     {
-                        <a href="@Url.Content(photo.PhotoPath)" class="gallery-item image-popup">
-                            <img src="@Url.Content(photo.PhotoPath)" alt="Event photo" />
-                        </a>
-                    }
-                    <!-- Duplicate items for seamless looping -->
-                    @foreach (var photo in Model.EventPhotos)
-                    {
-                        <a href="@Url.Content(photo.PhotoPath)" class="gallery-item image-popup">
-                            <img src="@Url.Content(photo.PhotoPath)" alt="Event photo" />
+                        <a href="@Url.Content(photo.Path)" class="gallery-item image-popup">
+                            <img src="@Url.Content(photo.Path)" alt="Event photo" />
                         </a>
                     }
                 </div>
@@ -635,14 +550,40 @@
             <p class="text-muted">No photos available yet.</p>
         }
     </div>
-
+    <!-- Video Gallery Section -->
+    <div class="gallery-section">
+        <h2 class="section-title"><i class="bi bi-camera-video me-2"></i> Event Videos</h2>
+        @if (Model.EventPhotos != null && Model.EventPhotos.Any(p => p.MediaType.Equals("Video", StringComparison.OrdinalIgnoreCase) && p.ApprovedByID.HasValue))
+        {
+            var approvedVideos = Model.EventPhotos
+                .Where(p => p.MediaType.Equals("Video", StringComparison.OrdinalIgnoreCase) && p.ApprovedByID.HasValue)
+                .ToList();
+            <div class="d-flex flex-wrap gap-3">
+                @foreach (var video in approvedVideos)
+                {
+                    <a href="@Url.Content(video.Path)" class="video-popup" style="min-width: 500px; max-width: 100%; display: block;">
+                        <div class="gallery-item">
+                            <video width="100%" height="300" poster="" controls>
+                                <source src="@Url.Content(video.Path)" type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No videos available yet.</p>
+        }
+    </div>
     <!-- Centered Winners Section -->
     <div class="winners-section">
         <h2 class="section-title"><i class="bi bi-trophy me-2"></i> Winners</h2>
         @if (Model.EventWinners != null && Model.EventWinners.Any())
         {
             <div class="winners-grid">
-                @foreach (var winner in Model.EventWinners)
+                @foreach (var winner in Model.EventWinners.Where(x => !string.IsNullOrEmpty(x.ApprovedByID.ToString())))
                 {
                     <div class="winner-card">
                         <h3 class="winner-name">@winner.WinnerName</h3>
@@ -657,7 +598,6 @@
             <p class="text-muted">No winners announced yet.</p>
         }
     </div>
-
     <!-- Description and Brochure Modal -->
     <div class="modal fade" id="descriptionModal" tabindex="-1" aria-labelledby="descriptionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -686,7 +626,6 @@
                             }
                         }
                     </div>
-
                     <!-- Brochure Section -->
                     <div class="brochure-section">
                         <h6 style="font-weight: 600; color: var(--text-dark); margin-bottom: 1rem;">Event Brochure</h6>
@@ -727,9 +666,7 @@
             </div>
         </div>
     </div>
-
 </div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
 <style>
@@ -752,7 +689,6 @@
         z-index: 9998;
     }
 </style>
-
 <script>
     $(function () {
         // Attach to the gallery container via delegate (more robust with duplicated items)
@@ -766,30 +702,25 @@
                 duration: 400,
                 opener: function (el) { return el.find('img'); }
             },
-
             // ✅ closing behaviors
             closeOnContentClick: false,
             closeOnBgClick: true,
             enableEscapeKey: true,
             showCloseBtn: true,
-            closeBtnInside: false,              // put the × outside the figure (reliable)
+            closeBtnInside: false, // put the × outside the figure (reliable)
             closeMarkup: '<button title="%title%" type="button" class="mfp-close">&times;</button>',
             fixedContentPos: true
         });
-
         // Hard fallback for ESC if anything else intercepts it
         $(document).on('keydown.mfpForceClose', function (e) {
             if (e.key === 'Escape') { $.magnificPopup.close(); }
         });
     });
 </script>
-
-
 <!-- Back to Top Button -->
 <button type="button" id="btn-back-to-top" title="Go to top">
     ↑
 </button>
-
 <style>
     #btn-back-to-top {
         position: fixed;
@@ -815,10 +746,8 @@
             background-color: darkorange;
         }
 </style>
-
 <script>
     const backToTopBtn = document.getElementById("btn-back-to-top");
-
     window.onscroll = function () {
         if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
             backToTopBtn.style.display = "block";
@@ -826,7 +755,6 @@
             backToTopBtn.style.display = "none";
         }
     };
-
     backToTopBtn.addEventListener("click", function () {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });

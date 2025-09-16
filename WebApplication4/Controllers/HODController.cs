@@ -17,7 +17,7 @@ using WebApplication4.Models;
 
 namespace WebApplication4.Controllers
 {
-    public class HODController : Controller
+    public class HODController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
@@ -95,6 +95,7 @@ namespace WebApplication4.Controllers
             };
             return View(model);
         }
+
         // ✅ Add Mentor - POST
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -102,25 +103,23 @@ namespace WebApplication4.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Collect all validation errors
-                ViewBag.Errors = ModelState.Values
-                                   .SelectMany(v => v.Errors)
-                                   .Select(e => e.ErrorMessage)
-                                   .ToList();
+                ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors)
+                                                  .Select(e => e.ErrorMessage)
+                                                  .ToList();
                 return View(model);
             }
 
             try
             {
-                // Auto-fill mentor defaults
-                model.DepartmentID = GetDepartmentID();
-                model.Userrole = "Mentor";        // correct: role = Mentor
-                model.UserType = "Campus";        // default, unless chosen in form
+                int deptId = GetDepartmentID();
+                model.DepartmentID = deptId;
+                model.Userrole = "Mentor";
+                model.UserType = "Campus";
                 model.RegistrationDate = DateTime.Now;
                 model.IsActiveDate = DateTime.Now;
                 model.IsActive = true;
 
-                // ✅ Photo upload
+                // Handle photo upload
                 if (Photo != null && Photo.ContentLength > 0)
                 {
                     string uploadDir = Server.MapPath("~/Uploads/");
@@ -128,84 +127,101 @@ namespace WebApplication4.Controllers
                         Directory.CreateDirectory(uploadDir);
 
                     string fileName = Guid.NewGuid() + Path.GetExtension(Photo.FileName);
-                    string path = Path.Combine(uploadDir, fileName);
-
-                    Photo.SaveAs(path);
-                    model.PhotoPath = "/Uploads/" + fileName; // ✅ use web path
+                    Photo.SaveAs(Path.Combine(uploadDir, fileName));
+                    model.PhotoPath = "/Uploads/" + fileName;
                 }
 
-                // ✅ Save USER
-                _db.USERs.Add(model);
-
-                // ✅ Create login with plain text password
-                string defaultPassword = "Mentor@123";
-                // Get department info
-                var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == model.DepartmentID);
-
-                Login login = new Models.Login
+                // Check if email exists in Logins
+                var existingLogin = _db.Logins.FirstOrDefault(l => l.Email == model.Email);
+                if (existingLogin != null)
                 {
-                    Email = model.Email,
-                    PasswordHash = defaultPassword,
-                    Role = "Mentor",
-                    CreatedDate = DateTime.Now,
-                    IsActive = true,
-                    DepartmentID = model.DepartmentID,
-                    UniversityID = department?.Universityid ?? 0  // ✅ set UniversityID here
-                };
-
-                _db.Logins.Add(login);
-
-                // ✅ Save both with logging
-                try
-                {
-                    int rows = await _db.SaveChangesAsync();
-                    System.Diagnostics.Debug.WriteLine($"[DEBUG] SaveChangesAsync affected {rows} rows");
-
-                    if (rows == 0)
+                    // Update roles
+                    var roles = existingLogin.Role.Split(',').Select(r => r.Trim()).ToList();
+                    if (!roles.Contains("Mentor"))
                     {
-                        ViewBag.Errors = new List<string> { "No records were saved. Please check your data." };
-                        return View(model);
+                        roles.Add("Mentor");
+                        existingLogin.Role = string.Join(",", roles);
+                    }
+
+                    // Update DepartmentID & UniversityID
+                    existingLogin.DepartmentID = deptId;
+                    var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == deptId);
+                    existingLogin.UniversityID = department?.Universityid ?? existingLogin.UniversityID;
+
+                    // Save or update USER table
+                    var existingMentor = _db.USERs.FirstOrDefault(u => u.Email == model.Email && u.Userrole.Contains("Mentor"));
+                    if (existingMentor != null)
+                    {
+                        existingMentor.FirstName = model.FirstName;
+                        existingMentor.LastName = model.LastName;
+                        existingMentor.PhotoPath = model.PhotoPath;
+                        existingMentor.UserType = model.UserType;
+                        existingMentor.IsActive = true;
+                    }
+                    else
+                    {
+                        _db.USERs.Add(model);
                     }
                 }
-                catch (System.Data.Entity.Validation.DbEntityValidationException valEx)
+                else
                 {
-                    // EF validation errors
-                    var errors = valEx.EntityValidationErrors
-                        .SelectMany(e => e.ValidationErrors)
-                        .Select(e => e.PropertyName + ": " + e.ErrorMessage)
-                        .ToList();
+                    // Create new Login
+                    var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == deptId);
+                    var login = new Login
+                    {
+                        Email = model.Email,
+                        PasswordHash = "Mentor@123",
+                        Role = "Mentor",
+                        CreatedDate = DateTime.Now,
+                        IsActive = true,
+                        DepartmentID = deptId,
+                        UniversityID = department?.Universityid ?? 0
+                    };
+                    _db.Logins.Add(login);
 
-                    ViewBag.Errors = errors;
-                    return View(model);
+                    // Add USER record
+                    _db.USERs.Add(model);
                 }
 
-                // ✅ Try sending email
+                // Save changes
+                await _db.SaveChangesAsync();
+
+                // Optional: send welcome email
                 try
                 {
-                    string subject = "Welcome to Our Platform!";
-                    string body = $"Hello {model.FirstName},<br/><br/>" +
-                                  $"You have been successfully added as a mentor. Your login credentials are:<br/>" +
-                                  $"<strong>Email:</strong> {model.Email}<br/>" +
-                                  $"<strong>Password:</strong> {defaultPassword}<br/><br/>" +
-                                  "Please change your password after login.";
-
+                    string subject = "Welcome as Mentor";
+                    string body = $"Hello {model.FirstName},<br/>" +
+                                  $"You are added as a mentor. Email: {model.Email}, Password: Mentor@123";
                     await _emailService.SendEmailAsync(model.Email, subject, body);
                 }
-                catch (Exception emailEx)
-                {
-                    System.Diagnostics.Debug.WriteLine("[DEBUG] Email send failed: " + emailEx.Message);
-                }
+                catch { /* optionally log email errors */ }
 
-                TempData["SuccessMessage"] = "Mentor added successfully.";
-                return RedirectToAction("AddMentor", "HOD");
+                TempData["SuccessMessage"] = "Mentor details saved successfully.";
+                return RedirectToAction("AddMentor");
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+            {
+                // Capture EF validation errors
+                var errorList = new List<string>();
+                foreach (var eve in dbEx.EntityValidationErrors)
+                {
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        errorList.Add($"Property: {ve.PropertyName}, Error: {ve.ErrorMessage}");
+                    }
+                }
+                ViewBag.Errors = errorList;
+                return View(model);
             }
             catch (Exception ex)
             {
-                ViewBag.Errors = new List<string> { "Error saving mentor: " + ex.Message };
-                System.Diagnostics.Debug.WriteLine("[DEBUG] Exception: " + ex.ToString());
+                // Generic errors
+                ViewBag.Errors = new List<string> { "Error: " + ex.Message };
                 return View(model);
             }
         }
+
+
 
 
         private int GetDepartmentID()
@@ -356,9 +372,9 @@ namespace WebApplication4.Controllers
 
         private bool IsHODLoggedIn()
         {
-            return Session["UserRole"] != null &&
+            return Session["Role"] != null &&
                    Session["DepartmentID"] != null &&
-                   ((string)Session["UserRole"]).Equals("HOD", StringComparison.OrdinalIgnoreCase);
+                   ((string)Session["Role"]).Equals("HOD", StringComparison.OrdinalIgnoreCase);
         }
 
         // Club Requests (only under HOD's department)
@@ -727,17 +743,12 @@ namespace WebApplication4.Controllers
             return RedirectToAction("Login");
         }
 
+
+
+
         public ActionResult EventsForApproval()
         {
-            // Step 1: Get logged-in HOD's email
-            string email = Session["UserEmail"]?.ToString();
-
-            // Step 2: Get HOD's department ID from Logins table
-            var hod = _db.Logins.FirstOrDefault(l => l.Email == email && l.Role == "HOD");
-            if (hod == null)
-                return HttpNotFound("HOD not found");
-
-            int departmentId = (int)hod.DepartmentID;
+            int departmentId = Convert.ToInt32(Session["DepartmentID"]);
 
             // Step 3: Get all club IDs under this department
             var clubIds = _db.CLUBS

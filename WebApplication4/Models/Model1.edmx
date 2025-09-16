@@ -87,8 +87,12 @@
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="EventId" Type="int" Nullable="false" />
-          <Property Name="PhotoPath" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="Path" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="UploadedDate" Type="datetime" Nullable="false" />
+          <Property Name="ApprovalStatusID" Type="int" />
+          <Property Name="ApprovedByID" Type="int" />
+          <Property Name="ApprovedDate" Type="datetime" />
+          <Property Name="MediaType" Type="varchar" MaxLength="10" />
         </EntityType>
         <EntityType Name="EventRegistrations">
           <Key>
@@ -141,15 +145,9 @@
           <Property Name="RejectionReason" Type="nvarchar" MaxLength="500" />
           <Property Name="Venue" Type="nvarchar" MaxLength="255" />
           <Property Name="LastAlertSentDate" Type="datetime" />
-        </EntityType>
-        <EntityType Name="EventVideos">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="EventID" Type="int" Nullable="false" />
-          <Property Name="VideoPath" Type="nvarchar" MaxLength="500" Nullable="false" />
-          <Property Name="UploadedDate" Type="datetime" Nullable="false" />
+          <Property Name="BrochureApprovalStatusID" Type="int" />
+          <Property Name="BrochureApprovedDate" Type="datetime" />
+          <Property Name="BrochureApprovedByID" Type="int" />
         </EntityType>
         <EntityType Name="EventWinners">
           <Key>
@@ -160,6 +158,9 @@
           <Property Name="WinnerName" Type="nvarchar" MaxLength="255" Nullable="false" />
           <Property Name="Prize" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Description" Type="nvarchar" MaxLength="500" />
+          <Property Name="ApprovalStatusID" Type="int" />
+          <Property Name="ApprovedByID" Type="int" />
+          <Property Name="ApprovedDate" Type="datetime" />
         </EntityType>
         <EntityType Name="Logins">
           <Key>
@@ -226,7 +227,7 @@
           <Property Name="FirstName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="LastName" Type="varchar" MaxLength="100" />
           <Property Name="Email" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="Password" Type="varchar" MaxLength="200" Nullable="false" />
+          <Property Name="Password" Type="varchar" MaxLength="200" />
           <Property Name="SubscriptionStatus" Type="varchar" MaxLength="50" />
           <Property Name="RegistrationDate" Type="datetime" />
           <Property Name="UserType" Type="varchar" MaxLength="50" />
@@ -1525,18 +1526,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_EventVideos_EVENTS">
-          <End Role="EVENTS" Type="Self.EVENTS" Multiplicity="1" />
-          <End Role="EventVideos" Type="Self.EventVideos" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventVideos">
-              <PropertyRef Name="EventID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_HangFire_JobParameter_Job">
           <End Role="Job" Type="Self.Job" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -1660,7 +1649,6 @@
           <EntitySet Name="EventPhotos" EntityType="Self.EventPhotos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EventRegistrations" EntityType="Self.EventRegistrations" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EVENTS" EntityType="Self.EVENTS" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="EventVideos" EntityType="Self.EventVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EventWinners" EntityType="Self.EventWinners" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Logins" EntityType="Self.Logins" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Notifications" EntityType="Self.Notifications" Schema="dbo" store:Type="Tables" />
@@ -2070,10 +2058,6 @@
             <End Role="Comments" EntitySet="Comments" />
             <End Role="Comments1" EntitySet="Comments" />
           </AssociationSet>
-          <AssociationSet Name="FK_EventVideos_EVENTS" Association="Self.FK_EventVideos_EVENTS">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventVideos" EntitySet="EventVideos" />
-          </AssociationSet>
           <AssociationSet Name="FK_HangFire_JobParameter_Job" Association="Self.FK_HangFire_JobParameter_Job">
             <End Role="Job" EntitySet="Job" />
             <End Role="JobParameter" EntitySet="JobParameter" />
@@ -2294,22 +2278,6 @@
           <NavigationProperty Name="Logins" Relationship="Self.FK_Logins_Department" FromRole="DEPARTMENT" ToRole="Logins" />
           <NavigationProperty Name="USERs" Relationship="Self.FK_Users_Department" FromRole="DEPARTMENT" ToRole="USER" />
         </EntityType>
-        <EntityType Name="EventPhoto">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventId" Type="Int32" Nullable="false" />
-          <Property Name="PhotoPath" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="EVENT" Relationship="Self.FK__EventPhot__Event__4B7734FF" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT1" Relationship="Self.FK__EventPhot__Event__4C6B5938" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT2" Relationship="Self.FK__EventPhot__Event__4D5F7D71" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT3" Relationship="Self.FK__EventPhot__Event__4E53A1AA" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT4" Relationship="Self.FK__EventPhot__Event__4F47C5E3" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT5" Relationship="Self.FK__EventPhot__Event__503BEA1C" FromRole="EventPhotos" ToRole="EVENTS" />
-          <NavigationProperty Name="EVENT6" Relationship="Self.FK__EventPhot__Event__51300E55" FromRole="EventPhotos" ToRole="EVENTS" />
-        </EntityType>
         <EntityType Name="EventRegistration">
           <Key>
             <PropertyRef Name="RegistrationID" />
@@ -2376,13 +2344,6 @@
           <NavigationProperty Name="CLUB5" Relationship="Self.FK__EVENTS__ClubID__5E8A0973" FromRole="EVENTS" ToRole="CLUBS" />
           <NavigationProperty Name="CLUB6" Relationship="Self.FK__EVENTS__ClubID__5F7E2DAC" FromRole="EVENTS" ToRole="CLUBS" />
           <NavigationProperty Name="Comments" Relationship="Self.FK_Comments_Events" FromRole="EVENTS" ToRole="Comments" />
-          <NavigationProperty Name="EventPhotos" Relationship="Self.FK__EventPhot__Event__4B7734FF" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos1" Relationship="Self.FK__EventPhot__Event__4C6B5938" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos2" Relationship="Self.FK__EventPhot__Event__4D5F7D71" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos3" Relationship="Self.FK__EventPhot__Event__4E53A1AA" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos4" Relationship="Self.FK__EventPhot__Event__4F47C5E3" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos5" Relationship="Self.FK__EventPhot__Event__503BEA1C" FromRole="EVENTS" ToRole="EventPhotos" />
-          <NavigationProperty Name="EventPhotos6" Relationship="Self.FK__EventPhot__Event__51300E55" FromRole="EVENTS" ToRole="EventPhotos" />
           <NavigationProperty Name="EventRegistrations" Relationship="Self.FK_Registrations_Events" FromRole="EVENTS" ToRole="EventRegistrations" />
           <NavigationProperty Name="Login" Relationship="Self.FK__EVENTS__EventOrg__607251E5" FromRole="EVENTS" ToRole="Logins" />
           <NavigationProperty Name="Login1" Relationship="Self.FK__EVENTS__EventOrg__6166761E" FromRole="EVENTS" ToRole="Logins" />
@@ -2398,18 +2359,17 @@
           <NavigationProperty Name="EventWinners4" Relationship="Self.FK__EventWinn__Event__6BE40491" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventWinners5" Relationship="Self.FK__EventWinn__Event__6CD828CA" FromRole="EVENTS" ToRole="EventWinners" />
           <NavigationProperty Name="EventWinners6" Relationship="Self.FK__EventWinn__Event__6DCC4D03" FromRole="EVENTS" ToRole="EventWinners" />
-          <NavigationProperty Name="EventVideos" Relationship="Self.FK_EventVideos_EVENTS" FromRole="EVENTS" ToRole="EventVideos" />
           <Property Name="LastAlertSentDate" Type="DateTime" Precision="3" />
-        </EntityType>
-        <EntityType Name="EventVideo">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="EventID" Type="Int32" Nullable="false" />
-          <Property Name="VideoPath" Type="String" MaxLength="500" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="EVENT" Relationship="Self.FK_EventVideos_EVENTS" FromRole="EventVideos" ToRole="EVENTS" />
+          <Property Name="BrochureApprovalStatusID" Type="Int32" />
+          <Property Name="BrochureApprovedDate" Type="DateTime" Precision="3" />
+          <Property Name="BrochureApprovedByID" Type="Int32" />
+          <NavigationProperty Name="EventPhotos" Relationship="dummyclubsModel.FK__EventPhot__Event__4B7734FF" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos1" Relationship="dummyclubsModel.FK__EventPhot__Event__4C6B5938" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos2" Relationship="dummyclubsModel.FK__EventPhot__Event__4D5F7D71" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos3" Relationship="dummyclubsModel.FK__EventPhot__Event__4E53A1AA" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos4" Relationship="dummyclubsModel.FK__EventPhot__Event__4F47C5E3" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos5" Relationship="dummyclubsModel.FK__EventPhot__Event__503BEA1C" FromRole="EVENT" ToRole="EventPhoto" />
+          <NavigationProperty Name="EventPhotos6" Relationship="dummyclubsModel.FK__EventPhot__Event__51300E55" FromRole="EVENT" ToRole="EventPhoto" />
         </EntityType>
         <EntityType Name="EventWinner">
           <Key>
@@ -2427,6 +2387,9 @@
           <NavigationProperty Name="EVENT4" Relationship="Self.FK__EventWinn__Event__6BE40491" FromRole="EventWinners" ToRole="EVENTS" />
           <NavigationProperty Name="EVENT5" Relationship="Self.FK__EventWinn__Event__6CD828CA" FromRole="EventWinners" ToRole="EVENTS" />
           <NavigationProperty Name="EVENT6" Relationship="Self.FK__EventWinn__Event__6DCC4D03" FromRole="EventWinners" ToRole="EVENTS" />
+          <Property Name="ApprovalStatusID" Type="Int32" />
+          <Property Name="ApprovedByID" Type="Int32" />
+          <Property Name="ApprovedDate" Type="DateTime" Precision="3" />
         </EntityType>
         <EntityType Name="Login">
           <Key>
@@ -2539,7 +2502,7 @@
           <Property Name="FirstName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="LastName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Password" Type="String" MaxLength="200" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Password" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="SubscriptionStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="RegistrationDate" Type="DateTime" Precision="3" />
           <Property Name="UserType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
@@ -3442,90 +3405,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__EventPhot__Event__4B7734FF">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__4C6B5938">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__4D5F7D71">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__4E53A1AA">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__4F47C5E3">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__503BEA1C">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__EventPhot__Event__51300E55">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventPhotos" Type="Self.EventPhoto" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventPhotos">
-              <PropertyRef Name="EventId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Registrations_Events">
           <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -3708,18 +3587,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_EventVideos_EVENTS">
-          <End Role="EVENTS" Type="Self.EVENT" Multiplicity="1" />
-          <End Role="EventVideos" Type="Self.EventVideo" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="EVENTS">
-              <PropertyRef Name="EventID" />
-            </Principal>
-            <Dependent Role="EventVideos">
-              <PropertyRef Name="EventID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Notificat__Login__72910220">
           <End Role="Logins" Type="Self.Login" Multiplicity="0..1" />
           <End Role="Notifications" Type="Self.Notification" Multiplicity="*" />
@@ -3846,10 +3713,8 @@
           <EntitySet Name="CLUBS" EntityType="Self.CLUB" />
           <EntitySet Name="Comments" EntityType="Self.Comment" />
           <EntitySet Name="DEPARTMENTs" EntityType="Self.DEPARTMENT" />
-          <EntitySet Name="EventPhotos" EntityType="Self.EventPhoto" />
           <EntitySet Name="EventRegistrations" EntityType="Self.EventRegistration" />
           <EntitySet Name="EVENTS" EntityType="Self.EVENT" />
-          <EntitySet Name="EventVideos" EntityType="Self.EventVideo" />
           <EntitySet Name="EventWinners" EntityType="Self.EventWinner" />
           <EntitySet Name="Logins" EntityType="Self.Login" />
           <EntitySet Name="Notifications" EntityType="Self.Notification" />
@@ -4148,34 +4013,6 @@
             <End Role="DEPARTMENT" EntitySet="DEPARTMENTs" />
             <End Role="USER" EntitySet="USERs" />
           </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__4B7734FF" Association="Self.FK__EventPhot__Event__4B7734FF">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__4C6B5938" Association="Self.FK__EventPhot__Event__4C6B5938">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__4D5F7D71" Association="Self.FK__EventPhot__Event__4D5F7D71">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__4E53A1AA" Association="Self.FK__EventPhot__Event__4E53A1AA">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__4F47C5E3" Association="Self.FK__EventPhot__Event__4F47C5E3">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__503BEA1C" Association="Self.FK__EventPhot__Event__503BEA1C">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
-          <AssociationSet Name="FK__EventPhot__Event__51300E55" Association="Self.FK__EventPhot__Event__51300E55">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventPhotos" EntitySet="EventPhotos" />
-          </AssociationSet>
           <AssociationSet Name="FK_Registrations_Events" Association="Self.FK_Registrations_Events">
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventRegistrations" EntitySet="EventRegistrations" />
@@ -4236,10 +4073,6 @@
             <End Role="EVENTS" EntitySet="EVENTS" />
             <End Role="EventWinners" EntitySet="EventWinners" />
           </AssociationSet>
-          <AssociationSet Name="FK_EventVideos_EVENTS" Association="Self.FK_EventVideos_EVENTS">
-            <End Role="EVENTS" EntitySet="EVENTS" />
-            <End Role="EventVideos" EntitySet="EventVideos" />
-          </AssociationSet>
           <AssociationSet Name="FK__Notificat__Login__72910220" Association="Self.FK__Notificat__Login__72910220">
             <End Role="Logins" EntitySet="Logins" />
             <End Role="Notifications" EntitySet="Notifications" />
@@ -4298,6 +4131,35 @@
           <AssociationSet Name="FK_HangFire_State_Job" Association="dummyclubsModel.FK_HangFire_State_Job">
             <End Role="Job" EntitySet="Jobs" />
             <End Role="State" EntitySet="States" />
+          </AssociationSet>
+          <EntitySet Name="EventPhotos" EntityType="dummyclubsModel.EventPhoto" />
+          <AssociationSet Name="FK__EventPhot__Event__4B7734FF" Association="dummyclubsModel.FK__EventPhot__Event__4B7734FF">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__4C6B5938" Association="dummyclubsModel.FK__EventPhot__Event__4C6B5938">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__4D5F7D71" Association="dummyclubsModel.FK__EventPhot__Event__4D5F7D71">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__4E53A1AA" Association="dummyclubsModel.FK__EventPhot__Event__4E53A1AA">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__4F47C5E3" Association="dummyclubsModel.FK__EventPhot__Event__4F47C5E3">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__503BEA1C" Association="dummyclubsModel.FK__EventPhot__Event__503BEA1C">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__EventPhot__Event__51300E55" Association="dummyclubsModel.FK__EventPhot__Event__51300E55">
+            <End Role="EVENT" EntitySet="EVENTS" />
+            <End Role="EventPhoto" EntitySet="EventPhotos" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="AggregatedCounter">
@@ -4437,6 +4299,110 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="EventPhoto">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EventId" Type="Int32" Nullable="false" />
+          <Property Name="Path" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="UploadedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ApprovalStatusID" Type="Int32" />
+          <Property Name="ApprovedByID" Type="Int32" />
+          <Property Name="ApprovedDate" Type="DateTime" Precision="3" />
+          <Property Name="MediaType" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="EVENT" Relationship="dummyclubsModel.FK__EventPhot__Event__4B7734FF" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT1" Relationship="dummyclubsModel.FK__EventPhot__Event__4C6B5938" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT2" Relationship="dummyclubsModel.FK__EventPhot__Event__4D5F7D71" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT3" Relationship="dummyclubsModel.FK__EventPhot__Event__4E53A1AA" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT4" Relationship="dummyclubsModel.FK__EventPhot__Event__4F47C5E3" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT5" Relationship="dummyclubsModel.FK__EventPhot__Event__503BEA1C" FromRole="EventPhoto" ToRole="EVENT" />
+          <NavigationProperty Name="EVENT6" Relationship="dummyclubsModel.FK__EventPhot__Event__51300E55" FromRole="EventPhoto" ToRole="EVENT" />
+        </EntityType>
+        <Association Name="FK__EventPhot__Event__4B7734FF">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__4C6B5938">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__4D5F7D71">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__4E53A1AA">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__4F47C5E3">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__503BEA1C">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__EventPhot__Event__51300E55">
+          <End Type="dummyclubsModel.EVENT" Role="EVENT" Multiplicity="1" />
+          <End Type="dummyclubsModel.EventPhoto" Role="EventPhoto" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="EVENT">
+              <PropertyRef Name="EventID" />
+            </Principal>
+            <Dependent Role="EventPhoto">
+              <PropertyRef Name="EventId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4524,16 +4490,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="EventPhotos">
-            <EntityTypeMapping TypeName="dummyclubsModel.EventPhoto">
-              <MappingFragment StoreEntitySet="EventPhotos">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="EventId" ColumnName="EventId" />
-                <ScalarProperty Name="PhotoPath" ColumnName="PhotoPath" />
-                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="EventRegistrations">
             <EntityTypeMapping TypeName="dummyclubsModel.EventRegistration">
               <MappingFragment StoreEntitySet="EventRegistrations">
@@ -4557,6 +4513,9 @@
           <EntitySetMapping Name="EVENTS">
             <EntityTypeMapping TypeName="dummyclubsModel.EVENT">
               <MappingFragment StoreEntitySet="EVENTS">
+                <ScalarProperty Name="BrochureApprovedByID" ColumnName="BrochureApprovedByID" />
+                <ScalarProperty Name="BrochureApprovedDate" ColumnName="BrochureApprovedDate" />
+                <ScalarProperty Name="BrochureApprovalStatusID" ColumnName="BrochureApprovalStatusID" />
                 <ScalarProperty Name="LastAlertSentDate" ColumnName="LastAlertSentDate" />
                 <ScalarProperty Name="ClubID" ColumnName="ClubID" />
                 <ScalarProperty Name="EventID" ColumnName="EventID" />
@@ -4588,19 +4547,12 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="EventVideos">
-            <EntityTypeMapping TypeName="dummyclubsModel.EventVideo">
-              <MappingFragment StoreEntitySet="EventVideos">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="EventID" ColumnName="EventID" />
-                <ScalarProperty Name="VideoPath" ColumnName="VideoPath" />
-                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="EventWinners">
             <EntityTypeMapping TypeName="dummyclubsModel.EventWinner">
               <MappingFragment StoreEntitySet="EventWinners">
+                <ScalarProperty Name="ApprovedDate" ColumnName="ApprovedDate" />
+                <ScalarProperty Name="ApprovedByID" ColumnName="ApprovedByID" />
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="EventId" ColumnName="EventId" />
                 <ScalarProperty Name="WinnerName" ColumnName="WinnerName" />
@@ -4802,6 +4754,20 @@
                 <ScalarProperty Name="Reason" ColumnName="Reason" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="JobId" ColumnName="JobId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EventPhotos">
+            <EntityTypeMapping TypeName="dummyclubsModel.EventPhoto">
+              <MappingFragment StoreEntitySet="EventPhotos">
+                <ScalarProperty Name="MediaType" ColumnName="MediaType" />
+                <ScalarProperty Name="ApprovedDate" ColumnName="ApprovedDate" />
+                <ScalarProperty Name="ApprovedByID" ColumnName="ApprovedByID" />
+                <ScalarProperty Name="ApprovalStatusID" ColumnName="ApprovalStatusID" />
+                <ScalarProperty Name="UploadedDate" ColumnName="UploadedDate" />
+                <ScalarProperty Name="Path" ColumnName="Path" />
+                <ScalarProperty Name="EventId" ColumnName="EventId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

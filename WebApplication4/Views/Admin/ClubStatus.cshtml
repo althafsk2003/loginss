@@ -5,6 +5,8 @@
     ViewBag.Title = "Club Status";
 }
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
 <style>
     .club-table {
         width: 100%;
@@ -13,62 +15,101 @@
     }
 
         .club-table th, .club-table td {
-            padding: 10px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
         }
 
         .club-table th {
-            background: #004d40;
+            background-color: #004d40;
             color: white;
+            font-weight: 600;
+        }
+
+        .club-table td {
+            background-color: #fafafa;
         }
 
     .btn-filter {
-        margin-bottom: 10px;
+        margin: 5px;
+        padding: 8px 16px;
+        border-radius: 5px;
+        font-weight: 500;
+        color: white;
+        border: none;
         cursor: pointer;
     }
 
-    /* Status Badge Colors */
+    .btn-warning {
+        background-color: #f39c12;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+    }
+
+    .btn-filter.active {
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+
     .status-pending {
-        background: #ffc107;
+        background-color: #ffc107;
         color: black;
-        padding: 5px 10px;
+        padding: 5px 12px;
         border-radius: 5px;
+        font-weight: 500;
     }
 
     .status-approved {
-        background: #28a745;
+        background-color: #28a745;
         color: white;
-        padding: 5px 10px;
+        padding: 5px 12px;
         border-radius: 5px;
+        font-weight: 500;
     }
 
     .status-rejected {
-        background: #dc3545;
+        background-color: #dc3545;
         color: white;
-        padding: 5px 10px;
+        padding: 5px 12px;
         border-radius: 5px;
+        font-weight: 500;
     }
 
     .reason-col {
         display: none;
     }
-    /* Hide rejection reason by default */
+
+    @@media (max-width: 768px) {
+        .btn-filter {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    }
 </style>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Club Status</h2>
-
-    <!-- ✅ Filter Buttons -->
-    <div class="text-center">
-        <a href="@Url.Action("ClubStatus", new { status = 1 })" class="btn btn-warning btn-filter">Pending Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = 2 })" class="btn btn-success btn-filter">Approved Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = 3 })" class="btn btn-danger btn-filter">Rejected Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = (int?)null })" class="btn btn-primary btn-filter">View All Requests</a>
+    <!-- Heading + Filter Buttons -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">Club Status</h2>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-warning btn-filter" data-status="pending">Pending Requests</button>
+            <button class="btn btn-success btn-filter" data-status="approved">Approved Requests</button>
+            <button class="btn btn-danger btn-filter" data-status="rejected">Rejected Requests</button>
+            <button class="btn btn-primary btn-filter" data-status="all">View All Requests</button>
+        </div>
     </div>
 
-    <!-- ✅ Club Status Table -->
-    <table class="club-table">
+    <!-- Club Status Table -->
+    <table class="club-table table table-bordered">
         <thead>
             <tr>
                 <th>Club Name</th>
@@ -77,18 +118,14 @@
                 <th>University</th>
                 <th>Department</th>
                 <th>Status</th>
-                <th class="reason-col">Rejection Reason</th> <!-- Hidden for non-rejected -->
+                <th class="reason-col">Rejection Reason</th>
             </tr>
         </thead>
         <tbody>
-            @{
-                var notifications = ViewBag.Notifications as List<WebApplication4.Models.Notification>;
-            }
-
             @foreach (var club in Model)
             {
                 var mentorID = (int?)club.MentorID;
-                var notification = notifications?.FirstOrDefault(n => n.LoginID == mentorID);
+                var notification = (ViewBag.Notifications as List<WebApplication4.Models.Notification>)?.FirstOrDefault(n => n.LoginID == mentorID);
 
                 <tr class="club-row" data-status="@club.ApprovalStatusID">
                     <td>@club.ClubName</td>
@@ -97,7 +134,7 @@
                         {
                             <span class="short-text">@club.Description.Substring(0, 10)...</span>
                             <span class="full-text d-none">@club.Description</span>
-                            <a href="javascript:void(0);" class="see-more" onclick="toggleDescription(this)">See More</a>
+                            <a href="javascript:void(0);" class="see-more">See More</a>
                         }
                         else
                         {
@@ -129,52 +166,11 @@
                     </td>
                 </tr>
             }
-
         </tbody>
     </table>
-</div>
 
-<script>
-    function toggleDescription(link) {
-        var row = link.closest("td");
-        var shortText = row.querySelector(".short-text");
-        var fullText = row.querySelector(".full-text");
-
-        if (fullText.classList.contains("d-none")) {
-            shortText.classList.add("d-none");
-            fullText.classList.remove("d-none");
-            link.textContent = "See Less";
-        } else {
-            shortText.classList.remove("d-none");
-            fullText.classList.add("d-none");
-            link.textContent = "See More";
-        }
-    }
-</script>
-
-
-<!-- ✅ JavaScript for Filtering -->
-<script>
-    function filterTable(status) {
-        $(".club-row").hide();
-        $(".reason-col").hide(); // Hide reason column by default
-
-        if (status === "pending") {
-            $(".club-row[data-status='1']").show();
-        } else if (status === "approved") {
-            $(".club-row[data-status='2']").show();
-        } else if (status === "rejected") {
-            $(".club-row[data-status='3']").show();
-            $(".reason-col").show(); // Show rejection reason
-        } else {
-            $(".club-row").show();
-            $(".reason-col").show();
-        }
-    }
-</script>
-
-<div class="pagination" style="margin-top: 20px;">
-    <div class="pagination-container">
+    <!-- Pagination -->
+    <div class="pagination mt-4">
         <div class="pagination-info text-center mb-2">
             Showing @ViewBag.FirstItemOnPage to @ViewBag.LastItemOnPage of @ViewBag.TotalItemCount entries
         </div>
@@ -183,9 +179,7 @@
             {
                 if (i == ViewBag.CurrentPage)
                 {
-                    <li class="page-item active">
-                        <span class="page-link">@i</span>
-                    </li>
+                    <li class="page-item active"><span class="page-link">@i</span></li>
                 }
                 else
                 {
@@ -199,168 +193,44 @@
 </div>
 
 
+@section Scripts {
+    <script>
+        jQuery(document).ready(function ($) {
+            // See More / See Less
+            $('.see-more').on('click', function () {
+                var $td = $(this).closest('td');
+                $td.find('.short-text').toggleClass('d-none');
+                $td.find('.full-text').toggleClass('d-none');
+                $(this).text($(this).text() === 'See More' ? 'See Less' : 'See More');
+            });
 
-<style>
-    /* Table Styling */
-    .club-table {
-        width: 100%;
-        background-color: #fff;
-        border-collapse: collapse;
-        border-radius: 8px;
-        overflow: hidden;
-        margin-top: 20px;
-    }
+            // Filter buttons
+            $('.btn-filter').click(function () {
+                var status = $(this).data('status');
 
-        .club-table th,
-        .club-table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
+                $('.btn-filter').removeClass('active');
+                $(this).addClass('active');
 
-        .club-table th {
-            background-color: #004d40;
-            color: white;
-            font-weight: 600;
-        }
+                $(".club-row").hide();
+                $(".reason-col").hide();
 
-        .club-table td {
-            background-color: #fafafa;
-        }
+                if (status === "pending") {
+                    $(".club-row[data-status='1']").show();
+                } else if (status === "approved") {
+                    $(".club-row[data-status='2']").show();
+                } else if (status === "rejected") {
+                    $(".club-row[data-status='3']").show();
+                    $(".reason-col").show();
+                } else {
+                    $(".club-row").show();
+                    $(".reason-col").show();
+                }
+            });
 
-    /* Buttons */
-    .btn-filter {
-        margin: 10px 5px;
-        padding: 8px 16px;
-        border-radius: 5px;
-        font-weight: 500;
-        color: white;
-        border: none;
-    }
+            // Trigger "View All" by default
+            $('.btn-filter[data-status="all"]').click();
+        });
+    </script>
+}
 
-    .btn-warning {
-        background-color: #f39c12;
-    }
 
-        .btn-warning:hover {
-            background-color: #e67e22;
-        }
-
-    .btn-success {
-        background-color: #28a745;
-    }
-
-        .btn-success:hover {
-            background-color: #218838;
-        }
-
-    .btn-danger {
-        background-color: #dc3545;
-    }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-
-    .btn-primary {
-        background-color: #007bff;
-    }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-
-    /* Pagination Styling */
-    .pagination-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 30px 0 10px;
-        width: 100%;
-    }
-
-    .pagination-info {
-        font-size: 15px;
-        color: #6c757d;
-        margin-bottom: 8px;
-    }
-
-    .pagination {
-        display: flex;
-        gap: 8px;
-        padding: 0;
-        list-style: none;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .page-item {
-        margin: 0;
-    }
-
-    .page-link {
-        padding: 10px 14px;
-        border-radius: 50%;
-        background-color: #e0e0e0;
-        color: black;
-        text-decoration: none;
-        font-weight: 600;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-        .page-link:hover {
-            background-color: #007bff;
-            color: white;
-        }
-
-    .page-item.active .page-link {
-        background-color: #007bff;
-        color: white;
-    }
-
-    /* Badge Styles */
-    .status-pending {
-        background-color: #ffc107;
-        color: black;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
-    }
-
-    .status-approved {
-        background-color: #28a745;
-        color: white;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
-    }
-
-    .status-rejected {
-        background-color: #dc3545;
-        color: white;
-        padding: 5px 12px;
-        border-radius: 5px;
-        font-weight: 500;
-    }
-
-    .reason-col {
-        display: none;
-    }
-
-    /* Responsive Tweaks */
-    @@media (max-width: 768px) {
-        .btn-filter {
-            padding: 6px 12px;
-            font-size: 14px;
-        }
-
-        .pagination {
-            gap: 4px;
-        }
-
-        .page-link {
-            padding: 8px 10px;
-        }
-    }
-</style>

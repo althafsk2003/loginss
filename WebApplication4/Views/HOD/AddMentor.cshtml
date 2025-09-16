@@ -38,7 +38,8 @@
     <div class="container-fluid">
         <div class="card mx-auto" style="width: 80%;">
             <div class="card-body">
-                <!-- First Row: Personal Information -->
+
+                <!-- Row 1: Personal Information -->
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -63,22 +64,8 @@
                     </div>
                 </div>
 
-                <!-- Second Row: Authentication and Contact -->
+                <!-- Row 2: Contact & User Type -->
                 <div class="row g-3 mt-2">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            @Html.LabelFor(model => model.Password, new { @class = "form-label" })
-                            <div class="input-group">
-                                @Html.PasswordFor(model => model.Password, new { @class = "form-control", id = "password", placeholder = "Enter Password", value = "Mentor@123" })
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <span class="text-danger" id="passwordError"></span>
-                        </div>
-                    </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="form-label">Mobile Number</label>
@@ -93,9 +80,18 @@
                             <span class="text-danger" id="whatsappError"></span>
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">User Type</label>
+                            @Html.DropDownListFor(model => model.UserType,
+                                new SelectList(new List<string> { "Campus", "Open" }),
+                                "Select User Type",
+                                new { @class = "form-control" })
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Third Row: Address Information -->
+                <!-- Row 3: Address Details -->
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -126,7 +122,7 @@
                     </div>
                 </div>
 
-                <!-- Fourth Row: Additional Address Details -->
+                <!-- Row 4: District, Pin Code & Subscription -->
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -136,27 +132,6 @@
                             </select>
                             <span class="text-danger" id="districtError"></span>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="form-label">Pin Code</label>
-                            @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control", id = "pincode", placeholder = "Enter Pin Code" })
-                            <span class="text-danger" id="pincodeError"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        @*<div class="form-group">
-                            <label class="form-label">Department</label>
-                            @if (ViewBag.Departments != null)
-                            {
-                                @Html.DropDownList("DepartmentID", (SelectList)ViewBag.Departments, "Select Department", new { @class = "form-control" })
-                            }
-                            else
-                            {
-                                <p class="text-danger">Error loading departments.</p>
-                            }
-                            <span class="text-danger" id="departmentError"></span>
-                        </div>*@
                         <script>
                             document.getElementById("DepartmentID").addEventListener("change", function () {
                                 var departmentError = document.getElementById("departmentError");
@@ -168,10 +143,13 @@
                             });
                         </script>
                     </div>
-                </div>
-
-                <!-- Fifth Row: Account and Role Details -->
-                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Pin Code</label>
+                            @Html.TextBoxFor(model => model.PinCode, new { @class = "form-control", id = "pincode", placeholder = "Enter Pin Code" })
+                            <span class="text-danger" id="pincodeError"></span>
+                        </div>
+                    </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="form-label">Subscription Status</label>
@@ -181,6 +159,10 @@
                                 new { @class = "form-control" })
                         </div>
                     </div>
+                </div>
+
+                <!-- Row 5: User Role & Photo -->
+                <div class="row g-3 mt-2">
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="form-label">User Role</label>
@@ -190,19 +172,6 @@
                                 new { @class = "form-control" })
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="form-label">User Type</label>
-                            @Html.DropDownListFor(model => model.UserType,
-                                new SelectList(new List<string> { "Campus", "Open" }),
-                                "Select User Type",
-                                new { @class = "form-control" })
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sixth Row: Photo Upload -->
-                <div class="row g-3 mt-2">
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="form-label">Photo Path</label>
@@ -218,9 +187,12 @@
                         <i class="fas fa-save"></i> Add Mentor
                     </button>
                 </div>
+
             </div>
         </div>
     </div>
+
+
 }
 
 <style>
@@ -366,21 +338,6 @@
         }
     });
 
-    document.getElementById("togglePassword").addEventListener("click", function () {
-        let passwordField = document.getElementById("password");
-        let icon = this.querySelector("i");
-
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            passwordField.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-    });
-
     // Initialize state dropdown on page load
     populateStates();
 </script>
@@ -396,7 +353,7 @@
         let mobileInput = document.getElementById("mobile");
         let whatsappInput = document.getElementById("whatsapp");
 
-        let gmailPattern = /^[a-zA-Z0-9._%+-]+@@gmail\.com$/;
+        let emailPattern = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         let mobilePattern = /^[6-9]\d{9}$/;
 
         function validateField(input, errorElement, message) {

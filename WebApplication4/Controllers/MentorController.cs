@@ -16,7 +16,7 @@ using AppLogin = WebApplication4.Models.Login;
 
 namespace WebApplication4.Controllers
 {
-    public class MentorController : Controller
+    public class MentorController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
@@ -29,7 +29,7 @@ namespace WebApplication4.Controllers
             int mentorID = GetMentorID();
 
             // Get Mentor Login
-            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role == "Mentor");
+            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role.Contains("Mentor"));
             if (mentor == null)
             {
                 TempData["ErrorMessage"] = "Mentor not found!";
@@ -114,8 +114,9 @@ namespace WebApplication4.Controllers
 
             // ✅ Pass data to view
             ViewBag.Mentor = mentor;
-/*            ViewBag.University = university;
-*/            ViewBag.IsSubDepartmentMentor = isSubDepartmentMentor;
+            /*            ViewBag.University = university;
+            */
+            ViewBag.IsSubDepartmentMentor = isSubDepartmentMentor;
 
             ViewBag.DepartmentName = departmentName;
             ViewBag.SubDepartmentName = subDepartmentName;
@@ -152,8 +153,8 @@ namespace WebApplication4.Controllers
         // ✅ Utility: Check if Mentor is Logged In
         private bool IsMentorLoggedIn()
         {
-            return Session["UserRole"] != null &&
-                   (string)Session["UserRole"] == "Mentor" &&
+            return Session["Role"] != null &&
+                   (string)Session["Role"] == "Mentor" &&
                    Session["UserID"] != null;
         }
 
@@ -178,7 +179,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Login", "Admin");
 
             int mentorID = GetMentorID();
-            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role == "Mentor");
+            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role.Contains("Mentor"));
             if (mentor == null)
             {
                 TempData["ErrorMessage"] = "Mentor not found!";
@@ -210,7 +211,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Login", "Admin");
 
             int mentorID = GetMentorID();
-            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role == "Mentor");
+            var mentor = _db.Logins.FirstOrDefault(m => m.LoginID == mentorID && m.Role.Contains ("Mentor"));
             var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == mentor.DepartmentID);
 
             if (!ModelState.IsValid)
@@ -345,118 +346,118 @@ namespace WebApplication4.Controllers
 
 
 
-/*
-        //[Authorize] // Ensures only logged-in users can access
-        public ActionResult ViewClubRegistrations()
-        {
-            // Get the logged-in Mentor's UserID from session
-            if (Session["UserID"] == null)
-            {
-                return RedirectToAction("AccessDenied", "Home");
-            }
-
-            int loggedInMentorID = (int)Session["UserID"]; // Corrected variable name
-
-            // Get clubs where the logged-in mentor is assigned
-            var clubs = _db.CLUBS.Where(c => c.MentorID == loggedInMentorID)
-                                 .Select(c => new { c.ClubID, c.ClubName })
-                                 .ToList();
-
-            ViewBag.Clubs = new SelectList(clubs, "ClubID", "ClubName");
-
-            return View();
-        }
-
-        // Fetch registrations dynamically based on the selected club
-        public ActionResult GetClubRegistrations(int clubId)
-        {
-            var registrations = _db.ClubRegistrations
-                       .Where(r => r.ClubID == clubId)
-                       .ToList() // Materialize the query before using .ToString()
-                       .Select(r => new
-                       {
-                           r.RegistrationID,
-                           r.FullName,
-                           r.Email,
-                           r.ContactNumber,
-                           r.PreferredRole,
-                           r.RoleJustification,
-                           r.ProfileImagePath,
-                           r.AssignedRole,
-                           RegisteredAt = r.RegisteredAt.HasValue
-                               ? r.RegisteredAt.Value.ToString("yyyy-MM-dd HH:mm")
-                               : null
-                       })
-                       .ToList(); // Convert to list after transformation
-
-            return Json(registrations, JsonRequestBehavior.AllowGet);
-        }
-        [HttpPost]
-
-
-        public async Task<ActionResult> AssignRole(int registrationId, string role)
-        {
-            var registration = await _db.ClubRegistrations.FindAsync(registrationId);
-            if (registration == null)
-            {
-                return View("Error");
-            }
-
-            registration.AssignedRole = role;
-            registration.ApprovalStatusID = 2;
-            await _db.SaveChangesAsync();
-
-            // If the role is "Club Admin", store credentials and send an email
-            if (role == "Club Admin")
-            {
-                var existingUser = await _db.Logins.FirstOrDefaultAsync(l => l.Email == registration.Email);
-                if (existingUser == null)
+        /*
+                //[Authorize] // Ensures only logged-in users can access
+                public ActionResult ViewClubRegistrations()
                 {
-                    // New login entry
-                    var newUser = new Login
+                    // Get the logged-in Mentor's UserID from session
+                    if (Session["UserID"] == null)
                     {
-                        Email = registration.Email,
-                        PasswordHash = "clubadmin@123", // Default password
-                        CreatedDate = DateTime.Now,
-                        IsActive = true,
-                        UniversityID = ViewBag.UniversityID,  // Ensure these values are correct
-                        DepartmentID = ViewBag.DepartmentID,
-                        Role = "Club Admin"
-                    };
+                        return RedirectToAction("AccessDenied", "Home");
+                    }
 
-                    _db.Logins.Add(newUser);
+                    int loggedInMentorID = (int)Session["UserID"]; // Corrected variable name
+
+                    // Get clubs where the logged-in mentor is assigned
+                    var clubs = _db.CLUBS.Where(c => c.MentorID == loggedInMentorID)
+                                         .Select(c => new { c.ClubID, c.ClubName })
+                                         .ToList();
+
+                    ViewBag.Clubs = new SelectList(clubs, "ClubID", "ClubName");
+
+                    return View();
+                }
+
+                // Fetch registrations dynamically based on the selected club
+                public ActionResult GetClubRegistrations(int clubId)
+                {
+                    var registrations = _db.ClubRegistrations
+                               .Where(r => r.ClubID == clubId)
+                               .ToList() // Materialize the query before using .ToString()
+                               .Select(r => new
+                               {
+                                   r.RegistrationID,
+                                   r.FullName,
+                                   r.Email,
+                                   r.ContactNumber,
+                                   r.PreferredRole,
+                                   r.RoleJustification,
+                                   r.ProfileImagePath,
+                                   r.AssignedRole,
+                                   RegisteredAt = r.RegisteredAt.HasValue
+                                       ? r.RegisteredAt.Value.ToString("yyyy-MM-dd HH:mm")
+                                       : null
+                               })
+                               .ToList(); // Convert to list after transformation
+
+                    return Json(registrations, JsonRequestBehavior.AllowGet);
+                }
+                [HttpPost]
+
+
+                public async Task<ActionResult> AssignRole(int registrationId, string role)
+                {
+                    var registration = await _db.ClubRegistrations.FindAsync(registrationId);
+                    if (registration == null)
+                    {
+                        return View("Error");
+                    }
+
+                    registration.AssignedRole = role;
+                    registration.ApprovalStatusID = 2;
                     await _db.SaveChangesAsync();
 
-                    // ✅ Send welcome email
-                    string subject = "Club Admin Role Assigned";
-                    string body = $"Hello {registration.FullName},<br/><br/>" +
-                                  $"You have been assigned as a Club Admin. Here are your login details:<br/>" +
-                                  $"<strong>Username:</strong> {registration.Email}<br/>" +
-                                  $"<strong>Password:</strong> clubadmin@123 (Please change your password upon login).<br/><br/>" +
-                                  "Please log in and update your profile.";
+                    // If the role is "Club Admin", store credentials and send an email
+                    if (role == "Club Admin")
+                    {
+                        var existingUser = await _db.Logins.FirstOrDefaultAsync(l => l.Email == registration.Email);
+                        if (existingUser == null)
+                        {
+                            // New login entry
+                            var newUser = new Login
+                            {
+                                Email = registration.Email,
+                                PasswordHash = "clubadmin@123", // Default password
+                                CreatedDate = DateTime.Now,
+                                IsActive = true,
+                                UniversityID = ViewBag.UniversityID,  // Ensure these values are correct
+                                DepartmentID = ViewBag.DepartmentID,
+                                Role = "Club Admin"
+                            };
 
-                    await _emailService.SendEmailAsync(registration.Email, subject, body);
+                            _db.Logins.Add(newUser);
+                            await _db.SaveChangesAsync();
+
+                            // ✅ Send welcome email
+                            string subject = "Club Admin Role Assigned";
+                            string body = $"Hello {registration.FullName},<br/><br/>" +
+                                          $"You have been assigned as a Club Admin. Here are your login details:<br/>" +
+                                          $"<strong>Username:</strong> {registration.Email}<br/>" +
+                                          $"<strong>Password:</strong> clubadmin@123 (Please change your password upon login).<br/><br/>" +
+                                          "Please log in and update your profile.";
+
+                            await _emailService.SendEmailAsync(registration.Email, subject, body);
+                        }
+                    }
+
+                    return Json(new { success = true });
                 }
-            }
-
-            return Json(new { success = true });
-        }
 
 
 
-        [HttpPost]
-        public ActionResult LeaveClub(int registrationId)
-        {
-            var registration = _db.ClubRegistrations.Find(registrationId);
-            if (registration != null)
-            {
-                registration.AssignedRole = "Club Member"; // Set role to "Club Member"
-                registration.ApprovalStatusID = 2;
-                _db.SaveChanges();
-                return Json(new { success = true });
-            }
-            return Json(new { success = false });
-        }*/
+                [HttpPost]
+                public ActionResult LeaveClub(int registrationId)
+                {
+                    var registration = _db.ClubRegistrations.Find(registrationId);
+                    if (registration != null)
+                    {
+                        registration.AssignedRole = "Club Member"; // Set role to "Club Member"
+                        registration.ApprovalStatusID = 2;
+                        _db.SaveChanges();
+                        return Json(new { success = true });
+                    }
+                    return Json(new { success = false });
+                }*/
 
 
 
@@ -513,84 +514,84 @@ namespace WebApplication4.Controllers
 
 
 
-// GET: View Event Requests
-public ActionResult ViewEventRequests()
-{
-    if (Session["UserEmail"] == null)
-    {
-        return RedirectToAction("Login", "Admin");
-    }
+        // GET: View Event Requests
+        public ActionResult ViewEventRequests()
+        {
+            if (Session["UserEmail"] == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
 
-    string userEmail = Session["UserEmail"].ToString();
-    var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+            string userEmail = Session["UserEmail"].ToString();
+            var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
 
-    if (mentorLogin == null)
-    {
-        return HttpNotFound("Mentor login not found");
-    }
+            if (mentorLogin == null)
+            {
+                return HttpNotFound("Mentor login not found");
+            }
 
-    ViewBag.Clubs = _db.CLUBS
-        .Where(c => c.MentorID == mentorLogin.LoginID && c.ApprovalStatusID == 2)
-        .ToList();
+            ViewBag.Clubs = _db.CLUBS
+                .Where(c => c.MentorID == mentorLogin.LoginID && c.ApprovalStatusID == 2)
+                .ToList();
 
-    return View(); // No model initially
-}
+            return View(); // No model initially
+        }
 
-// POST: View Event Requests (Filtered)
-[HttpPost]
-public ActionResult ViewEventRequests(int selectedClubId)
-{
-    if (Session["UserEmail"] == null)
-    {
-        return RedirectToAction("Login", "Admin");
-    }
+        // POST: View Event Requests (Filtered)
+        [HttpPost]
+        public ActionResult ViewEventRequests(int selectedClubId)
+        {
+            if (Session["UserEmail"] == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
 
-    string userEmail = Session["UserEmail"].ToString();
-    var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
+            string userEmail = Session["UserEmail"].ToString();
+            var mentorLogin = _db.Logins.FirstOrDefault(l => l.Email == userEmail);
 
-    if (mentorLogin == null)
-    {
-        return HttpNotFound("Mentor login not found");
-    }
+            if (mentorLogin == null)
+            {
+                return HttpNotFound("Mentor login not found");
+            }
 
-    ViewBag.Clubs = _db.CLUBS
-        .Where(c => c.MentorID == mentorLogin.LoginID)
-        .ToList();
+            ViewBag.Clubs = _db.CLUBS
+                .Where(c => c.MentorID == mentorLogin.LoginID)
+                .ToList();
 
-    var events = _db.EVENTS
-        .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
-        .ToList();
+            var events = _db.EVENTS
+                .Where(e => e.ClubID == selectedClubId && e.ApprovalStatusID == 1)
+                .ToList();
 
-    // Generate token for each event
-    foreach (var ev in events)
-    {
-        ev.Token = SecureHelper.Encrypt($"{ev.EventID}|{ev.ClubID}");
-    }
+            // Generate token for each event
+            foreach (var ev in events)
+            {
+                ev.Token = SecureHelper.Encrypt($"{ev.EventID}|{ev.ClubID}");
+            }
 
-    // Flag to indicate filtering applied
-    ViewBag.FilterApplied = true;
+            // Flag to indicate filtering applied
+            ViewBag.FilterApplied = true;
 
-    // Map Organizer Names
-    var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
-    var loginIdToEmail = _db.Logins
-        .Where(l => loginIds.Contains(l.LoginID))
-        .ToDictionary(l => l.LoginID, l => l.Email);
+            // Map Organizer Names
+            var loginIds = events.Select(e => e.EventOrganizerID).Distinct().ToList();
+            var loginIdToEmail = _db.Logins
+                .Where(l => loginIds.Contains(l.LoginID))
+                .ToDictionary(l => l.LoginID, l => l.Email);
 
-    var emailToName = _db.ClubRegistrations
-        .Where(cr => loginIdToEmail.Values.Contains(cr.Email))
-        .ToDictionary(cr => cr.Email, cr => cr.FullName);
+            var emailToName = _db.ClubRegistrations
+                .Where(cr => loginIdToEmail.Values.Contains(cr.Email))
+                .ToDictionary(cr => cr.Email, cr => cr.FullName);
 
-    ViewBag.OrganizerNames = loginIdToEmail
-        .Where(le => emailToName.ContainsKey(le.Value))
-        .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
+            ViewBag.OrganizerNames = loginIdToEmail
+                .Where(le => emailToName.ContainsKey(le.Value))
+                .ToDictionary(le => le.Key.ToString(), le => emailToName[le.Value]);
 
-    ViewBag.ClubNames = _db.CLUBS.ToDictionary(c => c.ClubID, c => c.ClubName);
+            ViewBag.ClubNames = _db.CLUBS.ToDictionary(c => c.ClubID, c => c.ClubName);
 
-    ViewBag.UniversityName = "ICFAI Foundation for Higher Education"; // Hardcoded or fetch dynamically
-    ViewBag.Universities = _db.UNIVERSITies.ToList();
+            ViewBag.UniversityName = "ICFAI Foundation for Higher Education"; // Hardcoded or fetch dynamically
+            ViewBag.Universities = _db.UNIVERSITies.ToList();
 
-    return View(events);
-}
+            return View(events);
+        }
 
 
 
@@ -1086,8 +1087,8 @@ public ActionResult ViewEventRequests(int selectedClubId)
 
             // 3. Find the club admin (adjust field name to your schema)
             int? adminId = ev.EventOrganizerID;        // many apps store organiser here
-/*                           ?? ev.CLUB.ClubAdminID;    // or maybe on the CLUB row
-*/
+            /*                           ?? ev.CLUB.ClubAdminID;    // or maybe on the CLUB row
+            */
             if (adminId != null)
             {
                 string notifMsg = accept
@@ -1104,16 +1105,16 @@ public ActionResult ViewEventRequests(int selectedClubId)
                     CreatedDate = DateTime.Now
                 });
 
-               /* // 4. Optional: send an e-mail as well
-                var admin = _db.Logins.FirstOrDefault(l => l.LoginID == adminId);
-                if (admin != null && !string.IsNullOrWhiteSpace(admin.Email))
-                {
-                    EmailHelper.Send(
-                        to: admin.Email,
-                        subject: "Event Budget Decision",
-                        body: notifMsg.Replace("\n", "<br/>")  // simple HTML email
-                    );
-                }*/
+                /* // 4. Optional: send an e-mail as well
+                 var admin = _db.Logins.FirstOrDefault(l => l.LoginID == adminId);
+                 if (admin != null && !string.IsNullOrWhiteSpace(admin.Email))
+                 {
+                     EmailHelper.Send(
+                         to: admin.Email,
+                         subject: "Event Budget Decision",
+                         body: notifMsg.Replace("\n", "<br/>")  // simple HTML email
+                     );
+                 }*/
             }
 
             // 5. Commit everything
@@ -1183,6 +1184,156 @@ public ActionResult ViewEventRequests(int selectedClubId)
             ViewBag.Message = "Password reset successful!";
             return RedirectToAction("Login");
         }
+
+
+
+
+
+        // ===========================
+        // MentorConcludedEventDetails
+        // ===========================
+
+        public ActionResult MentorClubs()
+        {
+            if (Session["UserID"] == null)
+            {
+                TempData["ErrorMessage"] = "Please log in first!";
+                return RedirectToAction("Login", "Admin");
+            }
+
+            int mentorID = Convert.ToInt32(Session["UserID"]);
+
+            var clubs = _db.CLUBS
+                           .Where(c => c.MentorID == mentorID)
+                           .ToList();
+
+            return View(clubs);
+        }
+
+
+
+        public ActionResult MentorConcludedEvents(int clubId)
+        {
+            var events = _db.EVENTS
+                            .Where(e => e.ClubID == clubId && e.EventStatus == "Concluded")
+                            .ToList();
+
+            ViewBag.ClubName = _db.CLUBS.Find(clubId)?.ClubName;
+            return View(events);
+        }
+
+
+        // GET: Mentor Concluded Event Details
+        public ActionResult MentorConcludedEventDetails(int id)
+        {
+            var evnt = _db.EVENTS.Find(id);
+            if (evnt == null) return HttpNotFound();
+
+            // Get all photos and videos (uploaded by club admin)
+            var allMedia = _db.EventPhotos
+                .Where(p => p.EventId == id)
+                .ToList();
+
+            var eventPhotos = allMedia.Where(m => m.MediaType == "Photo").ToList();
+            var eventVideos = allMedia.Where(m => m.MediaType == "Video").ToList();
+
+            // Get all winners
+            var MediaList = _db.EventPhotos.Where(p => p.EventId == id).ToList();
+            var eventWinners = _db.EventWinners.Where(w => w.EventId == id).ToList();
+
+            var model = new EventDetailsViewModel
+            {
+                Event = evnt,
+                EventPhotos = allMedia,      // contains both photos & videos
+                EventWinners = eventWinners
+            };
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult MentorApproveEventDetails(
+            int EventId,
+            int? ApprovedBrochure,
+            List<int> ApprovedPhotoIds,
+            List<int> ApprovedVideoIds,
+            List<int> ApprovedWinnerIds
+        )
+        {
+            // Mentor’s login id from session
+            int approverId = Convert.ToInt32(Session["UserID"]);
+
+            var evnt = _db.EVENTS.Find(EventId);
+            if (evnt == null) return HttpNotFound();
+
+            // --- Brochure Approval ---
+            if (ApprovedBrochure.HasValue && ApprovedBrochure.Value == 1)
+            {
+                evnt.BrochureApprovalStatusID = 2; // Approved
+                evnt.BrochureApprovedByID = approverId;
+                evnt.BrochureApprovedDate = DateTime.Now;
+            }
+            else
+            {
+                evnt.BrochureApprovalStatusID = 3; // Rejected
+            }
+
+            // --- Approve selected photos ---
+            var photos = _db.EventPhotos.Where(p => p.EventId == EventId).ToList();
+            foreach (var photo in photos)
+            {
+                if (ApprovedPhotoIds != null && ApprovedPhotoIds.Contains(photo.Id))
+                {
+                    photo.ApprovalStatusID = 2; // Approved
+                    photo.ApprovedByID = approverId;
+                    photo.ApprovedDate = DateTime.Now;
+                }
+                else
+                {
+                    photo.ApprovalStatusID = 3; // Rejected
+                }
+            }
+
+            // --- Approve selected videos ---
+            var videos = _db.EventPhotos.Where(p => p.EventId == EventId && p.MediaType == "Video").ToList();
+            foreach (var video in videos)
+            {
+                if (ApprovedVideoIds != null && ApprovedVideoIds.Contains(video.Id))
+                {
+                    video.ApprovalStatusID = 2; // Approved
+                    video.ApprovedByID = approverId;
+                    video.ApprovedDate = DateTime.Now;
+                }
+                else
+                {
+                    video.ApprovalStatusID = 3; // Rejected
+                }
+            }
+
+            // --- Approve selected winners ---
+            var winners = _db.EventWinners.Where(w => w.EventId == EventId).ToList();
+            foreach (var winner in winners)
+            {
+                if (ApprovedWinnerIds != null && ApprovedWinnerIds.Contains(winner.Id))
+                {
+                    winner.ApprovalStatusID = 2; // Approved
+                    winner.ApprovedByID = approverId;
+                    winner.ApprovedDate = DateTime.Now;
+                }
+                else
+                {
+                    winner.ApprovalStatusID = 3; // Rejected
+                }
+            }
+
+            _db.SaveChanges();
+            TempData["SuccessMessage"] = "Selected items approved successfully!";
+            return RedirectToAction("MentorConcludedEvents", new { clubId = evnt.ClubID });
+        }
+
+
 
     }
 }

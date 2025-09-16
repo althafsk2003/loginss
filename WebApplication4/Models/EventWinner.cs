@@ -19,6 +19,9 @@ namespace WebApplication4.Models
         public string WinnerName { get; set; }
         public string Prize { get; set; }
         public string Description { get; set; }
+        public Nullable<int> ApprovalStatusID { get; set; }
+        public Nullable<int> ApprovedByID { get; set; }
+        public Nullable<System.DateTime> ApprovedDate { get; set; }
     
         public virtual EVENT EVENT { get; set; }
         public virtual EVENT EVENT1 { get; set; }

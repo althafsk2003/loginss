@@ -11,14 +11,14 @@ using WebApplication4.Models;
 
 namespace WebApplication4.Controllers
 {
-    public class DirectorController : Controller
+    public class DirectorController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
 
         public ActionResult Index()
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return RedirectToAction("Login", "Admin");
             }
@@ -70,7 +70,7 @@ namespace WebApplication4.Controllers
         [HttpGet]
         public ActionResult AddSubDepartments()
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
                 return RedirectToAction("Login", "Admin");
 
             // Return empty model with one entry
@@ -83,7 +83,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public async Task<ActionResult> AddSubDepartments(SubDepartmentPageViewModel model)
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
                 return RedirectToAction("Login", "Admin");
 
             int departmentID = Convert.ToInt32(Session["DepartmentID"]);
@@ -153,7 +153,7 @@ namespace WebApplication4.Controllers
         public ActionResult ViewSubHods(string filter = "manage")
         {
             // Check user role and redirect if not Director
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return RedirectToAction("Login", "Admin");
             }
@@ -226,7 +226,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult ToggleSubHodStatus(int id, bool isActive)
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return Json(new { success = false, message = "Unauthorized" });
             }
@@ -256,7 +256,7 @@ namespace WebApplication4.Controllers
         public ActionResult ViewMentors(string filter = "manage")
         {
             // Check user role (only Director can access)
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return RedirectToAction("Login", "Admin");
             }
@@ -324,7 +324,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult ToggleMentorStatus(int id, bool isActive)
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return Json(new { success = false, message = "Unauthorized" });
             }
@@ -354,7 +354,7 @@ namespace WebApplication4.Controllers
         public ActionResult ViewClubs(string filter = "manage")
         {
             // Check role
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return RedirectToAction("Login", "Admin");
             }
@@ -421,7 +421,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public JsonResult ToggleClubStatus(int id, bool isActive)
         {
-            if (Session["UserRole"]?.ToString() != "Director")
+            if (Session["Role"]?.ToString() != "Director")
             {
                 return Json(new { success = false, message = "Unauthorized" });
             }

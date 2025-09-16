@@ -40,7 +40,7 @@
             @foreach (var photo in Model.EventPhotos)
             {
                 <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                    <img src="@photo.PhotoPath" width="100" height="100" class="rounded-md object-cover" />
+                    <img src="@photo.Path" width="100" height="100" class="rounded-md object-cover" />
                     <span class="text-gray-600">Uploaded on: @photo.UploadedDate.ToString("dd-MM-yyyy")</span>
                     <button type="button" class="remove-existing-photo bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600" data-photoid="@photo.Id">Remove</button>
                 </div>
@@ -100,7 +100,7 @@
             {
                 <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                     <video width="200" controls>
-                        <source src="@video.VideoPath" type="video/mp4">
+                        <source src="@video.Path" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     <span class="text-gray-600">Uploaded on: @video.UploadedDate.ToString("dd-MM-yyyy")</span>

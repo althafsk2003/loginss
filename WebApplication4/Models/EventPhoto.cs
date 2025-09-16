@@ -16,8 +16,12 @@ namespace WebApplication4.Models
     {
         public int Id { get; set; }
         public int EventId { get; set; }
-        public string PhotoPath { get; set; }
+        public string Path { get; set; }
         public System.DateTime UploadedDate { get; set; }
+        public Nullable<int> ApprovalStatusID { get; set; }
+        public Nullable<int> ApprovedByID { get; set; }
+        public Nullable<System.DateTime> ApprovedDate { get; set; }
+        public string MediaType { get; set; }
     
         public virtual EVENT EVENT { get; set; }
         public virtual EVENT EVENT1 { get; set; }

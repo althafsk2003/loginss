@@ -1,0 +1,18 @@
+﻿
+
+@model IEnumerable<WebApplication4.Models.CLUB>
+@{ Layout = "~/Views/Shared/_MentorLayout.cshtml";
+}
+<h2>Your Clubs</h2>
+
+<div class="row">
+    @foreach (var club in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3">
+                <h5>@club.ClubName</h5>
+                <a class="btn btn-primary" href="@Url.Action("MentorConcludedEvents", "Mentor", new { clubId = club.ClubID })">View Concluded Events</a>
+            </div>
+        </div>
+    }
+</div>

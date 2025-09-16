@@ -16,13 +16,14 @@ using Org.BouncyCastle.Utilities;
 
 namespace WebApplication4.Controllers
 {
-    public class UniversityAdminController : Controller
+    public class UniversityAdminController : BaseController
     {
         private readonly dummyclubsEntities _db = new dummyclubsEntities();
         private readonly EmailService _emailService = new EmailService();  // Injecting EmailService
 
         public async Task<ActionResult> Index()
         {
+
             if (!IsUniversityAdminLoggedIn())
             {
                 return RedirectToAction("Login", "Admin");
@@ -236,8 +237,8 @@ namespace WebApplication4.Controllers
         // ✅ Utility: Check if University Admin is Logged In
         private bool IsUniversityAdminLoggedIn()
         {
-            return Session["UserRole"] != null &&
-                   (string)Session["UserRole"] == "UniversityAdministrator" &&
+            return Session["Role"] != null &&
+                   (string)Session["Role"] == "UniversityAdministrator" &&
                    Session["UniversityID"] != null;
         }
 
