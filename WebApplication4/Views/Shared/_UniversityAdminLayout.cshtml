@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <title>@ViewBag.Title - University Admin Dashboard</title>
 
-    <!-- Bootstrap & FontAwesome -->
+    <!-- Bootstrap & jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     @RenderSection("Styles", required: false)
-
 
     <style>
         /* Header Styling */
@@ -22,39 +23,36 @@
             padding: 15px 20px;
             z-index: 1000;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
-        .hamburger {
-            font-size: 24px;
-            cursor: pointer;
-            display: block;
-        }
+            .header .hamburger {
+                font-size: 24px;
+                cursor: pointer;
+            }
 
-        /* Sidebar Popup Styling */
+        /* Sidebar Popup Styling - now from right */
         .sidebar-popup {
             display: none;
             position: fixed;
             top: 0;
-            left: 0;
+            right: 0; /* Changed from left to right */
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            background: rgba(0, 0, 0, 0.5);
             z-index: 2000;
-            justify-content: flex-start;
+            justify-content: flex-end; /* Align sidebar to the right */
             align-items: flex-start;
         }
 
         .sidebar {
             width: 350px;
             height: 100%;
-            background: #343a40;
+            background: #ffffff;
+            color: black;
             padding: 20px;
             overflow-y: auto;
             transition: transform 0.3s ease-in-out;
-            transform: translateX(-100%); /* Hidden by default */
+            transform: translateX(100%); /* Hidden to the right initially */
         }
 
         .sidebar-popup.active {
@@ -62,12 +60,12 @@
         }
 
             .sidebar-popup.active .sidebar {
-                transform: translateX(0); /* Slide in when active */
+                transform: translateX(0); /* Slide in from right */
             }
 
         .sidebar a {
             display: block;
-            color: white;
+            color: black;
             padding: 10px;
             text-decoration: none;
             border-radius: 5px;
@@ -75,7 +73,7 @@
         }
 
             .sidebar a:hover {
-                background: #495057;
+                background: #f1f1f1;
             }
 
         .sidebar .collapse {
@@ -87,7 +85,7 @@
         }
 
         .close-btn {
-            color: white;
+            color: black;
             font-size: 24px;
             cursor: pointer;
             text-align: right;
@@ -99,56 +97,40 @@
             width: 100%;
             margin-top: 70px;
         }
-
-        /* Loader */
-        .loader {
-            display: none;
-            text-align: center;
-            padding: 10px;
-        }
-
-        /* Carousel Styling for Clubs */
-        .carousel-inner {
-            max-height: 1000px;
-        }
-
-        .carousel-item img {
-            object-fit: cover;
-            height: 300px;
-            width: 300px;
-        }
-
-        .sidebar a.quick-stats {
-            padding-left: 8px; /* Same as other links */
-            margin-top: 0; /* Ensure no extra margin */
-            display: block;
-        }
     </style>
 </head>
 <body>
 
     <!-- Header -->
     <div class="header bg-primary text-white py-3">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Left: Hamburger -->
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <!-- Left: Logo with white background -->
+            <div class="d-flex align-items-center" style="background-color:white; padding:5px; border-radius:5px;">
+                <img src="~/wwwroot/Images/Logo.svg" alt="App Logo" style="height:40px; width:auto;">
+            </div>
+
+            <!-- Center: Heading -->
+            <!-- Center: Heading -->
+            <h2 class="mb-0 text-center" style="position:absolute; left:50%; transform:translateX(-50%);">
+                Clubs & Experiences
+            </h2>
+
+            <!-- Right: Role Switcher + Hamburger -->
+            <div class="d-flex align-items-center gap-3">
+                @Html.Partial("_RoleSwitcher", Session["UserRoles"] as List<string>)
                 <i class="fas fa-bars hamburger"></i>
-
-                <!-- Center: Heading -->
-                <h2 class="mb-0 text-center flex-grow-1">University Admin Dashboard</h2>
-
-                <!-- Right: Role Switcher -->
-                <div>
-                    @Html.Partial("_RoleSwitcher", Session["UserRoles"] as List<string>)
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar Popup -->
+
+
+
+    <!-- Sidebar Popup (Right Side) -->
     <div class="sidebar-popup">
-        <div class="sidebar bg-dark text-white">
+        <div class="sidebar">
             <div class="close-btn"><i class="fas fa-times"></i></div>
+            <h4 class="text-center mb-4">University Admin</h4>
             <a href="@Url.Action("Index", "UniversityAdmin")"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
 
             <!-- Schools Section -->
@@ -166,22 +148,21 @@
                 <i class="fas fa-user-tie"></i> Mentors <i class="fas fa-caret-down float-right"></i>
             </a>
             <div id="mentorsSubmenu" class="collapse">
-                @*                <a href="@Url.Action("AddMentor", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-user-plus"></i> Add Mentor</a>
-                *@                <a href="@Url.Action("ManageMentors", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-users-cog"></i> Manage Mentors</a>
                 <a href="@Url.Action("ViewMentors", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-eye"></i> View Mentors</a>
             </div>
+
             <!-- Clubs Section -->
             <a href="#clubsSubmenu" data-toggle="collapse">
                 <i class="fas fa-users"></i> Clubs <i class="fas fa-caret-down float-right"></i>
             </a>
             <div id="clubsSubmenu" class="collapse">
-                @*                <a href="@Url.Action("ClubRequests", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-envelope"></i> View Club Requests</a>
-                *@                <a href="@Url.Action("ClubStatus", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-envelope"></i> View Club Status</a>
-                <a href="@Url.Action("ManageClubs", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-cogs"></i> Manage Clubs</a>
+                <a href="@Url.Action("ClubStatus", "UniversityAdmin")" class="nested-collapse"><i class="fas fa-envelope"></i> View Club Status</a>
             </div>
+
             <a href="@Url.Action("ViewAllDepartments", "UniversityAdmin")" class="nested-collapse quick-stats">
                 <i class="fas fa-eye"></i> Quick Stats
             </a>
+
             <!-- Settings -->
             <a href="@Url.Action("ChangePassword", "UniversityAdmin")"><i class="fas fa-key"></i> Change Password</a>
 
@@ -195,57 +176,23 @@
         @RenderBody()
     </div>
 
-    <!-- Bootstrap & jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
     <script>
         $(document).ready(function () {
-            // Toggle sidebar popup on hamburger click
+            // Toggle sidebar popup
             $('.hamburger').click(function () {
                 $('.sidebar-popup').addClass('active');
             });
-
-            // Close sidebar popup on close button click
             $('.close-btn').click(function () {
                 $('.sidebar-popup').removeClass('active');
             });
-
-            // Close sidebar popup when clicking outside
             $('.sidebar-popup').click(function (e) {
                 if ($(e.target).hasClass('sidebar-popup')) {
                     $('.sidebar-popup').removeClass('active');
                 }
             });
-
-            // Load Universities dynamically when View All Universities is clicked under Clubs section
-            $(document).on("click", "#viewMoreSubmenu a", function () {
-                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
-                $.get("@Url.Action("ViewAllUniversities", "Admin")", function (data) {
-                    $("#content-area").html(data);
-                });
-            });
-
-            // Load Departments dynamically when a University is clicked
-            $(document).on("click", ".university-item", function () {
-                var universityId = $(this).data("id");
-                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
-                $.get("@Url.Action("GetDepartments", "Admin")", { universityId: universityId }, function (data) {
-                    $("#content-area").html(data);
-                });
-            });
-
-            // Load Clubs dynamically when a Department is clicked
-            $(document).on("click", ".department-item", function () {
-                var departmentId = $(this).data("id");
-                $("#content-area").html('<div class="loader"><i class="fas fa-spinner fa-spin"></i> Loading...</div>');
-                $.get("@Url.Action("GetClubs", "Admin")", { departmentId: departmentId }, function (data) {
-                    $("#content-area").html(data);
-                });
-            });
         });
     </script>
-    @RenderSection("Scripts", required: false)
 
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

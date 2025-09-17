@@ -40,16 +40,22 @@ namespace WebApplication4.Controllers
 
             // 1️⃣ Get all Sub-HODs for this department
             var subHods = _db.Logins
-                .Where(l => l.DepartmentID == departmentId && l.Role.ToLower() == "subhod")
+                .Where(l => l.DepartmentID == departmentId &&
+                            ("," + l.Role + ",").Contains(",SUBHOD,"))
                 .ToList();
+
+
 
             ViewBag.HodActiveCount = subHods.Count(s => s.IsActive == true);
             ViewBag.HodInactiveCount = subHods.Count(s => s.IsActive == false || s.IsActive == null);
 
             // 2️⃣ Get all Mentors in this department
             var mentors = _db.Logins
-                .Where(l => l.DepartmentID == departmentId && l.Role.ToLower() == "mentor")
+                .Where(l => l.DepartmentID == departmentId &&
+                            ("," + l.Role + ",").Contains(",Mentor,"))
                 .ToList();
+
+
 
             ViewBag.MentorActiveCount = mentors.Count(m => m.IsActive == true);
             ViewBag.MentorInactiveCount = mentors.Count(m => m.IsActive == false || m.IsActive == null);
@@ -96,6 +102,7 @@ namespace WebApplication4.Controllers
                     if (string.IsNullOrWhiteSpace(hod.HODName) || string.IsNullOrWhiteSpace(hod.HODEmail))
                         continue;
 
+                    // 1️⃣ Add sub-departments
                     foreach (var subDeptName in hod.SubDepartments ?? new List<string>())
                     {
                         if (string.IsNullOrWhiteSpace(subDeptName)) continue;
@@ -114,8 +121,22 @@ namespace WebApplication4.Controllers
                         _db.SUBDEPARTMENTs.Add(subDept);
                     }
 
-                    if (!_db.Logins.Any(l => l.Email == hod.HODEmail && l.Role == "SUBHOD"))
+                    // 2️⃣ Handle login with multiple roles
+                    var existingLogin = _db.Logins.FirstOrDefault(l => l.Email == hod.HODEmail);
+
+                    if (existingLogin != null)
                     {
+                        // Split roles, add SUBHOD if missing
+                        var roles = existingLogin.Role?.Split(',').Select(r => r.Trim()).ToList() ?? new List<string>();
+                        if (!roles.Any(r => r.Equals("SUBHOD", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            roles.Add("SUBHOD");
+                            existingLogin.Role = string.Join(",", roles);
+                        }
+                    }
+                    else
+                    {
+                        // Create new login if email doesn't exist
                         _db.Logins.Add(new Login
                         {
                             Email = hod.HODEmail,
@@ -148,65 +169,50 @@ namespace WebApplication4.Controllers
             }
         }
 
-        // view sccs
 
+        // GET: View SubDepartments
         public ActionResult ViewSubHods(string filter = "manage")
         {
-            // Check user role and redirect if not Director
             if (Session["Role"]?.ToString() != "Director")
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
-            // Get DepartmentID from session
             int departmentId = 0;
             if (!int.TryParse(Session["DepartmentID"]?.ToString(), out departmentId) || departmentId == 0)
-            {
-                ViewBag.ErrorMessage = "Department not found or invalid.";
-                return View(new SubHodDashboardViewModel()); // Return empty model or error view
-            }
+                return View(new SubHodDashboardViewModel());
 
             var department = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == departmentId);
             if (department == null)
-            {
-                ViewBag.ErrorMessage = "Department not found.";
-                return View(new SubHodDashboardViewModel()); // Return empty model or error view
-            }
+                return View(new SubHodDashboardViewModel());
 
-            // Query SubHODs for this department
-            var subHods = (from sd in _db.SUBDEPARTMENTs
-                           join l in _db.Logins on sd.HOD_Email equals l.Email
-                           join dept in _db.DEPARTMENTs on sd.DepartmentID equals dept.DepartmentID
-                           where sd.DepartmentID == departmentId
-                           select new SubHodViewModel
-                           {
-                               Id = l.LoginID,
-                               Name = sd.HOD, // Name from SUBDEPARTMENT table
-                               Email = l.Email,
-                               DepartmentName = dept.DepartmentName,
-                               SubDepartmentName = sd.SubDepartmentName,
-                               IsActive = l.IsActive ?? false
-                           }).ToList();
+            // Query each sub-department individually
+            var subDepartments = _db.SUBDEPARTMENTs
+                .Where(sd => sd.DepartmentID == departmentId)
+                .Select(sd => new SubHodViewModel
+                {
+                    SubDepartmentId = sd.SubDepartmentID,
+                    HODName = sd.HOD,
+                    HODEmail = sd.HOD_Email,
+                    DepartmentName = department.DepartmentName,
+                    SubDepartmentName = sd.SubDepartmentName,
+                    IsActive = sd.IsActive
+                })
+                .ToList();
 
-            // Filter based on toggle buttons
             List<SubHodViewModel> filteredList;
 
             switch (filter.ToLower())
             {
                 case "all":
-                    filteredList = subHods;
+                    filteredList = subDepartments;
                     break;
-
                 case "active":
-                    filteredList = subHods.Where(s => s.IsActive).ToList();
+                    filteredList = subDepartments.Where(s => s.IsActive).ToList();
                     break;
-
                 case "inactive":
-                    filteredList = subHods.Where(s => !s.IsActive).ToList();
+                    filteredList = subDepartments.Where(s => !s.IsActive).ToList();
                     break;
-
-                default: // "manage"
-                    filteredList = subHods;
+                default:
+                    filteredList = subDepartments;
                     break;
             }
 
@@ -215,31 +221,28 @@ namespace WebApplication4.Controllers
             {
                 TableData = filteredList,
                 ShowToggle = filter.ToLower() == "manage",
-                TotalCount = subHods.Count,
-                ActiveCount = subHods.Count(s => s.IsActive),
-                InactiveCount = subHods.Count(s => !s.IsActive)
+                TotalCount = subDepartments.Count,
+                ActiveCount = subDepartments.Count(s => s.IsActive),
+                InactiveCount = subDepartments.Count(s => !s.IsActive)
             };
 
             return View(vm);
         }
 
+        // POST: Toggle individual sub-department status
         [HttpPost]
-        public JsonResult ToggleSubHodStatus(int id, bool isActive)
+        public JsonResult ToggleSubHodStatus(int subDeptId, bool isActive)
         {
             if (Session["Role"]?.ToString() != "Director")
-            {
                 return Json(new { success = false, message = "Unauthorized" });
-            }
 
             try
             {
-                var subHod = _db.Logins.FirstOrDefault(l => l.LoginID == id && l.Role == "SubHOD");
-                if (subHod == null)
-                {
-                    return Json(new { success = false, message = "Sub-HOD not found" });
-                }
+                var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.SubDepartmentID == subDeptId);
+                if (subDept == null)
+                    return Json(new { success = false, message = "Sub-Department not found" });
 
-                subHod.IsActive = isActive;
+                subDept.IsActive = isActive;
                 _db.SaveChanges();
 
                 return Json(new { success = true, message = "Status updated successfully" });
@@ -250,10 +253,10 @@ namespace WebApplication4.Controllers
             }
         }
 
+
         // view mentors 
 
-
-        public ActionResult ViewMentors(string filter = "manage")
+        public ActionResult ViewMentors(string filter = "all")
         {
             // Check user role (only Director can access)
             if (Session["Role"]?.ToString() != "Director")
@@ -275,16 +278,16 @@ namespace WebApplication4.Controllers
                 return View(new MentorDashboardViewModel());
             }
 
-            // Get mentors for this department
+            // Get mentors for this department (including SubHODs who are also mentors)
             var mentors = (from l in _db.Logins
                            join u in _db.USERs on l.Email equals u.Email
                            join sd in _db.SUBDEPARTMENTs on l.SubDepartmentID equals sd.SubDepartmentID
                            join dept in _db.DEPARTMENTs on sd.DepartmentID equals dept.DepartmentID
-                           where l.Role == "Mentor" && sd.DepartmentID == departmentId
+                           where l.Role.Contains("Mentor") && sd.DepartmentID == departmentId
                            select new MentorViewModel
                            {
                                LoginID = l.LoginID,
-                               FullName = u.FirstName + " " + u.LastName, // Full Name from USERS table
+                               FullName = u.FirstName + " " + u.LastName,
                                Email = l.Email,
                                DepartmentName = dept.DepartmentName,
                                SubDepartmentName = sd.SubDepartmentName,
@@ -293,26 +296,25 @@ namespace WebApplication4.Controllers
 
             // Apply filters
             List<MentorViewModel> filteredList;
+
             switch (filter.ToLower())
             {
-                case "all":
-                    filteredList = mentors;
-                    break;
                 case "active":
                     filteredList = mentors.Where(m => m.IsActive).ToList();
                     break;
                 case "inactive":
                     filteredList = mentors.Where(m => !m.IsActive).ToList();
                     break;
-                default: // manage
+                default: // all mentors
                     filteredList = mentors;
                     break;
             }
 
+
             var vm = new MentorDashboardViewModel
             {
                 TableData = filteredList,
-                ShowToggle = filter.ToLower() == "manage",
+                ShowToggle = true, // always show toggle checkboxes
                 TotalCount = mentors.Count,
                 ActiveCount = mentors.Count(m => m.IsActive),
                 InactiveCount = mentors.Count(m => !m.IsActive)
@@ -331,7 +333,7 @@ namespace WebApplication4.Controllers
 
             try
             {
-                var mentor = _db.Logins.FirstOrDefault(l => l.LoginID == id && l.Role == "Mentor");
+                var mentor = _db.Logins.FirstOrDefault(l => l.LoginID == id && l.Role.Contains("Mentor"));
                 if (mentor == null)
                 {
                     return Json(new { success = false, message = "Mentor not found" });
@@ -349,9 +351,9 @@ namespace WebApplication4.Controllers
         }
 
 
-        // clubs section
+
         // View Clubs
-        public ActionResult ViewClubs(string filter = "manage")
+        public ActionResult ViewClubs(string filter = "all")
         {
             // Check role
             if (Session["Role"]?.ToString() != "Director")
@@ -387,28 +389,26 @@ namespace WebApplication4.Controllers
                              IsActive = c.IsActive ?? false
                          }).ToList();
 
-            // Apply filters
             List<ClubViewModel> filteredList;
+
             switch (filter.ToLower())
             {
-                case "all":
-                    filteredList = clubs;
-                    break;
                 case "active":
                     filteredList = clubs.Where(c => c.IsActive).ToList();
                     break;
                 case "inactive":
                     filteredList = clubs.Where(c => !c.IsActive).ToList();
                     break;
-                default: // manage
+                default: // all
                     filteredList = clubs;
                     break;
             }
 
+
             var vm = new ClubDashboardViewModel
             {
                 TableData = filteredList,
-                ShowToggle = filter.ToLower() == "manage",
+                ShowToggle = true, // always show toggle checkbox
                 TotalCount = clubs.Count,
                 ActiveCount = clubs.Count(c => c.IsActive),
                 InactiveCount = clubs.Count(c => !c.IsActive)
@@ -444,6 +444,7 @@ namespace WebApplication4.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
 
 
 
@@ -561,7 +562,7 @@ namespace WebApplication4.Controllers
         {
             string email = Session["UserEmail"]?.ToString();
 
-            var director = _db.Logins.FirstOrDefault(l => l.Email == email && l.Role == "Director");
+            var director = _db.Logins.FirstOrDefault(l => l.Email == email && l.Role.Contains("Director"));
             if (director == null)
                 return HttpNotFound("Director not found");
 

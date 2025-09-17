@@ -15,7 +15,8 @@ namespace WebApplication4.Models
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            using (var smtp = new SmtpClient("smtp.gmail.com", 587))
+/*            toEmail = "pradeepayyaluri74@gmail.com";
+*/            using (var smtp = new SmtpClient("smtp.gmail.com", 587))
             {
                 smtp.Credentials = new NetworkCredential(_email, _password);
                 smtp.EnableSsl = true;

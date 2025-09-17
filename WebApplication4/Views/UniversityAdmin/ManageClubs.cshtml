@@ -43,13 +43,19 @@
                             <td>
                                 @if (club.IsActive == true)
                                 {
-                                    <a href="@Url.Action("DeactivateClub", "UniversityAdmin", new { id = club.ClubID, page = ViewBag.CurrentPage })"
-                                       class="btn btn-warning">Deactivate</a> }
+                                    <a href="javascript:void(0);" class="btn btn-warning"
+                                       onclick="confirmAction('@Url.Action("DeactivateClub", "UniversityAdmin", new { id = club.ClubID, page = ViewBag.CurrentPage })', 'deactivate', '@club.ClubName')">
+                                        Deactivate
+                                    </a>
+                                }
                                 else
                                 {
+                                    <a href="javascript:void(0);" class="btn btn-success"
+                                       onclick="confirmAction('@Url.Action("ActivateClub", "UniversityAdmin", new { id = club.ClubID, page = ViewBag.CurrentPage })', 'activate', '@club.ClubName')">
+                                        Activate
+                                    </a>
+                                }
 
-                                    <a href="@Url.Action("ActivateClub", "UniversityAdmin", new { id = club.ClubID, page = ViewBag.CurrentPage })"
-                                       class="btn btn-success">Activate</a>}
                             </td>
                         </tr>
                     }
@@ -76,6 +82,7 @@
     {
         <p class="text-center">No clubs found to manage.</p>
     }
+
 </div>
 
 <!-- ✅ JS for See More / See Less -->
@@ -93,6 +100,14 @@
             shortText.classList.remove("d-none");
             fullText.classList.add("d-none");
             link.textContent = "See More";
+        }
+    }
+
+    // ✅ Confirmation popup before activating/deactivating
+    function confirmAction(url, actionType, clubName) {
+        let message = `Are you sure you want to ${actionType} the club "${clubName}"?`;
+        if (confirm(message)) {
+            window.location.href = url;
         }
     }
 </script>

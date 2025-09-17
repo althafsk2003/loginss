@@ -1459,8 +1459,14 @@ namespace WebApplication4.Controllers
                 .Where(c => c.DepartmentID == departmentId && c.IsActive == true) // Filter active clubs
                 .ToList();
 
+            ViewBag.DepartmentName = _db.DEPARTMENTs
+                .Where(d => d.DepartmentID == departmentId)
+                .Select(d => d.DepartmentName)
+                .FirstOrDefault();
+
             return View(clubs);
         }
+
 
 
         //forgetpassword

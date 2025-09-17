@@ -49,10 +49,47 @@
             opacity: 1;
         }
     }
+
+    /* Header section with back button */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        color: #2563eb;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .back-button:hover {
+            color: #1e40af;
+        }
+
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.25rem;
+        }
 </style>
 
 <div class="container mt-4">
-    <h3 class="text-center mb-5">📚 Departments under <span class="text-primary">@ViewBag.UniversityName</span></h3>
+    <div class="page-header">
+        <h3 class="mb-0">📚 Departments under <span class="text-primary">@ViewBag.UniversityName</span></h3>
+        <a href="javascript:history.back()" class="back-button">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back
+        </a>
+    </div>
 
     <div class="department-list">
         @for (int i = 0; i < Model.Count; i++)

@@ -1,7 +1,4 @@
-﻿@{
-    Layout = null;
-}
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,47 +19,61 @@
             width: 100%;
             background: #007bff;
             color: white;
-            padding: 20px 20px;
+            padding: 15px 20px;
             z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
 
-        .hamburger {
-            font-size: 28px;
-            cursor: pointer;
-            position: absolute;
-            left: 20px;
-        }
+            .header .logo-container {
+                background-color: white;
+                padding: 5px;
+                border-radius: 5px;
+            }
 
-        .header h2 {
-            margin: 0;
-            font-size: 2rem;
-        }
+                .header .logo-container img {
+                    height: 40px;
+                    width: auto;
+                }
+
+            .header h2 {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                margin: 0;
+                font-size: 1.75rem;
+                color: white;
+            }
+
+            .header .hamburger {
+                font-size: 28px;
+                cursor: pointer;
+            }
 
         .sidebar-popup {
             display: none;
             position: fixed;
             top: 0;
-            left: 0;
+            right: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             z-index: 2000;
-            justify-content: flex-start;
+            justify-content: flex-end;
             align-items: flex-start;
         }
 
         .sidebar {
             width: 350px;
             height: 100%;
-            background: #343a40;
+            background: #ffffff;
+            color: black;
             padding: 20px;
             overflow-y: auto;
             transition: transform 0.3s ease-in-out;
-            transform: translateX(-100%);
+            transform: translateX(100%);
         }
 
         .sidebar-popup.active {
@@ -75,7 +86,7 @@
 
         .sidebar a {
             display: block;
-            color: white;
+            color: black;
             padding: 10px;
             text-decoration: none;
             border-radius: 5px;
@@ -83,19 +94,11 @@
         }
 
             .sidebar a:hover {
-                background: #495057;
+                background: #f1f1f1;
             }
 
-        .sidebar .collapse {
-            padding-left: 15px;
-        }
-
-        .sidebar .nested-collapse {
-            padding-left: 30px;
-        }
-
         .close-btn {
-            color: white;
+            color: black;
             font-size: 24px;
             cursor: pointer;
             text-align: right;
@@ -103,62 +106,41 @@
         }
 
         .content {
-            padding: 3px;
-            width: 100%;
+            padding: 20px;
             margin-top: 80px;
         }
     </style>
 </head>
 <body>
+
     <!-- Header -->
-    <div class="header bg-primary text-white py-3">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Left: Hamburger -->
-                <i class="fas fa-bars hamburger"></i>
+    <div class="header">
+        <!-- Left: Logo -->
+        <div class="logo-container">
+            <img src="~/wwwroot/Images/Logo.svg" alt="App Logo">
+        </div>
 
-                <!-- Center: Heading -->
-                <h2 class="mb-0 text-center flex-grow-1">Director Dashboard</h2>
+        <!-- Center: Heading -->
+        <h2>Clubs & Experiences</h2>
 
-                <!-- Right: Role Switcher -->
-                <div>
-                    @Html.Partial("_RoleSwitcher", Session["UserRoles"] as List<string>)
-                </div>
-            </div>
+        <!-- Right: Role Switcher + Hamburger -->
+        <div class="d-flex align-items-center gap-3">
+            @Html.Partial("_RoleSwitcher", Session["UserRoles"] as List<string>)
+            <i class="fas fa-bars hamburger"></i>
         </div>
     </div>
 
     <!-- Sidebar Popup -->
     <div class="sidebar-popup">
-        <div class="sidebar bg-dark text-white">
+        <div class="sidebar">
             <div class="close-btn"><i class="fas fa-times"></i></div>
+            <h4 class="text-center mb-4">Director</h4>
             <a href="@Url.Action("Index", "Director")"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-
-            <!-- Sub-Departments Section -->
-            <a href="@Url.Action("AddSubDepartments", "Director")">
-                <i class="fas fa-building"></i> Add Sub-Departments
-            </a>
-
-            <!-- HOD Management Section -->
-            <a href="@Url.Action("ViewSubHODs", "Director")">
-                <i class="fas fa-user-tie"></i> View SCC
-            </a>
-
-            <!-- Mentor Overview -->
-            <a href="@Url.Action("ViewMentors", "Director")">
-                <i class="fas fa-chalkboard-teacher"></i> View Mentors
-            </a>
-
-            <!-- Clubs Overview -->
-            <a href="@Url.Action("ViewClubs", "Director")">
-                <i class="fas fa-palette"></i> View Clubs
-            </a>
-
-            <!-- Events Section -->
-            <a href="@Url.Action("EventsForDirectorApproval", "Director")">
-                <i class="fas fa-calendar-check"></i> Approve Events
-            </a>
-
+            <a href="@Url.Action("AddSubDepartments", "Director")"><i class="fas fa-building"></i> Add Sub-Departments</a>
+            <a href="@Url.Action("ViewSubHODs", "Director")"><i class="fas fa-user-tie"></i> View SCC</a>
+            <a href="@Url.Action("ViewMentors", "Director")"><i class="fas fa-chalkboard-teacher"></i> View Mentors</a>
+            <a href="@Url.Action("ViewClubs", "Director")"><i class="fas fa-palette"></i> View Clubs</a>
+            <a href="@Url.Action("EventsForDirectorApproval", "Director")"><i class="fas fa-calendar-check"></i> Approve Events</a>
             <a href="@Url.Action("ChangePassword", "Director")"><i class="fas fa-key"></i> Change Password</a>
             <a href="@Url.Action("Logout", "Admin")" class="btn btn-danger mt-3"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
@@ -169,7 +151,6 @@
         @RenderBody()
     </div>
 
-    <!-- Bootstrap & jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 

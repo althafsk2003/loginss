@@ -101,14 +101,25 @@
             });
         }
 
-        $(document).on("click", ".toggle-btn", function () {
-            let clubId = $(this).data("id");
-            let currentStatus = $(this).data("status");
+$(document).on("click", ".toggle-btn", function () {
+    let clubId = $(this).data("id");
+    let currentStatus = $(this).data("status");
 
-            $.post('@Url.Action("ToggleClubStatus", "SubHOD")', { clubId: clubId }, function () {
-                loadClubs();
-            });
-        });
+    // Show confirmation dialog
+    let message = currentStatus
+        ? "Are you sure you want to deactivate this club?"
+        : "Are you sure you want to activate this club?";
+
+    if (!confirm(message)) {
+        return; // If user clicks Cancel, do nothing
+    }
+
+    // If confirmed, make the POST request
+    $.post('@Url.Action("ToggleClubStatus", "SubHOD")', { clubId: clubId }, function () {
+        loadClubs();
+    });
+});
+
 
         $(document).ready(function () {
             loadClubs();

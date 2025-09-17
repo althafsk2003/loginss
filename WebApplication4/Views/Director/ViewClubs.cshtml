@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* Keep header fixed during scroll */
     .table-responsive {
         max-height: 350px;
         overflow-y: auto;
@@ -14,32 +13,27 @@
     .table thead th {
         position: sticky;
         top: 0;
-        background-color: #004085; /* Deep blue for header */
+        background-color: #004085;
         color: white;
         z-index: 2;
     }
 
-    /* Zebra striping */
     .table tbody tr:nth-child(odd) {
         background-color: #f9f9f9;
     }
 
-    /* Hover effect */
     .table tbody tr:hover {
         background-color: #e2e6ea;
     }
 
-    /* Filter buttons spacing */
     .btn-group .btn {
         margin-right: 5px;
     }
 
-    /* Badge style */
     .badge {
         font-size: 0.9rem;
     }
 
-    /* Card styling */
     .card {
         border-radius: 8px;
         overflow: hidden;
@@ -49,21 +43,21 @@
 
 <div class="container mt-4">
 
-    <!-- Filter Buttons -->
-    <div class="mb-3 text-center">
-        <a href="@Url.Action("ViewClubs", new { filter = "manage" })" class="btn btn-primary me-2 shadow-sm">
-            Manage Clubs
-        </a>
-        <a href="@Url.Action("ViewClubs", new { filter = "all" })" class="btn btn-secondary me-2 shadow-sm">
-            All Clubs <span class="badge bg-light text-dark">@Model.TotalCount</span>
-        </a>
-        <a href="@Url.Action("ViewClubs", new { filter = "active" })" class="btn btn-success me-2 shadow-sm">
-            Active <span class="badge bg-light text-dark">@Model.ActiveCount</span>
-        </a>
-        <a href="@Url.Action("ViewClubs", new { filter = "inactive" })" class="btn btn-danger shadow-sm">
-            Inactive <span class="badge bg-light text-dark">@Model.InactiveCount</span>
-        </a>
+    <div class="d-flex mb-3 align-items-center">
+        <h3 class="me-auto">View Clubs</h3>
+        <div class="btn-group">
+            <a href="@Url.Action("ViewClubs", new { filter = "all" })" class="btn btn-secondary me-2 shadow-sm">
+                All Clubs <span class="badge bg-light text-dark">@Model.TotalCount</span>
+            </a>
+            <a href="@Url.Action("ViewClubs", new { filter = "active" })" class="btn btn-success me-2 shadow-sm">
+                Active <span class="badge bg-light text-dark">@Model.ActiveCount</span>
+            </a>
+            <a href="@Url.Action("ViewClubs", new { filter = "inactive" })" class="btn btn-danger shadow-sm">
+                Inactive <span class="badge bg-light text-dark">@Model.InactiveCount</span>
+            </a>
+        </div>
     </div>
+
 
     <!-- Table -->
     <div class="card shadow-sm">
@@ -76,10 +70,6 @@
                             <th>Department</th>
                             <th>Sub Department</th>
                             <th>Status</th>
-                            @if (Model.ShowToggle)
-                            {
-                                <th>Action</th>
-                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -89,16 +79,9 @@
                                 <td>@club.ClubName</td>
                                 <td>@club.DepartmentName</td>
                                 <td>@club.SubDepartmentName</td>
-                                <td id="status-@club.ClubID" class="fw-bold text-@(club.IsActive ? "success" : "danger")">
+                                <td class="fw-bold text-@(club.IsActive ? "success" : "danger")">
                                     @(club.IsActive ? "Active" : "Inactive")
                                 </td>
-                                @if (Model.ShowToggle)
-                                {
-                                    <td>
-                                        <input type="checkbox" @(club.IsActive ? "checked" : "")
-                                               onchange="toggleClubStatus(@club.ClubID, this.checked)" />
-                                    </td>
-                                }
                             </tr>
                         }
                     </tbody>
@@ -107,6 +90,7 @@
         </div>
     </div>
 </div>
+
 
 @section scripts {
     <script>

@@ -35,7 +35,7 @@
 
     .dashboard-container {
         display: grid;
-        grid-template-columns: 1fr 2fr;
+        grid-template-columns: 2fr 1fr; /* 👈 Left = departments (wider), Right = chart */
         gap: 20px; /* Increased for more vertical spacing between header and content */
         padding: 15px;
         max-width: 1200px;
@@ -172,10 +172,10 @@
     </div>
 
     <!-- 📊 Pie Chart for Mentors per Department -->
-    <div class="chart-section">
+    <!--<div class="chart-section">
         <h4>Mentor Distribution Across Departments</h4>
         <canvas id="mentorChart" height="80"></canvas>
-    </div>
+    </div>-->
 
     <!-- 🏫 Department Cards -->
     <div class="departments-section">
@@ -233,6 +233,11 @@
         {
             <p class="text-center text-muted">No departments found.</p>
         }
+    </div>
+    <!-- 📊 Pie Chart for Mentors per Department -->
+    <div class="chart-section">
+        <h4>Mentor Distribution Across Departments</h4>
+        <canvas id="mentorChart" height="80"></canvas>
     </div>
 </div>
 

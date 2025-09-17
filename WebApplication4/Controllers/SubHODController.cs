@@ -242,17 +242,33 @@ namespace WebApplication4.Controllers
 
         public ActionResult ManageMentors()
         {
-            string subHODEmail = Session["UserEmail"]?.ToString();
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
+            string userEmail = Session["UserEmail"]?.ToString().ToLower();
 
-            if (subDept == null)
-                return HttpNotFound("SubDepartment not found");
+            // 1️⃣ Get all sub-department IDs where the user is HOD
+            var subDeptIdsAsHOD = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == userEmail)
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
 
-            int subDeptId = subDept.SubDepartmentID;
+            // 2️⃣ Get all sub-department IDs where the user is a Mentor
+            var subDeptIdsAsMentor = _db.Logins
+                .Where(l => l.Email.ToLower() == userEmail && l.Role == "Mentor")
+                .Select(l => l.SubDepartmentID)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
 
-            // Fetch raw data first (without conversion)
+            // 3️⃣ Merge all sub-department IDs (avoid duplicates)
+            var allSubDeptIds = subDeptIdsAsHOD.Union(subDeptIdsAsMentor).ToList();
+
+            if (!allSubDeptIds.Any())
+                return HttpNotFound("No SubDepartments found for this user.");
+
+            // 4️⃣ Fetch mentors for all relevant subdepartments
             var mentorData = (from login in _db.Logins
-                              where login.Role == "Mentor" && login.SubDepartmentID == subDeptId
+                              where login.Role == "Mentor"
+                                    && login.SubDepartmentID.HasValue
+                                    && allSubDeptIds.Contains(login.SubDepartmentID.Value)
                               join user in _db.USERs on login.Email equals user.Email
                               select new
                               {
@@ -264,18 +280,18 @@ namespace WebApplication4.Controllers
                                   login.IsActive
                               }).ToList();
 
-            // Now do the conversion in memory (outside DB)
             var mentors = mentorData.Select(m => new MentorViewModel
             {
                 LoginID = m.LoginID,
                 FullName = m.FirstName + " " + m.LastName,
                 Email = m.Email,
                 Mobile = m.MobileNumber,
-                IsActive = m.IsActive == true // null-safe comparison
+                IsActive = m.IsActive == true
             }).ToList();
 
             return View(mentors);
         }
+
 
 
         public ActionResult ActivateMentor(int id)
@@ -302,16 +318,29 @@ namespace WebApplication4.Controllers
 
         public ActionResult ViewMentors()
         {
-            string subHODEmail = Session["UserEmail"]?.ToString();
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
+            string userEmail = Session["UserEmail"]?.ToString().ToLower();
 
-            if (subDept == null)
-                return HttpNotFound("SubDepartment not found");
+            var subDeptIdsAsHOD = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == userEmail)
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
 
-            int subDeptId = subDept.SubDepartmentID;
+            var subDeptIdsAsMentor = _db.Logins
+                .Where(l => l.Email.ToLower() == userEmail && l.Role == "Mentor")
+                .Select(l => l.SubDepartmentID)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
+
+            var allSubDeptIds = subDeptIdsAsHOD.Union(subDeptIdsAsMentor).ToList();
+
+            if (!allSubDeptIds.Any())
+                return HttpNotFound("No SubDepartments found for this user.");
 
             var mentors = (from login in _db.Logins
-                           where login.Role == "Mentor" && login.SubDepartmentID == subDeptId
+                           where login.Role == "Mentor"
+                                 && login.SubDepartmentID.HasValue
+                                 && allSubDeptIds.Contains(login.SubDepartmentID.Value)
                            join user in _db.USERs on login.Email equals user.Email
                            select new MentorViewModel
                            {
@@ -328,6 +357,7 @@ namespace WebApplication4.Controllers
 
             return View(mentors);
         }
+
 
 
 
@@ -365,6 +395,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Index", "SubHOD");
             }
 
+            // Get all subdepartments of this SubHOD
             var subDepartmentIDs = _db.SUBDEPARTMENTs
                 .Where(sd => sd.HOD_Email.ToLower() == subHodEmail.ToLower())
                 .Select(sd => sd.SubDepartmentID)
@@ -375,6 +406,8 @@ namespace WebApplication4.Controllers
                 TempData["ErrorMessage"] = "No SubDepartments assigned to this SubHOD.";
                 return RedirectToAction("Index", "SubHOD");
             }
+
+            // Fetch all clubs for these subdepartments
             var clubs = _db.CLUBS
                 .Where(c => c.SubDepartmentID.HasValue && subDepartmentIDs.Contains(c.SubDepartmentID.Value))
                 .Include(c => c.SUBDEPARTMENT)
@@ -382,27 +415,35 @@ namespace WebApplication4.Controllers
                 .Include(c => c.SUBDEPARTMENT.DEPARTMENT.UNIVERSITY)
                 .ToList();
 
-            // ✅ Fill mentor name separately
+            // Fetch all mentors for these subdepartments
+            var mentors = _db.Logins
+                .Where(l => l.Role == "Mentor" && l.SubDepartmentID.HasValue && subDepartmentIDs.Contains(l.SubDepartmentID.Value))
+                .Join(_db.USERs,
+                      l => l.Email.ToLower(),
+                      u => u.Email.ToLower(),
+                      (l, u) => new
+                      {
+                          l.SubDepartmentID,
+                          FullName = u.FirstName + " " + u.LastName
+                      })
+                .ToList();
+
+            // Assign mentors to clubs
             foreach (var club in clubs)
             {
-                var mentorLogin = _db.Logins
-                    .FirstOrDefault(l => l.SubDepartmentID == club.SubDepartmentID && l.Role == "Mentor");
+                var clubMentors = mentors
+                    .Where(m => m.SubDepartmentID == club.SubDepartmentID)
+                    .Select(m => m.FullName)
+                    .ToList();
 
-                if (mentorLogin != null)
-                {
-                    var mentorUser = _db.USERs.FirstOrDefault(u => u.Email.ToLower() == mentorLogin.Email.ToLower());
-                    club.MentorName = mentorUser != null
-                        ? mentorUser.FirstName + " " + mentorUser.LastName
-                        : "Mentor (User Not Found)";
-                }
-                else
-                {
-                    club.MentorName = "Mentor Not Assigned";
-                }
+                club.MentorName = clubMentors.Any()
+                    ? string.Join(", ", clubMentors)
+                    : "Mentor Not Assigned";
             }
 
             return View(clubs);
         }
+
 
 
 
@@ -470,7 +511,7 @@ namespace WebApplication4.Controllers
         }
 
 
-        //ViewEventRequests
+        // GET: ViewEventRequests
         public ActionResult ViewEventRequests()
         {
             if (Session["UserEmail"] == null)
@@ -478,15 +519,23 @@ namespace WebApplication4.Controllers
 
             string subHODEmail = Session["UserEmail"].ToString();
 
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
-            if (subDept == null)
+            // Get all subdepartment IDs for this SubHOD
+            var subDeptIDs = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == subHODEmail.ToLower())
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
+
+            if (!subDeptIDs.Any())
             {
-                TempData["ErrorMessage"] = "Sub-department not found.";
+                TempData["ErrorMessage"] = "No sub-departments assigned to this SubHOD.";
                 return RedirectToAction("Index", "Home");
             }
 
+            // Fetch all active clubs under these subdepartments
             var activeClubs = _db.CLUBS
-                .Where(c => c.SubDepartmentID == subDept.SubDepartmentID && c.IsActive == true)
+.Where(c => c.IsActive == true
+            && c.SubDepartmentID.HasValue
+            && subDeptIDs.Contains(c.SubDepartmentID.Value))
                 .Select(c => new SelectListItem
                 {
                     Value = c.ClubID.ToString(),
@@ -501,6 +550,7 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        // POST: ViewEventRequests
         [HttpPost]
         public ActionResult ViewEventRequests(SubHODEventReviewViewModel model)
         {
@@ -508,17 +558,22 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Login", "Admin");
 
             string subHODEmail = Session["UserEmail"].ToString();
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
 
-            if (subDept == null)
+            // Get all subdepartment IDs for this SubHOD
+            var subDeptIDs = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == subHODEmail.ToLower())
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
+
+            if (!subDeptIDs.Any())
             {
-                TempData["ErrorMessage"] = "Sub-department not found.";
+                TempData["ErrorMessage"] = "No sub-departments assigned to this SubHOD.";
                 return RedirectToAction("Index", "Home");
             }
 
-            // Repopulate dropdown after postback
+            // Repopulate dropdown for clubs in all subdepartments
             model.ActiveClubs = _db.CLUBS
-                .Where(c => c.SubDepartmentID == subDept.SubDepartmentID && c.ApprovalStatusID == 2)
+                .Where(c => subDeptIDs.Contains(c.SubDepartmentID ?? 0) && c.ApprovalStatusID == 2)
                 .Select(c => new SelectListItem
                 {
                     Value = c.ClubID.ToString(),
@@ -527,11 +582,16 @@ namespace WebApplication4.Controllers
 
             // Load events forwarded to SubHOD (ApprovalStatus = 4)
             model.Events = _db.EVENTS
-                .Where(e => e.ClubID == model.SelectedClubId && e.ApprovalStatusID == 4)
+                .Where(e => e.ApprovalStatusID == 4 && model.SelectedClubId != 0 &&
+                            subDeptIDs.Contains(_db.CLUBS
+                                .Where(c => c.ClubID == e.ClubID)
+                                .Select(c => c.SubDepartmentID ?? 0)
+                                .FirstOrDefault()))
                 .ToList();
 
             return View(model);
         }
+
 
 
 
@@ -920,23 +980,36 @@ namespace WebApplication4.Controllers
             if (Session["UserEmail"] == null)
                 return Json(new { error = "Not logged in" }, JsonRequestBehavior.AllowGet);
 
-            string subHODEmail = Session["UserEmail"].ToString();
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
+            string userEmail = Session["UserEmail"].ToString().ToLower();
 
-            if (subDept == null)
-                return Json(new { error = "Sub-department not found" }, JsonRequestBehavior.AllowGet);
+            // 1️⃣ Get sub-departments where user is SubHOD
+            var subHodDeptIds = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == userEmail)
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
 
-            int subDeptId = subDept.SubDepartmentID;
+            // 2️⃣ Get sub-departments where user is Mentor
+            var mentorDeptIds = _db.Logins
+                .Where(l => l.Email.ToLower() == userEmail && l.Role == "Mentor" && l.SubDepartmentID.HasValue)
+                .Select(l => l.SubDepartmentID.Value)
+                .ToList();
 
+            // 3️⃣ Combine both lists
+            var allDeptIds = subHodDeptIds.Union(mentorDeptIds).ToList();
+
+            if (!allDeptIds.Any())
+                return Json(new { error = "No accessible subdepartments found for this user." }, JsonRequestBehavior.AllowGet);
+
+            // 4️⃣ Fetch all clubs under any of these sub-departments
             var clubs = (from c in _db.CLUBS
                          join d in _db.DEPARTMENTs on c.DepartmentID equals d.DepartmentID
                          join sd in _db.SUBDEPARTMENTs on c.SubDepartmentID equals sd.SubDepartmentID
-                         where c.SubDepartmentID == subDeptId
+                         where c.SubDepartmentID.HasValue && allDeptIds.Contains(c.SubDepartmentID.Value)
                          select new
                          {
                              c.ClubID,
                              c.ClubName,
-                             c.IsActive,
+                             IsActive = c.IsActive ?? false,
                              DepartmentName = d.DepartmentName,
                              SubDepartmentName = sd.SubDepartmentName
                          }).ToList();
@@ -944,15 +1017,13 @@ namespace WebApplication4.Controllers
             var result = new
             {
                 TotalClubs = clubs.Count,
-                ActiveClubs = clubs.Count(c => c.IsActive == true),
-                InactiveClubs = clubs.Count(c => !c.IsActive == true),
+                ActiveClubs = clubs.Count(c => c.IsActive),
+                InactiveClubs = clubs.Count(c => !c.IsActive),
                 Clubs = clubs
             };
 
             return Json(result, JsonRequestBehavior.AllowGet);
         }
-
-
 
         [HttpPost]
         public ActionResult ToggleClubStatus(int clubId)
@@ -960,25 +1031,29 @@ namespace WebApplication4.Controllers
             if (Session["UserEmail"] == null)
                 return Json(new { success = false, message = "Not logged in." });
 
-            // Get the logged-in Sub HOD's email
-            string subHODEmail = Session["UserEmail"].ToString();
+            string userEmail = Session["UserEmail"].ToString().ToLower();
 
-            // Ensure this Sub HOD owns the club's sub-department
-            var subDept = _db.SUBDEPARTMENTs
-                .FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
+            // Get all sub-department IDs where user is SubHOD or Mentor
+            var subHodDeptIds = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == userEmail)
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
 
-            if (subDept == null)
-                return Json(new { success = false, message = "Unauthorized: Sub-department not found." });
+            var mentorDeptIds = _db.Logins
+                .Where(l => l.Email.ToLower() == userEmail && l.Role == "Mentor" && l.SubDepartmentID.HasValue)
+                .Select(l => l.SubDepartmentID.Value)
+                .ToList();
 
-            // Find the club under that sub-department
-            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubId && c.SubDepartmentID == subDept.SubDepartmentID);
+            var allDeptIds = subHodDeptIds.Union(mentorDeptIds).ToList();
+
+            // Find the club under any of these sub-departments
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == clubId && c.SubDepartmentID.HasValue && allDeptIds.Contains(c.SubDepartmentID.Value));
 
             if (club == null)
-                return Json(new { success = false, message = "Club not found or not under your sub-department." });
+                return Json(new { success = false, message = "Club not found or not under your accessible sub-departments." });
 
             // Toggle the IsActive value safely
             club.IsActive = !(club.IsActive ?? false);
-
             _db.SaveChanges();
 
             return Json(new
@@ -988,6 +1063,7 @@ namespace WebApplication4.Controllers
                 message = $"Club '{club.ClubName}' is now {(club.IsActive == true ? "Active" : "Inactive")}."
             });
         }
+
 
 
         [HttpGet]
@@ -1005,23 +1081,39 @@ namespace WebApplication4.Controllers
             if (Session["UserEmail"] == null)
                 return Json(new { error = "Not logged in" }, JsonRequestBehavior.AllowGet);
 
-            string subHODEmail = Session["UserEmail"].ToString();
-            var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.HOD_Email == subHODEmail);
+            string userEmail = Session["UserEmail"].ToString().ToLower();
 
-            if (subDept == null)
-                return Json(new { error = "Sub-department not found" }, JsonRequestBehavior.AllowGet);
+            // Get all sub-department IDs where the user is HOD
+            var subDeptIdsAsHOD = _db.SUBDEPARTMENTs
+                .Where(sd => sd.HOD_Email.ToLower() == userEmail)
+                .Select(sd => sd.SubDepartmentID)
+                .ToList();
 
-            int subDeptId = subDept.SubDepartmentID;
+            // Get all sub-department IDs where the user is a mentor
+            var subDeptIdsAsMentor = _db.Logins
+                .Where(l => l.Email.ToLower() == userEmail && l.Role == "Mentor")
+                .Select(l => l.SubDepartmentID)
+                .Where(id => id.HasValue)
+                .Select(id => id.Value)
+                .ToList();
+
+            // Merge all sub-department IDs (avoid duplicates)
+            var allSubDeptIds = subDeptIdsAsHOD
+                .Union(subDeptIdsAsMentor)
+                .ToList();
+
+            if (!allSubDeptIds.Any())
+                return Json(new { error = "No sub-departments found for this user." }, JsonRequestBehavior.AllowGet);
 
             var clubs = (from c in _db.CLUBS
                          join d in _db.DEPARTMENTs on c.DepartmentID equals d.DepartmentID
                          join sd in _db.SUBDEPARTMENTs on c.SubDepartmentID equals sd.SubDepartmentID
-                         where c.SubDepartmentID == subDeptId
+                         where c.SubDepartmentID.HasValue && allSubDeptIds.Contains(c.SubDepartmentID.Value)
                          select new
                          {
                              c.ClubID,
                              c.ClubName,
-                             c.IsActive,
+                             IsActive = c.IsActive ?? false,
                              DepartmentName = d.DepartmentName,
                              SubDepartmentName = sd.SubDepartmentName
                          }).ToList();
@@ -1029,13 +1121,14 @@ namespace WebApplication4.Controllers
             var result = new
             {
                 TotalClubs = clubs.Count,
-                ActiveClubs = clubs.Count(c => c.IsActive == true),
-                InactiveClubs = clubs.Count(c => c.IsActive == false),
+                ActiveClubs = clubs.Count(c => c.IsActive),
+                InactiveClubs = clubs.Count(c => !c.IsActive),
                 Clubs = clubs
             };
 
             return Json(result, JsonRequestBehavior.AllowGet);
         }
+
 
 
 

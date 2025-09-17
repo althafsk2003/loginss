@@ -54,6 +54,28 @@
         margin-left: 5px;
     }
 
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-button {
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .back-button svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+        }
+
     @@keyframes revealUp {
         to {
             transform: translateY(0);
@@ -63,7 +85,17 @@
 </style>
 
 <div class="container mt-4">
-    <h3 class="text-center mb-5">🎓 Clubs under <span class="text-primary">@ViewBag.DepartmentName</span></h3>
+    <div class="page-header">
+        <h3 class="mb-0">🎓 Clubs under <span class="text-primary">@ViewBag.DepartmentName</span></h3>
+        <a href="javascript:history.back()" class="back-button">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back
+        </a>
+    </div>
 
     <div class="club-list">
         @for (int i = 0; i < Model.Count; i++)

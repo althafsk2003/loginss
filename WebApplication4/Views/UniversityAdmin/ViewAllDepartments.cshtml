@@ -56,18 +56,35 @@
     }
 
     .department-header {
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
     }
+
+        .department-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
 
         .department-header i {
             color: #28a745;
             margin-right: 0.5rem;
         }
 
-        .department-header a {
-            color: #007bff;
-            text-decoration: none;
+    .back-button {
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .back-button svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
         }
 
     .btn-view-clubs {
@@ -81,6 +98,14 @@
             <i class="fas fa-layer-group"></i>
             Departments under your UNIVERSITY
         </h4>
+        <a href="javascript:history.back()" class="back-button">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back
+        </a>
     </div>
 
     <div class="department-list">

@@ -98,8 +98,8 @@
 
 <div class="container mt-4">
     <!-- Heading + Filter Buttons -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-        <h2 class="mb-0">Club Status</h2>
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 me-3">Club Status</h2> <!-- added margin-end for small gap -->
         <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-warning btn-filter" data-status="pending">Pending Requests</button>
             <button class="btn btn-success btn-filter" data-status="approved">Approved Requests</button>
@@ -107,6 +107,7 @@
             <button class="btn btn-primary btn-filter" data-status="all">View All Requests</button>
         </div>
     </div>
+
 
     <!-- Club Status Table -->
     <table class="club-table table table-bordered">

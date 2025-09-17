@@ -41,13 +41,30 @@
                         <td>
                             @if (mentor.IsActive)
                             {
-                                @Html.ActionLink("Deactivate", "DeactivateMentor", new { id = mentor.LoginID }, new { @class = "btn btn-sm btn-warning" })
+                                @Html.ActionLink(
+                                    "Deactivate",
+                                    "DeactivateMentor",
+                                    new { id = mentor.LoginID },
+                                    new
+                                         {
+                                        @class = "btn btn-sm btn-warning",
+                                        onclick = "return confirm('Are you sure you want to deactivate this mentor?');"
+                                    })
                             }
                             else
                             {
-                                @Html.ActionLink("Activate", "ActivateMentor", new { id = mentor.LoginID }, new { @class = "btn btn-sm btn-success" })
+                                @Html.ActionLink(
+                                    "Activate",
+                                    "ActivateMentor",
+                                    new { id = mentor.LoginID },
+                                    new
+                                         {
+                                        @class = "btn btn-sm btn-success",
+                                        onclick = "return confirm('Are you sure you want to activate this mentor?');"
+                                    })
                             }
                         </td>
+
                     </tr>
                     count++;
                 }

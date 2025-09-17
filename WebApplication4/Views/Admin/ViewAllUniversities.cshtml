@@ -13,6 +13,32 @@
         max-width: 1400px; /* Increased width for the container */
     }
 
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        color: #2563eb;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .back-button:hover {
+            color: #1e40af;
+        }
+
+        .back-button svg {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.25rem;
+        }
+
     .university-list {
         display: grid;
         grid-template-columns: repeat(3, 1fr); /* Three columns per row */
@@ -33,10 +59,10 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .university-block:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-    }
+        .university-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
 
     .icon-block {
         font-size: 2.5rem;
@@ -70,10 +96,10 @@
         transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    .info-block .btn:hover {
-        background-color: #007bff;
-        color: #fff;
-    }
+        .info-block .btn:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
 
     @@keyframes revealUp {
         to {
@@ -89,7 +115,7 @@
         }
 
         .university-list {
-            grid-template-columns: repeat(2, 1fr); /* Two columns on medium screens */
+            grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
             padding: 1.2rem;
         }
@@ -110,7 +136,7 @@
         }
 
         .university-list {
-            grid-template-columns: 1fr; /* Single column on small screens */
+            grid-template-columns: 1fr;
             gap: 1rem;
         }
 
@@ -130,13 +156,23 @@
 </style>
 
 <div class="container mt-5">
-    <h2 class="text-center mb-5" style="font-weight: 700; color: #333;">🎓 All Universities</h2>
+    <div class="page-header">
+        <h2 class="mb-0" style="font-weight: 700; color: #333;">🎓 All Universities</h2>
+        <a href="javascript:history.back()" class="back-button">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back
+        </a>
+    </div>
 
     <div class="university-list">
         @for (int i = 0; i < Model.Count; i++)
         {
             var university = Model[i];
-            var delay = i * 0.2; // Staggered animation delay
+            var delay = i * 0.2;
 
             <div class="university-block" style="animation-delay: @($"{delay}s");">
                 <div class="icon-block">

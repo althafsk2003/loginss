@@ -45,24 +45,38 @@
         overflow: hidden;
         border: 1px solid #ddd;
     }
+
+    /* Heading above table */
+    .table-heading {
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #004085;
+    }
 </style>
 
 <div class="container mt-4">
 
-    <!-- Filter Buttons -->
-    <div class="mb-3 text-center">
-        <a href="@Url.Action("ViewSubHods", new { filter = "manage" })" class="btn btn-primary me-2 shadow-sm">
-            Manage Sub-HODs
-        </a>
-        <a href="@Url.Action("ViewSubHods", new { filter = "all" })" class="btn btn-secondary me-2 shadow-sm">
-            All Sub-HODs <span class="badge bg-light text-dark">@Model.TotalCount</span>
-        </a>
-        <a href="@Url.Action("ViewSubHods", new { filter = "active" })" class="btn btn-success me-2 shadow-sm">
-            Active <span class="badge bg-light text-dark">@Model.ActiveCount</span>
-        </a>
-        <a href="@Url.Action("ViewSubHods", new { filter = "inactive" })" class="btn btn-danger shadow-sm">
-            Inactive <span class="badge bg-light text-dark">@Model.InactiveCount</span>
-        </a>
+    <!-- Heading and Filter Buttons in the same row -->
+    <div class="d-flex mb-3">
+        <div class="table-heading">
+            View SCC
+        </div>
+
+        <div class="btn-group">
+            <a href="@Url.Action("ViewSubHods", new { filter = "manage" })" class="btn btn-primary me-2 shadow-sm">
+                Manage Sub-HODs
+            </a>
+            <a href="@Url.Action("ViewSubHods", new { filter = "all" })" class="btn btn-secondary me-2 shadow-sm">
+                All Sub-HODs <span class="badge bg-light text-dark">@Model.TotalCount</span>
+            </a>
+            <a href="@Url.Action("ViewSubHods", new { filter = "active" })" class="btn btn-success me-2 shadow-sm">
+                Active <span class="badge bg-light text-dark">@Model.ActiveCount</span>
+            </a>
+            <a href="@Url.Action("ViewSubHods", new { filter = "inactive" })" class="btn btn-danger shadow-sm">
+                Inactive <span class="badge bg-light text-dark">@Model.InactiveCount</span>
+            </a>
+        </div>
     </div>
 
     <!-- Table -->
@@ -87,18 +101,32 @@
                         @foreach (var hod in Model.TableData)
                         {
                             <tr>
-                                <td>@hod.Name</td>
-                                <td>@hod.Email</td>
+                                <td>@hod.HODName</td>
+                                <td>@hod.HODEmail</td>
                                 <td>@hod.DepartmentName</td>
                                 <td>@hod.SubDepartmentName</td>
-                                <td id="status-@hod.Id" class="fw-bold text-@(hod.IsActive ? "success" : "danger")">
+                                <td id="status-@hod.SubDepartmentId" class="fw-bold text-@(hod.IsActive ? "success" : "danger")">
                                     @(hod.IsActive ? "Active" : "Inactive")
                                 </td>
                                 @if (Model.ShowToggle)
                                 {
                                     <td>
-                                        <input type="checkbox" @(hod.IsActive ? "checked" : "")
-                                               onchange="toggleStatus(@hod.Id, this.checked)" />
+                                        @if (hod.IsActive)
+                                        {
+                                            <button class="btn btn-danger btn-sm toggle-btn"
+                                                    data-id="@hod.SubDepartmentId"
+                                                    data-active="false">
+                                                Deactivate
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-success btn-sm toggle-btn"
+                                                    data-id="@hod.SubDepartmentId"
+                                                    data-active="true">
+                                                Activate
+                                            </button>
+                                        }
                                     </td>
                                 }
                             </tr>
@@ -110,21 +138,44 @@
     </div>
 </div>
 
+
 @section scripts {
     <script>
-        function toggleStatus(id, isChecked) {
+$(document).ready(function () {
+    $(document).on("click", ".toggle-btn", function () {
+        var btn = $(this);
+        var id = btn.data("id");
+        var isActive = btn.data("active");
+        var actionText = isActive ? "activate" : "deactivate";
+
+        if (confirm("Are you sure you want to " + actionText + " this Sub-HOD?")) {
             $.post('@Url.Action("ToggleSubHodStatus", "Director")',
-                { id: id, isActive: isChecked },
+                { subDeptId: id, isActive: isActive },
                 function (response) {
                     if (response.success) {
-                        $("#status-" + id)
-                            .text(isChecked ? "Active" : "Inactive")
-                            .removeClass("text-success text-danger")
-                            .addClass(isChecked ? "text-success" : "text-danger");
+                        var row = btn.closest("tr");
+                        var statusTd = row.find("td[id='status-" + id + "']");
+                        statusTd.text(isActive ? "Active" : "Inactive")
+                                .removeClass("text-success text-danger")
+                                .addClass(isActive ? "text-success" : "text-danger");
+
+                        if (isActive) {
+                            btn.removeClass("btn-success")
+                               .addClass("btn-danger")
+                               .text("Deactivate")
+                               .data("active", false);
+                        } else {
+                            btn.removeClass("btn-danger")
+                               .addClass("btn-success")
+                               .text("Activate")
+                               .data("active", true);
+                        }
                     } else {
                         alert(response.message);
                     }
                 });
         }
+    });
+});
     </script>
 }

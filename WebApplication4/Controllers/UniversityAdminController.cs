@@ -561,7 +561,6 @@ namespace WebApplication4.Controllers
         public ActionResult ClubStatus(int page = 1, int? status = null)
         {
             int universityId = GetUniversityID();
-
             int pageSize = 5;
 
             var clubsQuery = _db.CLUBS
@@ -569,7 +568,7 @@ namespace WebApplication4.Controllers
                 .Include(c => c.DEPARTMENT.UNIVERSITY)
                 .Include(c => c.ApprovalStatusTable)
                 .Include(c => c.Login)
-                .Where(c => c.DEPARTMENT.Universityid == universityId) // 👈 Filter
+                .Where(c => c.DEPARTMENT.Universityid == universityId)
                 .AsQueryable();
 
             if (status.HasValue)
@@ -584,18 +583,53 @@ namespace WebApplication4.Controllers
                 .Take(pageSize)
                 .ToList();
 
-            var mentorEmails = clubs.Select(c => c.Login.Email).Distinct().ToList();
-            var mentorNames = _db.USERs
-                .Where(u => mentorEmails.Contains(u.Email))
-                .ToDictionary(u => u.Email, u => u.FirstName);
-
             foreach (var club in clubs)
             {
-                club.MentorName = mentorNames.ContainsKey(club.Login?.Email)
-                    ? mentorNames[club.Login.Email]
-                    : "Unknown Mentor";
+                // ✅ Mentor details (MentorID → Logins → USERs)
+                var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == club.MentorID);
+                if (mentorLogin != null)
+                {
+                    var mentorUser = _db.USERs.FirstOrDefault(u => u.Email == mentorLogin.Email);
+                    if (mentorUser != null)
+                    {
+                        club.MentorName = mentorUser.FirstName + " " + mentorUser.LastName;
+                        club.MentorEmail = mentorLogin.Email;
+                        club.MentorMobile = mentorUser.MobileNumber;
+                    }
+                }
+
+                // ✅ Department & SubDepartment
+                if (club.SubDepartmentID.HasValue)
+                {
+                    var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.SubDepartmentID == club.SubDepartmentID.Value);
+                    if (subDept != null)
+                    {
+                        club.SubDepartmentName = subDept.SubDepartmentName;
+                        club.SubDeptHOD = subDept.HOD;
+                        club.SubDeptHODEmail = subDept.HOD_Email;
+
+                        // parent department (director info)
+                        var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == subDept.DepartmentID);
+                        if (dept != null)
+                        {
+                            club.DepartmentDirector = dept.DirectorName;
+                            club.DepartmentDirectorEmail = dept.DirectorEmail;
+                        }
+                    }
+                }
+                else
+                {
+                    // no sub department → take HOD from department directly
+                    var dept = _db.DEPARTMENTs.FirstOrDefault(d => d.DepartmentID == club.DepartmentID);
+                    if (dept != null)
+                    {
+                        club.DepartmentHOD = dept.HOD;
+                        club.DepartmentHODEmail = dept.HOD_Email;
+                    }
+                }
             }
 
+            // ✅ Notifications (same as before)
             var mentorIds = clubs.Select(c => c.MentorID).ToList();
             var notifications = _db.Notifications
                 .Where(n => n.LoginID.HasValue && mentorIds.Contains(n.LoginID.Value) && n.Message.Contains("rejected"))
@@ -612,28 +646,39 @@ namespace WebApplication4.Controllers
             return View(clubs);
         }
 
+
         // ✅ Manage Clubs with pagination - Only University Admin's clubs
-        public ActionResult ManageClubs(int page = 1)
+        public ActionResult ManageClubs(int page = 1, int? status = null)
         {
             int universityId = GetUniversityID();
-
             int pageSize = 5;
 
-            var clubs = _db.CLUBS
-                .Where(c => c.DEPARTMENT.Universityid == universityId) // 👈 Filter
+            // Filter clubs by university
+            var clubsQuery = _db.CLUBS
+                .Where(c => c.DEPARTMENT.Universityid == universityId)
                 .OrderBy(c => c.ClubName)
-                .ToList();
+                .AsQueryable();
 
-            var pagedClubs = clubs.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            // Filter by status if provided
+            if (status.HasValue)
+            {
+                clubsQuery = clubsQuery.Where(c => c.ApprovalStatusID == status.Value);
+            }
 
-            ViewBag.TotalItemCount = clubs.Count;
+            var totalCount = clubsQuery.Count();
+            var clubs = clubsQuery.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            ViewBag.TotalItemCount = totalCount;
             ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)clubs.Count / pageSize);
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             ViewBag.FirstItemOnPage = ((page - 1) * pageSize) + 1;
-            ViewBag.LastItemOnPage = Math.Min(page * pageSize, clubs.Count);
+            ViewBag.LastItemOnPage = Math.Min(page * pageSize, totalCount);
+            ViewBag.CurrentStatus = status; // Used for filter buttons
 
-            return View(pagedClubs);
+            return View(clubs);
         }
+
+
         public ActionResult DeactivateClub(int id, int page = 1)
         {
             var club = _db.CLUBS.Find(id);
@@ -641,6 +686,8 @@ namespace WebApplication4.Controllers
             {
                 club.IsActive = false;
                 _db.SaveChanges();
+                TempData["Message"] = $"Club '{club.ClubName}' has been deactivated successfully.";
+                TempData["MessageType"] = "warning"; // Bootstrap alert type
             }
             return RedirectToAction("ManageClubs", new { page });
         }
@@ -652,9 +699,12 @@ namespace WebApplication4.Controllers
             {
                 club.IsActive = true;
                 _db.SaveChanges();
+                TempData["Message"] = $"Club '{club.ClubName}' has been activated successfully.";
+                TempData["MessageType"] = "success"; // Bootstrap alert type
             }
             return RedirectToAction("ManageClubs", new { page });
         }
+
 
 
 
@@ -781,8 +831,10 @@ namespace WebApplication4.Controllers
                 .Where(c => c.DepartmentID == departmentId)
                 .ToList();
 
-            ViewBag.Department = _db.DEPARTMENTs.Find(departmentId);
-            return View(clubs); // Views/UniversityAdmin/ViewClubs.cshtml
+            ViewBag.DepartmentName = _db.DEPARTMENTs
+                .Where(d => d.DepartmentID == departmentId)
+                .Select(d => d.DepartmentName)
+                .FirstOrDefault(); return View(clubs); // Views/UniversityAdmin/ViewClubs.cshtml
         }
         [HttpGet]
         public ActionResult ViewEvents(int clubId)

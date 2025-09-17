@@ -7,12 +7,12 @@ namespace WebApplication4.Models
 {
     public class SubHodViewModel
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
+        public int SubDepartmentId { get; set; } // ID of the sub-department
+        public string HODName { get; set; }      // HOD responsible
+        public string HODEmail { get; set; }     // HOD email
         public string DepartmentName { get; set; }
-        public bool IsActive { get; set; }
         public string SubDepartmentName { get; set; }
+        public bool IsActive { get; set; }
 
     }
 }
