@@ -218,3 +218,24 @@
         });
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Confirm before Deactivating a club
+        document.querySelectorAll('a[href*="DeactivateClub"]').forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                if (!confirm("Are you sure you want to deactivate this club?")) {
+                    e.preventDefault(); // Cancel action if user clicks "Cancel"
+                }
+            });
+        });
+
+        // Confirm before Activating a club
+        document.querySelectorAll('a[href*="ActivateClub"]').forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                if (!confirm("Are you sure you want to activate this club?")) {
+                    e.preventDefault(); // Cancel action if user clicks "Cancel"
+                }
+            });
+        });
+    });
+</script>

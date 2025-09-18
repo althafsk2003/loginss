@@ -805,10 +805,19 @@ namespace WebApplication4.Controllers
             }
 
             var parts = plainData.Split('|');
-            if (parts.Length < 1)
+            if (parts.Length < 3) // expecting EventID | ClubID | RecipientLoginID
                 return HttpNotFound("Invalid token data");
 
             int eventId = Convert.ToInt32(parts[0]);
+            int recipientLoginId = Convert.ToInt32(parts[2]);
+
+            // Ensure only intended recipient can access this
+            if (Session["UserEmail"] != null)
+            {
+                var currentUser = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                if (currentUser == null || currentUser.LoginID != recipientLoginId)
+                    return Content("❌ You are not authorized to reject this event.");
+            }
 
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
             if (ev == null)
@@ -834,8 +843,8 @@ namespace WebApplication4.Controllers
             try
             {
                 int evtId;
+                int? tokenRecipientId = null;
 
-                // Determine event ID from token or dashboard
                 if (!string.IsNullOrEmpty(token))
                 {
                     string plainData;
@@ -849,10 +858,19 @@ namespace WebApplication4.Controllers
                     }
 
                     var parts = plainData.Split('|');
-                    if (parts.Length < 1)
+                    if (parts.Length < 3)
                         return Json(new { success = false, message = "Invalid token data." });
 
                     evtId = Convert.ToInt32(parts[0]);
+                    tokenRecipientId = Convert.ToInt32(parts[2]);
+
+                    // Validate recipient
+                    if (Session["UserEmail"] != null)
+                    {
+                        var currentUser = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                        if (currentUser == null || currentUser.LoginID != tokenRecipientId)
+                            return Json(new { success = false, message = "❌ You are not authorized to reject this event." });
+                    }
                 }
                 else if (eventId.HasValue)
                 {
@@ -863,12 +881,10 @@ namespace WebApplication4.Controllers
                     return Json(new { success = false, message = "Missing event information." });
                 }
 
-                // Fetch event with club info
                 var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
                 if (ev == null || ev.CLUB == null)
                     return Json(new { success = false, message = "Event not found." });
 
-                // Prevent duplicate rejection
                 if (ev.ApprovalStatusID == 2)
                     return Json(new { success = false, message = $"Event '{ev.EventName}' has already been approved." });
                 if (ev.ApprovalStatusID == 3)
@@ -882,7 +898,7 @@ namespace WebApplication4.Controllers
                 var emailService = new EmailService();
                 var emailTasks = new List<Task>();
 
-                // 1️⃣ Notify Mentor
+                // --- Mentor ---
                 if (ev.CLUB.MentorID != null)
                 {
                     var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
@@ -903,7 +919,7 @@ namespace WebApplication4.Controllers
                     }
                 }
 
-                // 2️⃣ Notify Club Admin
+                // --- Club Admin ---
                 var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
                 if (clubAdminLogin != null)
                 {
@@ -921,14 +937,11 @@ namespace WebApplication4.Controllers
                         emailTasks.Add(emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Rejected: {ev.EventName}", message));
                 }
 
-                // Save changes
                 _db.SaveChanges();
 
-                // Send emails in parallel
                 if (emailTasks.Any())
                     await Task.WhenAll(emailTasks);
 
-                // Return response based on flow
                 if (!string.IsNullOrEmpty(token))
                     return Json(new { success = true, message = "Event rejected successfully and notifications sent!" });
                 else
@@ -952,9 +965,8 @@ namespace WebApplication4.Controllers
 
 
         // ===========================
-        // Approve Event (HOD dashboard or email)
+        // GET: Approve Event (HOD email link)
         // ===========================
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult> ApproveEvent(string token)
@@ -973,10 +985,20 @@ namespace WebApplication4.Controllers
             }
 
             var parts = plainData.Split('|');
-            if (parts.Length < 1)
+            if (parts.Length < 3) // expecting EventID | ClubID | RecipientLoginID
                 return Content("❌ Invalid token data.");
 
             int evtId = Convert.ToInt32(parts[0]);
+            int recipientLoginId = Convert.ToInt32(parts[2]);
+
+            // Ensure only intended recipient can approve
+            if (Session["UserEmail"] != null)
+            {
+                var currentUser = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                if (currentUser == null || currentUser.LoginID != recipientLoginId)
+                    return Content("❌ You are not authorized to approve this event.");
+            }
+
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
             if (ev == null || ev.CLUB == null)
                 return Content("❌ Event not found.");
@@ -996,79 +1018,53 @@ namespace WebApplication4.Controllers
             _db.SaveChanges();
 
             // Send notifications + emails to mentor and club admin
-            await SendHODApprovalNotificationsAndEmails(ev, false, proposedBudget);
+            //await SendHODApprovalNotificationsAndEmails(ev, false, proposedBudget);
 
             return Content($"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) fully approved by HOD.");
         }
 
-
-        private async Task SendHODApprovalNotificationsAndEmails(EVENT ev, bool budgetReduced, decimal finalBudget)
-        {
-            string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
-            string notifMsg = budgetReduced
-                ? baseMsg + $"was approved with reduced budget ₹{finalBudget:N0}. Mentor please confirm."
-                : baseMsg + "has been fully approved.";
-
-            var emailService = new EmailService();
-
-            // --- Mentor ---
-            if (ev.CLUB.MentorID != null)
-            {
-                var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
-                if (mentorLogin != null)
-                {
-                    _db.Notifications.Add(new Notification
-                    {
-                        LoginID = mentorLogin.LoginID,
-                        Message = notifMsg,
-                        IsRead = false,
-                        StartDate = DateTime.Now,
-                        EndDate = DateTime.Now.AddDays(7),
-                        CreatedDate = DateTime.Now
-                    });
-
-                    if (!string.IsNullOrEmpty(mentorLogin.Email))
-                        await emailService.SendEmailAsync(mentorLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
-                }
-            }
-
-            // --- Club Admin (via CLUB.ClubID → Logins table) ---
-            var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
-            if (clubAdminLogin != null)
-            {
-                _db.Notifications.Add(new Notification
-                {
-                    LoginID = clubAdminLogin.LoginID,
-                    Message = notifMsg,
-                    IsRead = false,
-                    StartDate = DateTime.Now,
-                    EndDate = DateTime.Now.AddDays(7),
-                    CreatedDate = DateTime.Now
-                });
-
-                if (!string.IsNullOrEmpty(clubAdminLogin.Email))
-                    await emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Approved: {ev.EventName}", notifMsg);
-            }
-
-
-
-            _db.SaveChanges();
-        }
-
-
-
-        // Step 4: POST Action Method
+        // ===========================
+        // POST: Approve Event (HOD dashboard or email)
+        // ===========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ApproveEvent(int eventId,
-                                  decimal? approvedAmount,
-                                  HttpPostedFileBase signedDocument)
+                                          decimal? approvedAmount,
+                                          HttpPostedFileBase signedDocument,
+                                          string token = null)
         {
             var ev = _db.EVENTS.Include(e => e.CLUB)
                                .FirstOrDefault(e => e.EventID == eventId);
             if (ev == null) return HttpNotFound("Event not found.");
 
-            // --- 1. Validate upload --------------------------------------------------
+            // --- Ensure only token recipient can approve via email
+            if (!string.IsNullOrEmpty(token))
+            {
+                string plainData;
+                try
+                {
+                    plainData = SecureHelper.Decrypt(token);
+                }
+                catch
+                {
+                    return Content("❌ Invalid token.");
+                }
+
+                var parts = plainData.Split('|');
+                if (parts.Length < 3)
+                    return Content("❌ Invalid token data.");
+
+                int recipientLoginId = Convert.ToInt32(parts[2]);
+
+                if (Session["UserEmail"] != null)
+                {
+                    var currentUser = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                    if (currentUser == null || currentUser.LoginID != recipientLoginId)
+                        return Content("❌ You are not authorized to approve this event.");
+                }
+            }
+
+            // --- Validate upload --------------------------------------------------
             if (signedDocument == null || signedDocument.ContentLength == 0)
             {
                 TempData["Error"] = "Signed PDF is required.";
@@ -1080,7 +1076,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("EventsForApproval", new { id = eventId });
             }
 
-            // --- 2. Save the PDF -----------------------------------------------------
+            // --- Save the PDF -----------------------------------------------------
             string uploadsRoot = Server.MapPath("~/uploads");
             Directory.CreateDirectory(uploadsRoot);
 
@@ -1090,38 +1086,26 @@ namespace WebApplication4.Controllers
 
             ev.EventFormPath = "/uploads/" + fileName;
 
-            // --- 3. Determine approved amount ---------------------------------------
+            // --- Determine approved amount ---------------------------------------
             decimal proposedBudget = 0;
             decimal.TryParse(ev.EventBudget, out proposedBudget);
-
-            // Use the approvedAmount if provided and greater than 0, otherwise fallback
             decimal finalBudget = (approvedAmount.HasValue && approvedAmount.Value > 0)
                                   ? approvedAmount.Value
                                   : proposedBudget;
-
-            ev.ApprovedAmount = finalBudget.ToString(); // Always set this
+            ev.ApprovedAmount = finalBudget.ToString();
 
             bool budgetReduced = finalBudget < proposedBudget;
-
-
-            // --- 4. Update status ----------------------------------------------------
-            if (budgetReduced)
-            {
-                ev.ApprovalStatusID = 6;   // WaitingMentor (define in enum / table)
-            }
-            else
-            {
-                ev.ApprovalStatusID = 2;   // Approved
-            }
+            ev.ApprovalStatusID = budgetReduced ? 6 : 2;
 
             _db.SaveChanges();
 
-            // --- 5. Notifications ----------------------------------------------------
+            // --- Notifications ----------------------------------------------------
             string baseMsg = $"✅ Event '{ev.EventName}' ({ev.CLUB.ClubName}) ";
+            var notifications = new List<Notification>();
+
             if (budgetReduced)
             {
-                // Notify mentor ONLY
-                _db.Notifications.Add(new Notification
+                notifications.Add(new Notification
                 {
                     LoginID = ev.CLUB.MentorID,
                     Message = baseMsg + $"was approved with a reduced budget of ₹{finalBudget:N0}. Please confirm.",
@@ -1133,8 +1117,7 @@ namespace WebApplication4.Controllers
             }
             else
             {
-                // Notify mentor
-                _db.Notifications.Add(new Notification
+                notifications.Add(new Notification
                 {
                     LoginID = ev.CLUB.MentorID,
                     Message = baseMsg + "has been fully approved.",
@@ -1144,16 +1127,14 @@ namespace WebApplication4.Controllers
                     CreatedDate = DateTime.Now
                 });
 
-                // Notify club admin (if found)
                 var clubReg = _db.ClubRegistrations.FirstOrDefault(c => c.ClubID == ev.ClubID);
                 var clubAdminId = clubReg == null ? 0 :
                                   _db.Logins.Where(l => l.Email == clubReg.Email)
                                             .Select(l => l.LoginID)
                                             .FirstOrDefault();
-
                 if (clubAdminId != 0)
                 {
-                    _db.Notifications.Add(new Notification
+                    notifications.Add(new Notification
                     {
                         LoginID = clubAdminId,
                         Message = baseMsg + "is now fully approved.",
@@ -1165,6 +1146,7 @@ namespace WebApplication4.Controllers
                 }
             }
 
+            _db.Notifications.AddRange(notifications);
             _db.SaveChanges();
 
             TempData["Message"] = "Event approval recorded successfully.";

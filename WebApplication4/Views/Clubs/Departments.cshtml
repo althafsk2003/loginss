@@ -5,6 +5,13 @@
     ViewBag.Title = "IFHE Departments";
 }
 
+<!-- Top Heading -->
+<div class="page-heading text-center my-5">
+    <h1 class="main-title">Departmental Clubs</h1>
+    <p class="subtitle">Discover, Connect, and Grow with Campus Communities</p>
+</div>
+
+
 <div class="departments-section">
     <div class="container">
         @for (int i = 0; i < Model.Count; i++)
@@ -369,6 +376,43 @@
             font-size: 16px;
         }
     }
+
+    .page-heading {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 1px;
+        position: relative;
+    }
+
+        .page-heading .main-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #222;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 1px;
+        }
+
+            .page-heading .main-title::after {
+                content: "";
+                width: 60%;
+                height: 3px;
+                background: linear-gradient(to right, #ff6600, #ff3300);
+                display: block;
+                margin: 12px auto 0;
+                border-radius: 2px;
+            }
+
+        .page-heading .subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            margin-top: 10px;
+            font-weight: 400;
+            font-style: italic;
+        }
+
 </style>
 
 <script>

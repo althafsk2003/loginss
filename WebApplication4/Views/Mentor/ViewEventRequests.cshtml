@@ -300,6 +300,7 @@
 <div class="container">
     <h2>View Event Requests</h2>
 
+    @* Alerts and Club filter remain unchanged *@
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -308,24 +309,51 @@
         </div>
     }
 
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <div class="container mt-4">
+        <h2 style="color:#1a1a1a; font-size:2rem; font-weight:700; margin-bottom: 20px;">
+            📅 View Event Requests
+        </h2>
 
-    @using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
-    {
-        <div class="form-group">
-            <label for="selectedClubId">Select Club:</label>
-            @Html.DropDownList("selectedClubId", new SelectList(ViewBag.Clubs, "ClubID", "ClubName"), "Select a Club", new { @class = "form-control" })
+        <!-- Toast container -->
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+            <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        @TempData["ErrorMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
         </div>
-        <div class="button-container">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
-    }
+
+        @using (Html.BeginForm("ViewEventRequests", "Mentor", FormMethod.Post))
+        {
+            <div class="form-group">
+                <label for="selectedClubId" style="font-weight:600; font-size:1rem; color:#333;">
+                    Select Club to View Event Requests:
+                </label>
+                @Html.DropDownList(
+                    "selectedClubId",
+                    new SelectList(ViewBag.Clubs, "ClubID", "ClubName"),
+                    "-- Select a Club --",
+                    new
+                    {
+                        @class = "form-control",
+                        style = "width: 100%; max-width: 400px; padding: 1px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #007bff; background-color: #fff; color: #333;"
+                    }
+                )
+            </div>
+            <div class="button-container" style="margin-top: 10px;">
+                <button type="submit" class="btn btn-primary">View Events</button>
+            </div>
+        }
+
+    </div>
+
+
+
+
+
 
     @if (ViewBag.FilterApplied != null && (Model == null || Model.Count == 0))
     {
@@ -335,10 +363,11 @@
     }
     else if (Model != null && Model.Count > 0)
     {
-        <div class="row row-cols-1 g-4">
-            @foreach (var item in Model)
+        <div id="event-carousel">
+            @for (int i = 0; i < Model.Count; i++)
             {
-                <div class="col">
+                var item = Model[i];
+                <div class="event-card-wrapper" style="display:@(i == 0 ? "block" : "none")">
                     <div class="event-card">
                         <div class="event-card-header">Event Details</div>
                         <div class="event-content">
@@ -368,8 +397,8 @@
                             </div>
                         </div>
                         <div class="event-card-buttons">
-                            <!-- Forward to HOD -->
-                            <form action="@Url.Action("ForwardEventToHOD", "Mentor")" method="post">
+                            <!-- Forward to HOD (Approve) -->
+                            <form id="approve-form-@item.EventID" action="@Url.Action("ForwardEventToHOD", "Mentor")" method="post" onsubmit="return confirmApprove(@item.EventID);">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="token" value="@item.Token" />
                                 <button type="submit" class="btn btn-success">Request to SCC</button>
@@ -385,23 +414,67 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             }
+            <div class="text-center mt-3">
+                <button class="btn btn-primary me-2" onclick="prevEvent()">Previous</button>
+                <button class="btn btn-primary" onclick="nextEvent()">Next</button>
+            </div>
         </div>
     }
 </div>
-
 @section Scripts {
     <script>
+        let currentEventIndex = 0;
+        const eventCards = document.querySelectorAll('.event-card-wrapper');
+
+        function showEvent(index) {
+            eventCards.forEach((card, i) => {
+                card.style.display = i === index ? 'block' : 'none';
+            });
+        }
+
+        function prevEvent() {
+            if (currentEventIndex > 0) {
+                currentEventIndex--;
+                showEvent(currentEventIndex);
+            }
+        }
+
+        function nextEvent() {
+            if (currentEventIndex < eventCards.length - 1) {
+                currentEventIndex++;
+                showEvent(currentEventIndex);
+            }
+        }
+
+        // Approve with confirmation
+        function confirmApprove(eventId) {
+            return confirm("Are you sure you want to approve this event and send it to SCC?");
+        }
+
+        // Reject box toggle
         function toggleRejectBox(eventId) {
             var rejectBox = $("#reject-box-" + eventId);
             $(".reject-box").not(rejectBox).hide();
             rejectBox.toggle();
         }
 
+        // Reject with confirmation
         function submitRejection(eventId) {
-            var reason = $("#rejection-text-" + eventId).val();
+            var reason = $("#rejection-text-" + eventId).val().trim();
+
+            if (!reason) {
+                alert("Please enter a rejection reason.");
+                return;
+            }
+
+            if (!confirm("Are you sure you want to reject this event?")) {
+                return; // Stop if user cancels
+            }
+
             var token = $("#token-" + eventId).val();
 
             $.ajax({
@@ -426,5 +499,24 @@
                 }
             });
         }
+
+
+        // Initialize first event
+        document.addEventListener("DOMContentLoaded", function () {
+            showEvent(currentEventIndex);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var errorMessage = "@TempData["ErrorMessage"]";
+            if (errorMessage) {
+                var toastEl = document.getElementById('errorToast');
+                var toast = new bootstrap.Toast(toastEl, { delay: 3000 }); // 3 seconds
+                toast.show();
+            }
+        });
     </script>
 }
+
+

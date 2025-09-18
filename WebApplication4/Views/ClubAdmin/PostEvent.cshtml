@@ -20,74 +20,80 @@
             @Html.HiddenFor(m => m.EventID)
 
             <div class="row g-2">
-                <!-- Row 1 -->
+                <!-- Row 1: Read-only fields -->
                 <div class="col-md-3 form-group">
-                    @Html.LabelFor(m => m.EventName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control form-control-custom", @readonly = "readonly" })
+                    @Html.LabelFor(m => m.EventName)
+                    @Html.TextBoxFor(m => m.EventName, new { @class = "form-control", @readonly = "readonly" })
                 </div>
                 <div class="col-md-3 form-group">
-                    @Html.LabelFor(m => m.ClubName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
+                    @Html.LabelFor(m => m.ClubName)
+                    @Html.TextBoxFor(m => m.ClubName, new { @class = "form-control", @readonly = "readonly" })
                 </div>
                 <div class="col-md-3 form-group">
-                    @Html.LabelFor(m => m.EventStartDateAndTime, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom" })
+                    @Html.LabelFor(m => m.EventStartDateAndTime)
+                    @Html.TextBoxFor(m => m.EventStartDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control", @readonly = "readonly" })
                 </div>
                 <div class="col-md-3 form-group">
-                    @Html.LabelFor(m => m.EventEndDateAndTime, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control form-control-custom" })
+                    @Html.LabelFor(m => m.EventEndDateAndTime)
+                    @Html.TextBoxFor(m => m.EventEndDateAndTime, "{0:yyyy-MM-ddTHH:mm}", new { @type = "datetime-local", @class = "form-control", @readonly = "readonly" })
                 </div>
 
-                <!-- Row 2 -->
+                <!-- Row 2: Event Description (read-only) -->
                 <div class="col-md-12 form-group">
-                    @Html.LabelFor(m => m.EventDescription, new { @class = "form-label" })
-                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control form-control-custom", rows = 3 })
+                    @Html.LabelFor(m => m.EventDescription)
+                    @Html.TextAreaFor(m => m.EventDescription, new { @class = "form-control", rows = 3, @readonly = "readonly" })
                 </div>
 
-                <!-- Row 3 -->
+                <!-- Row 3: Event Poster (read-only, show only) -->
                 <div class="col-md-6 form-group">
-                    <label for="EventPosterFile" class="form-label">Event Poster (Image)</label>
-                    <input type="file" name="EventPosterFile" id="EventPosterFile" class="form-control form-control-custom" accept="image/*" />
+                    <label>Event Poster</label>
                     @if (!string.IsNullOrEmpty(Model.EventPoster))
                     {
                         <div class="image-preview mt-1">
-                            <img src="@Model.EventPoster" alt="Event Poster" />
-                        </div>
-                    }
-                </div>
-                <div class="col-md-6 form-group">
-                    <label for="EventBannerFile" class="form-label">Event Banner (Image)</label>
-                    <input type="file" name="EventBannerFile" id="EventBannerFile" class="form-control form-control-custom" accept="image/*" />
-                    @if (!string.IsNullOrEmpty(Model.EventBanner))
-                    {
-                        <div class="image-preview mt-1">
-                            <img src="@Model.EventBanner" alt="Event Banner" />
+                            <img src="@Model.EventPoster" alt="Event Poster" style="max-width: 200px; max-height: 200px; object-fit: contain; border: 1px solid #ccc; padding: 2px;" />
                         </div>
                     }
                 </div>
 
-                <!-- Row 4 -->
+
+                <!-- Event Banner (Editable) -->
+                <div class="col-md-6 form-group">
+                    <label for="EventBannerFile">Event Banner (Image)</label>
+                    <input type="file" name="EventBannerFile" id="EventBannerFile" class="form-control" accept="image/*" />
+                    <div class="image-preview mt-1">
+                        @if (!string.IsNullOrEmpty(Model.EventBanner))
+                        {
+                            <img id="bannerPreview" src="@Model.EventBanner" alt="Event Banner" style="max-width: 200px; max-height: 100px;" />
+                        }
+                        else
+                        {
+                            <img id="bannerPreview" style="display:none; max-width: 200px; max-height: 100px;" />
+                        }
+                    </div>
+                </div>
+
+                <!-- Row 4: Venue (read-only), Registration URL & Organizer Name (editable) -->
                 <div class="col-md-4 form-group">
-                    @Html.LabelFor(m => m.Venue, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
+                    @Html.LabelFor(m => m.Venue)
+                    @Html.TextBoxFor(m => m.Venue, new { @class = "form-control", @readonly = "readonly" })
                 </div>
                 <div class="col-md-4 form-group">
-                    @Html.LabelFor(m => m.RegistrationURL, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control form-control-custom", required = "required", type = "url" })
+                    @Html.LabelFor(m => m.RegistrationURL)
+                    @Html.TextBoxFor(m => m.RegistrationURL, new { @class = "form-control", type = "url" })
                 </div>
                 <div class="col-md-4 form-group">
-                    @Html.LabelFor(m => m.OrganizerName, new { @class = "form-label" })
-                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control form-control-custom", required = "required", minlength = "3" })
+                    @Html.LabelFor(m => m.OrganizerName)
+                    @Html.TextBoxFor(m => m.OrganizerName, new { @class = "form-control" })
                 </div>
 
                 <!-- Submit -->
                 <div class="col-md-12 text-center mt-3">
-                    <button type="submit" class="btn btn-primary btn-submit">Submit Event</button>
+                    <button type="submit" class="btn btn-primary">Submit Event</button>
                 </div>
             </div>
         }
 
-        @if (ViewBag.Message != null)
+        @if (!string.IsNullOrEmpty(ViewBag.Message))
         {
             <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
                 @ViewBag.Message
@@ -101,106 +107,63 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("postEventForm");
+            const banner = document.getElementById("EventBannerFile");
+            const regUrl = document.getElementById("RegistrationURL");
+            const organizer = document.getElementById("OrganizerName");
 
-            const fields = {
-                clubName: document.getElementById("ClubName"),
-                venue: document.getElementById("Venue"),
-                organizerName: document.getElementById("OrganizerName"),
-                regUrl: document.getElementById("RegistrationURL"),
-                poster: document.getElementById("EventPosterFile"),
-                banner: document.getElementById("EventBannerFile"),
-            };
-
-            const messages = {};
-            for (const key in fields) {
-                const field = fields[key];
-                const msgEl = document.createElement("div");
-                msgEl.className = "text-danger small mt-1";
-                field.parentElement.appendChild(msgEl);
-                messages[key] = msgEl;
+            // Create or get preview image element
+            let bannerPreview = document.getElementById("bannerPreview");
+            if (!bannerPreview) {
+                bannerPreview = document.createElement("img");
+                bannerPreview.id = "bannerPreview";
+                bannerPreview.style.maxWidth = "200px";
+                bannerPreview.style.maxHeight = "100px";
+                bannerPreview.style.display = "none";
+                banner.parentElement.appendChild(bannerPreview);
             }
 
-            // Live validation
-            fields.clubName.addEventListener("input", () => validateText(fields.clubName, messages.clubName, "Club Name"));
-            fields.venue.addEventListener("input", () => validateText(fields.venue, messages.venue, "Venue"));
-            fields.organizerName.addEventListener("input", () => validateText(fields.organizerName, messages.organizerName, "Organizer Name"));
-            fields.regUrl.addEventListener("input", () => validateUrl(fields.regUrl, messages.regUrl));
-            fields.poster.addEventListener("change", () => validateImage(fields.poster, 960, 1280, "Poster", messages.poster));
-            fields.banner.addEventListener("change", () => validateImage(fields.banner, 1472, 832, "Banner", messages.banner));
-
-            form.addEventListener("submit", async function (e) {
-                const results = await Promise.all([
-                    validateText(fields.clubName, messages.clubName, "Club Name"),
-                    validateText(fields.venue, messages.venue, "Venue"),
-                    validateText(fields.organizerName, messages.organizerName, "Organizer Name"),
-                    validateUrl(fields.regUrl, messages.regUrl),
-                    validateImage(fields.poster, 960, 1280, "Poster", messages.poster),
-                    validateImage(fields.banner, 1472, 832, "Banner", messages.banner)
-                ]);
-
-                if (!results.every(r => r)) {
-                    e.preventDefault(); // ❌ only stop if invalid
+            // Live preview on file select
+            banner.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        bannerPreview.src = ev.target.result;
+                        bannerPreview.style.display = "block";
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    bannerPreview.src = "";
+                    bannerPreview.style.display = "none";
                 }
             });
 
-            function validateText(field, msgEl, label) {
-                if (!field.value || field.value.trim().length < 3) {
-                    msgEl.textContent = `${label} must be at least 3 characters.`;
-                    return false;
-                }
-                msgEl.textContent = "";
-                return true;
-            }
+            form.addEventListener("submit", function (e) {
+                let valid = true;
 
-            function validateUrl(field, msgEl) {
+                // Validate Registration URL
                 try {
-                    new URL(field.value);
-                    msgEl.textContent = "";
-                    return true;
+                    new URL(regUrl.value);
                 } catch {
-                    msgEl.textContent = "Please enter a valid Registration URL.";
-                    return false;
+                    alert("Please enter a valid Registration URL.");
+                    valid = false;
                 }
-            }
 
-            function validateImage(input, requiredWidth, requiredHeight, label, msgEl) {
-                return new Promise(resolve => {
-                    const file = input.files[0];
-                    if (!file) {
-                        msgEl.textContent = `${label} image is required.`;
-                        resolve(false);
-                        return;
-                    }
-                    const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
-                    if (!validTypes.includes(file.type)) {
-                        msgEl.textContent = `${label} must be JPG, JPEG, PNG, or WEBP format.`;
-                        resolve(false);
-                        return;
-                    }
-                    if (file.size > 1024 * 1024) {
-                        msgEl.textContent = `${label} must be ≤ 1MB.`;
-                        resolve(false);
-                        return;
-                    }
-                    const img = new Image();
-                    const url = URL.createObjectURL(file);
-                    img.onload = function () {
-                        URL.revokeObjectURL(url);
-                        if (img.naturalWidth !== requiredWidth || img.naturalHeight !== requiredHeight) {
-                            msgEl.textContent = `${label} must be exactly ${requiredWidth}×${requiredHeight}px.`;
-                            resolve(false);
-                        } else {
-                            msgEl.textContent = "";
-                            resolve(true);
-                        }
-                    };
-                    img.onerror = () => {
-                        msgEl.textContent = "Invalid image file.";
-                        resolve(false);
-                    };
-                    img.src = url;
-                });
-            }
+                // Validate Organizer Name
+                if (!organizer.value || organizer.value.trim().length < 3) {
+                    alert("Organizer Name must be at least 3 characters.");
+                    valid = false;
+                }
+
+                // Validate Banner
+                const file = banner.files[0];
+                if (!file) {
+                    alert("Event Banner is required.");
+                    valid = false;
+                }
+
+                if (!valid) e.preventDefault();
+            });
         });
     </script>
 }

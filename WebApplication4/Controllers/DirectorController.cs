@@ -558,6 +558,8 @@ namespace WebApplication4.Controllers
             return RedirectToAction("Login");
         }
 
+
+
         public ActionResult EventsForDirectorApproval()
         {
             string email = Session["UserEmail"]?.ToString();
@@ -820,14 +822,24 @@ namespace WebApplication4.Controllers
             }
 
             var parts = plainData.Split('|');
-            if (parts.Length < 1)
+            if (parts.Length != 3)
                 return Content("❌ Invalid token data.");
 
             int evtId = Convert.ToInt32(parts[0]);
+            int clubId = Convert.ToInt32(parts[1]);
+            int directorId = Convert.ToInt32(parts[2]);
 
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == evtId);
             if (ev == null || ev.CLUB == null)
                 return Content("❌ Event not found.");
+
+            // Ensure token matches assigned Director
+            if (Session["UserEmail"] != null)
+            {
+                var currentDirector = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                if (currentDirector == null || currentDirector.LoginID != directorId)
+                    return Content("❌ Unauthorized action.");
+            }
 
             // prevent duplicate approval
             if (ev.ApprovalStatusID == 2)
@@ -856,11 +868,28 @@ namespace WebApplication4.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DirectorApproveEvent(int eventId,
-                                                  decimal? approvedAmount,
-                                                  HttpPostedFileBase signedDocument)
+                                                      decimal? approvedAmount,
+                                                      HttpPostedFileBase signedDocument,
+                                                      string token = null)
         {
             var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
             if (ev == null) return HttpNotFound("Event not found.");
+
+            // Validate token if passed (email flow)
+            if (!string.IsNullOrEmpty(token))
+            {
+                var parts = SecureHelper.Decrypt(token).Split('|');
+                if (parts.Length != 3) return Json(new { success = false, message = "Invalid token." });
+
+                int tokenDirectorId = Convert.ToInt32(parts[2]);
+                // Get the email from session first
+                string currentEmail = Session["UserEmail"]?.ToString();
+
+                var currentDirector = _db.Logins.FirstOrDefault(l => l.Email == currentEmail);
+
+                if (currentDirector == null || currentDirector.LoginID != tokenDirectorId)
+                    return Json(new { success = false, message = "Unauthorized action." });
+            }
 
             if (signedDocument == null || signedDocument.ContentLength == 0)
             {
@@ -905,6 +934,7 @@ namespace WebApplication4.Controllers
             TempData["Message"] = "Event approved by Director successfully.";
             return RedirectToAction("EventsForDirectorApproval", new { id = eventId });
         }
+
 
 
         // ============================

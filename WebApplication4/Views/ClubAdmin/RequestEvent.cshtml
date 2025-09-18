@@ -147,9 +147,15 @@
 
                 <div class="col-md-4 form-group">
                     <label>Start Date & Time:</label>
-                    <input type="datetime-local" name="EventStartDateAndTime" id="EventStartDateAndTime" class="form-control" required />
+                    <input type="datetime-local"
+                           name="EventStartDateAndTime"
+                           id="EventStartDateAndTime"
+                           class="form-control"
+                           required
+                           min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                     <div id="EventStartDateAndTimeError" class="error-message"></div>
                 </div>
+
 
                 <div class="col-md-4 form-group">
                     <label>End Date & Time:</label>
@@ -293,41 +299,15 @@
             return false;
         }
 
-        if (file.size > 1024 * 1024) { // 1MB
+        // ✅ Only size validation (1 MB)
+        if (file.size > 1 * 1024 * 1024) {
             showError("EventPoster", "Poster size must be less than or equal to 1 MB.");
             return false;
         }
 
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = function () {
-            URL.revokeObjectURL(url);
-
-            const requiredWidth = 960;
-            const requiredHeight = 1280;
-            const aspectRatio = 3 / 4;
-            const actualRatio = img.naturalWidth / img.naturalHeight;
-
-            if (
-                img.naturalWidth !== requiredWidth ||
-                img.naturalHeight !== requiredHeight ||
-                Math.abs(actualRatio - aspectRatio) > 0.01
-            ) {
-                showError("EventPoster", "Poster must be exactly 960×1280 px with a 3:4 aspect ratio.");
-                return false;
-            }
-
-            clearError("EventPoster");
-        };
-
-        img.onerror = function () {
-            showError("EventPoster", "Invalid image file.");
-        };
-
-        img.src = url;
+        clearError("EventPoster");
         return true;
     }
-
 
     function formatAndValidateBudget(input) {
         let rawValue = input.value.replace(/,/g, '').trim();
@@ -343,7 +323,6 @@
             return false;
         }
 
-        // Format number with commas (Indian style)
         input.value = parseInt(rawValue).toLocaleString("en-IN");
         clearError(errorId);
         return true;
@@ -363,15 +342,14 @@
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ];
 
-        const maxSize = 1 * 1024 * 1024; // 1MB
-
+        // ✅ Only size validation (2 MB)
         if (!allowedTypes.includes(file.type)) {
             showError("BudgetDocument", "Only PDF, XLS, or XLSX allowed.");
             return false;
         }
 
-        if (file.size > maxSize) {
-            showError("BudgetDocument", "Document must be less than 1MB.");
+        if (file.size > 2 * 1024 * 1024) {
+            showError("BudgetDocument", "Document must be less than or equal to 2 MB.");
             return false;
         }
 
@@ -398,3 +376,4 @@
         return true;
     }
 </script>
+

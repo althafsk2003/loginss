@@ -112,15 +112,17 @@
 </head>
 <body>
     <div class="container mt-4">
-        <h2 class="text-center mb-4">Club Status</h2>
-
-        <!-- Filter Buttons -->
-        <div class="text-center mb-4">
-            <button class="btn btn-warning btn-filter @(ViewBag.Filter == "pending" ? "active" : "")" onclick="filterTable('pending')">Pending Requests</button>
-            <button class="btn btn-success btn-filter @(ViewBag.Filter == "approved" ? "active" : "")" onclick="filterTable('approved')">Approved Requests</button>
-            <button class="btn btn-danger btn-filter @(ViewBag.Filter == "rejected" ? "active" : "")" onclick="filterTable('rejected')">Rejected Requests</button>
-            <button class="btn btn-primary btn-filter @(ViewBag.Filter == "all" ? "active" : "")" onclick="filterTable('all')">View All Requests</button>
+        <!-- Heading + Filter Buttons Row -->
+        <div class="d-flex align-items-center mb-4 flex-wrap">
+            <h2 class="mb-0 me-3">Club Status</h2>
+            <div class="btn-group flex-wrap">
+                <button class="btn btn-warning btn-filter @(ViewBag.Filter == "pending" ? "active" : "")" onclick="filterTable('pending')">Pending Requests</button>
+                <button class="btn btn-success btn-filter @(ViewBag.Filter == "approved" ? "active" : "")" onclick="filterTable('approved')">Approved Requests</button>
+                <button class="btn btn-danger btn-filter @(ViewBag.Filter == "rejected" ? "active" : "")" onclick="filterTable('rejected')">Rejected Requests</button>
+                <button class="btn btn-primary btn-filter @(ViewBag.Filter == "all" ? "active" : "")" onclick="filterTable('all')">View All Requests</button>
+            </div>
         </div>
+
 
         <!-- Club Status Table -->
         <div class="table-responsive">

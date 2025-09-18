@@ -3,6 +3,14 @@
     ViewBag.Title = "Clubs and Experiences";
 }
 
+
+<div class="explore-heading text-center my-5">
+    <h1 class="main-title"> Explore Our Clubs </h1>
+    <p class="subtitle">Click Explore Our Clubs for More (Campus Traditions)</p>
+</div>
+
+
+
 <div class="clubs-section">
     <div class="row align-items-center">
         <!-- Left Section with Text -->
@@ -348,6 +356,37 @@
         #btn-back-to-top:hover {
             background-color: darkorange;
         }
+
+    /* Reusable Heading Styles */
+    .main-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #222;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+        .main-title::after {
+            content: "";
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(to right, #ff6600, #ff3300);
+            display: block;
+            margin: 12px auto 0;
+            border-radius: 2px;
+        }
+
+    .subtitle {
+        font-size: 1.2rem;
+        color: #555;
+        margin-top: 10px;
+        font-weight: 400;
+        font-style: italic;
+    }
+
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">

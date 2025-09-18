@@ -611,10 +611,13 @@ namespace WebApplication4.Controllers
             try { plainData = SecureHelper.Decrypt(token); }
             catch { return HttpNotFound("Invalid token"); }
 
+            // Token format: EventID|ClubID|SubHODLoginID
             var parts = plainData.Split('|');
-            if (parts.Length < 2) return HttpNotFound("Invalid token data");
+            if (parts.Length != 3) return HttpNotFound("Invalid token data");
 
             int eventId = Convert.ToInt32(parts[0]);
+            int clubId = Convert.ToInt32(parts[1]);
+            int subHodId = Convert.ToInt32(parts[2]);
 
             var evt = _db.EVENTS.Find(eventId);
             if (evt == null) return HttpNotFound("Event not found");
@@ -625,10 +628,18 @@ namespace WebApplication4.Controllers
             if (evt.ApprovalStatusID == 7)
                 return Content($"Event '{evt.EventName}' is already forwarded to Director.");
 
+            // ✅ Validate SubHOD email flow
+            if (Session["UserEmail"] != null)
+            {
+                var currentSubHod = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                if (currentSubHod == null || currentSubHod.LoginID != subHodId)
+                    return HttpNotFound("Unauthorized token usage.");
+            }
+
             evt.ApprovalStatusID = 7; // ForwardedToDirector
             _db.SaveChanges();
 
-            // Send notification/email to Director (same as your current code)
+            // Find Director
             var club = _db.CLUBS.Find(evt.ClubID);
             int deptId = club != null ? club.DepartmentID : 0;
             var director = _db.Logins.FirstOrDefault(l => l.Role == "Director" && l.DepartmentID == deptId);
@@ -646,7 +657,8 @@ namespace WebApplication4.Controllers
                 });
                 _db.SaveChanges();
 
-                string newToken = SecureHelper.Encrypt($"{evt.EventID}|{evt.ClubID}|email");
+                // Token for Director actions includes DirectorID
+                string newToken = SecureHelper.Encrypt($"{evt.EventID}|{evt.ClubID}|{director.LoginID}");
 
                 var emailSvc = new EmailService();
                 string scheme = Request.Url.Scheme;
@@ -656,7 +668,6 @@ namespace WebApplication4.Controllers
                 string budgetUrl = string.IsNullOrWhiteSpace(evt.BudgetDocumentPath) ? null :
                     (evt.BudgetDocumentPath.StartsWith("http") ? evt.BudgetDocumentPath : baseUrl + evt.BudgetDocumentPath);
 
-                // Inside both GET and POST ForwardToDirector methods
                 string loginUrl = Url.Action("Login", "Admin", null, scheme);
 
                 string emailBody = $@"
@@ -664,11 +675,8 @@ namespace WebApplication4.Controllers
     <p style='background:#f8f9fa;padding:10px;border:1px solid #ddd;border-radius:5px;'>
         <strong>ℹ️ Note:</strong> If you want to <b>reduce the budget</b> or 
         <b>upload the signed approval document</b>, please log in to your dashboard:<br/>
-        <a href='{loginUrl}' 
-           style='display:inline-block;margin-top:6px;padding:8px 12px;background:#007bff;
-                  color:#fff;text-decoration:none;border-radius:4px;'>
-           Go to Dashboard
-        </a>
+        <a href='{loginUrl}' style='display:inline-block;margin-top:6px;padding:8px 12px;background:#007bff;
+                  color:#fff;text-decoration:none;border-radius:4px;'>Go to Dashboard</a>
     </p>
     <hr/>
     <h3>New Event Forwarded for Approval</h3>
@@ -680,13 +688,10 @@ namespace WebApplication4.Controllers
     <p><b>Budget:</b> {evt.EventBudget}</p>
     {(budgetUrl != null ? $"<p><b>Budget Document:</b> <a href='{budgetUrl}'>View</a></p>" : "")}
     <div style='margin-top:16px;'>
-        <a href='{Url.Action("DirectorApproveEvent", "Director", new { token = newToken }, scheme)}'
-           style='padding:10px 14px;background:#1e7e34;color:#fff;text-decoration:none;border-radius:4px;margin-right:8px;'>Approve</a>
-        <a href='{Url.Action("DirectorRejectEvent", "Director", new { token = newToken }, scheme)}'
-           style='padding:10px 14px;background:#dc3545;color:#fff;text-decoration:none;border-radius:4px;'>Reject</a>
+        <a href='{Url.Action("DirectorApproveEvent", "Director", new { token = newToken }, scheme)}' style='padding:10px 14px;background:#1e7e34;color:#fff;text-decoration:none;border-radius:4px;margin-right:8px;'>Approve</a>
+        <a href='{Url.Action("DirectorRejectEvent", "Director", new { token = newToken }, scheme)}' style='padding:10px 14px;background:#dc3545;color:#fff;text-decoration:none;border-radius:4px;'>Reject</a>
     </div>
 </div>";
-
 
                 await emailSvc.SendEmailAsync(director.Email, $"Approval Needed: {evt.EventName}", emailBody);
             }
@@ -694,37 +699,53 @@ namespace WebApplication4.Controllers
             return Content($"✅ Event '{evt.EventName}' forwarded to Director successfully!");
         }
 
-
         // ===========================
         // POST: Forward inside SubHOD dashboard
         // ===========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForwardToDirector(int eventId)
+        public async Task<ActionResult> ForwardToDirectorPost(string token)
         {
-            var evt = _db.EVENTS.Find(eventId);
-            if (evt == null)
-                return HttpNotFound("Event not found");
+            if (Session["UserEmail"] == null)
+                return RedirectToAction("Login", "Admin");
 
-            // 🚫 Prevent duplicate forwarding
+            var subHod = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+            if (subHod == null) return HttpNotFound("SubHOD login not found.");
+
+            string plainData;
+            try { plainData = SecureHelper.Decrypt(token); }
+            catch { return HttpNotFound("Invalid token"); }
+
+            // Token format: EventID|ClubID|SubHODLoginID
+            var parts = plainData.Split('|');
+            if (parts.Length != 3) return HttpNotFound("Invalid token data");
+
+            int eventId = Convert.ToInt32(parts[0]);
+            int clubId = Convert.ToInt32(parts[1]);
+            int subHodId = Convert.ToInt32(parts[2]);
+
+            if (subHod.LoginID != subHodId)
+                return HttpNotFound("Unauthorized token usage.");
+
+            var evt = _db.EVENTS.Find(eventId);
+            if (evt == null) return HttpNotFound("Event not found");
+
             if (evt.ApprovalStatusID == 7)
             {
                 TempData["ErrorMessage"] = $"Event '{evt.EventName}' is already forwarded to Director.";
                 return RedirectToAction("ViewEventRequests");
             }
 
-            // ✅ Update status
             evt.ApprovalStatusID = 7; // ForwardedToDirector
             _db.SaveChanges();
 
-            // ✅ Get related club & department
+            // Find Director
             var club = _db.CLUBS.Find(evt.ClubID);
-            var deptId = club?.DepartmentID ?? 0;
+            int deptId = club?.DepartmentID ?? 0;
             var director = _db.Logins.FirstOrDefault(l => l.Role == "Director" && l.DepartmentID == deptId);
 
             if (director != null)
             {
-                // In-app notification
                 _db.Notifications.Add(new Notification
                 {
                     LoginID = director.LoginID,
@@ -736,22 +757,17 @@ namespace WebApplication4.Controllers
                 });
                 _db.SaveChanges();
 
-                // 🔑 Generate token for Director actions
-                string token = SecureHelper.Encrypt($"{evt.EventID}|{evt.ClubID}|email");
+                // Token for Director actions includes DirectorID
+                string newToken = SecureHelper.Encrypt($"{evt.EventID}|{evt.ClubID}|{director.LoginID}");
 
-                // 📧 Email body with venue, budget, budget document
+                var emailSvc = new EmailService();
                 string scheme = Request.Url.Scheme;
                 string host = Request.Url.Host;
                 string port = Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port;
                 string baseUrl = $"{scheme}://{host}{port}";
+                string budgetUrl = string.IsNullOrWhiteSpace(evt.BudgetDocumentPath) ? null :
+                    (evt.BudgetDocumentPath.StartsWith("http") ? evt.BudgetDocumentPath : baseUrl + evt.BudgetDocumentPath);
 
-                string budgetUrl = string.IsNullOrWhiteSpace(evt.BudgetDocumentPath)
-                    ? null
-                    : (evt.BudgetDocumentPath.StartsWith("http", StringComparison.OrdinalIgnoreCase)
-                        ? evt.BudgetDocumentPath
-                        : baseUrl + evt.BudgetDocumentPath);
-
-                // Inside both GET and POST ForwardToDirector methods
                 string loginUrl = Url.Action("Login", "Admin", null, scheme);
 
                 string emailBody = $@"
@@ -759,11 +775,8 @@ namespace WebApplication4.Controllers
     <p style='background:#f8f9fa;padding:10px;border:1px solid #ddd;border-radius:5px;'>
         <strong>ℹ️ Note:</strong> If you want to <b>reduce the budget</b> or 
         <b>upload the signed approval document</b>, please log in to your dashboard:<br/>
-        <a href='{loginUrl}' 
-           style='display:inline-block;margin-top:6px;padding:8px 12px;background:#007bff;
-                  color:#fff;text-decoration:none;border-radius:4px;'>
-           Go to Dashboard
-        </a>
+        <a href='{loginUrl}' style='display:inline-block;margin-top:6px;padding:8px 12px;background:#007bff;
+                  color:#fff;text-decoration:none;border-radius:4px;'>Go to Dashboard</a>
     </p>
     <hr/>
     <h3>New Event Forwarded for Approval</h3>
@@ -775,15 +788,11 @@ namespace WebApplication4.Controllers
     <p><b>Budget:</b> {evt.EventBudget}</p>
     {(budgetUrl != null ? $"<p><b>Budget Document:</b> <a href='{budgetUrl}'>View</a></p>" : "")}
     <div style='margin-top:16px;'>
-        <a href='{Url.Action("DirectorApproveEvent", "Director", new { token }, scheme)}'
-           style='padding:10px 14px;background:#1e7e34;color:#fff;text-decoration:none;border-radius:4px;margin-right:8px;'>Approve</a>
-        <a href='{Url.Action("DirectorRejectEvent", "Director", new { token }, scheme)}'
-           style='padding:10px 14px;background:#dc3545;color:#fff;text-decoration:none;border-radius:4px;'>Reject</a>
+        <a href='{Url.Action("DirectorApproveEvent", "Director", new { token = newToken }, scheme)}' style='padding:10px 14px;background:#1e7e34;color:#fff;text-decoration:none;border-radius:4px;margin-right:8px;'>Approve</a>
+        <a href='{Url.Action("DirectorRejectEvent", "Director", new { token = newToken }, scheme)}' style='padding:10px 14px;background:#dc3545;color:#fff;text-decoration:none;border-radius:4px;'>Reject</a>
     </div>
 </div>";
 
-
-                var emailSvc = new EmailService();
                 await emailSvc.SendEmailAsync(director.Email, $"Approval Needed: {evt.EventName}", emailBody);
             }
 
@@ -796,17 +805,12 @@ namespace WebApplication4.Controllers
 
 
 
-
-
-        // ===========================
-        // GET: Reject Event (SubHOD email link)
-        // ===========================
         [HttpGet]
         [AllowAnonymous]
         public ActionResult RejectEvent(string token)
         {
             if (string.IsNullOrEmpty(token))
-                return HttpNotFound("Token missing");
+                return Content("❌ Token missing");
 
             string plainData;
             try
@@ -815,40 +819,59 @@ namespace WebApplication4.Controllers
             }
             catch
             {
-                return HttpNotFound("Invalid token");
+                return Content("❌ Invalid token");
             }
 
+            // Expect 3 parts: EventID | ClubID | SubHODLoginID
             var parts = plainData.Split('|');
-            if (parts.Length < 2)
-                return HttpNotFound("Invalid token data");
+            if (parts.Length < 3)
+                return Content("❌ Invalid token data");
 
             int eventId = Convert.ToInt32(parts[0]);
+            int subHodId = Convert.ToInt32(parts[2]);
 
-            bool fromEmail = parts.Length >= 3 && parts[2].ToLower() == "email";
+            bool fromEmail = true; // email flow
             ViewBag.FromEmail = fromEmail;
 
             var ev = _db.EVENTS.Find(eventId);
-            if (ev == null) return HttpNotFound("Event not found");
+            if (ev == null) return Content("❌ Event not found");
 
-            // 🚫 Prevent rejection if already forwarded or rejected
+            // Fetch the club
+            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
+            if (club == null) return Content("❌ Club not found");
+
+            // Validate that the token recipient is the actual SubHOD for this club
+            var subHod = _db.SUBDEPARTMENTs
+                .Where(s => s.SubDepartmentID == club.SubDepartmentID)
+                .Select(s => _db.Logins.FirstOrDefault(l => l.LoginID == subHodId))
+                .FirstOrDefault();
+
+            if (subHod == null)
+                return Content("❌ You are not authorized to reject this event.");
+
+            // Prevent rejection if already forwarded or rejected
             if (ev.ApprovalStatusID == 7)
                 return Content($"Event '{ev.EventName}' has already been forwarded. You cannot reject it now.");
             if (ev.ApprovalStatusID == 3)
                 return Content($"Event '{ev.EventName}' is already rejected.");
 
-            // ✅ Send token & event to view
+            // Only the intended recipient sees the form
             ev.Token = token;
             return View("RejectEvent", ev);
         }
 
+        // ===========================
+        // POST: Reject Event (SubHOD email or dashboard)
+        // ===========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AllowAnonymous] // allow both flows
+        [AllowAnonymous]
         public async Task<ActionResult> RejectEvent(int? eventId, string rejectionReason, string token = null)
         {
             try
             {
                 int evtId;
+                int subHodId;
 
                 if (!string.IsNullOrEmpty(token))
                 {
@@ -864,15 +887,25 @@ namespace WebApplication4.Controllers
                     }
 
                     var parts = plainData.Split('|');
-                    if (parts.Length < 1)
+                    if (parts.Length < 3)
                         return Json(new { success = false, message = "Invalid token data." });
 
                     evtId = Convert.ToInt32(parts[0]);
+                    subHodId = Convert.ToInt32(parts[2]);
                 }
                 else if (eventId.HasValue)
                 {
                     // In-app dashboard flow
                     evtId = eventId.Value;
+
+                    if (Session["UserEmail"] == null)
+                        return Json(new { success = false, message = "Session expired. Please login again." });
+
+                    var subHod = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+                    if (subHod == null)
+                        return Json(new { success = false, message = "SubHOD login not found." });
+
+                    subHodId = subHod.LoginID;
                 }
                 else
                 {
@@ -882,6 +915,21 @@ namespace WebApplication4.Controllers
                 var ev = _db.EVENTS.FirstOrDefault(e => e.EventID == evtId);
                 if (ev == null)
                     return Json(new { success = false, message = "Event not found!" });
+
+                // Fetch the club first
+                var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
+                if (club == null)
+                    return Json(new { success = false, message = "Club not found." });
+
+                // Only the SubHOD from token/session can reject
+                var subHodCheck = _db.SUBDEPARTMENTs
+                    .Where(s => s.SubDepartmentID == club.SubDepartmentID)
+                    .Select(s => _db.Logins.FirstOrDefault(l => l.LoginID == subHodId))
+                    .FirstOrDefault();
+
+                if (subHodCheck == null)
+                    return Json(new { success = false, message = "Unauthorized action." });
+
 
                 // Prevent rejection if already forwarded or rejected
                 if (ev.ApprovalStatusID == 7)
@@ -910,9 +958,6 @@ namespace WebApplication4.Controllers
                     });
                     _db.SaveChanges();
                 }
-
-                // Fetch club info
-                var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
 
                 // Email to Club Admin
                 var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
@@ -945,6 +990,7 @@ namespace WebApplication4.Controllers
                     }
                 }
 
+
                 return Json(new { success = true, message = "Event rejected and emails sent to mentor and club admin." });
             }
             catch (Exception ex)
@@ -952,6 +998,7 @@ namespace WebApplication4.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
 
 
 

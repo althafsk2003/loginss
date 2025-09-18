@@ -280,7 +280,7 @@ namespace WebApplication1.Controllers
 
                     // Token generation
                     // Token generation (with source = email)
-                    string plainData = $"{newEvent.EventID}|{club.ClubID}|email";
+                    string plainData = $"{newEvent.EventID}|{club.ClubID}|{mentorLogin.LoginID}";
                     string encryptedToken = SecureHelper.Encrypt(plainData);
 
                     string token = !string.IsNullOrEmpty(encryptedToken) ? encryptedToken : "defaultToken";
@@ -402,30 +402,35 @@ namespace WebApplication1.Controllers
                 return RedirectToAction("Login", "Admin");
             }
 
-            // Get logged-in user's email
             string userEmail = Session["UserEmail"].ToString();
 
             // Fetch Club Admin details
             var clubAdmin = _db.Logins.FirstOrDefault(c => c.Email == userEmail);
 
             if (clubAdmin == null)
-            {
                 return HttpNotFound("Club Admin not found");
-            }
 
-            // Get the ClubID for the logged-in club admin
-            int clubId = clubAdmin.ClubID ?? 0; // Handle null case if necessary
+            int clubId = clubAdmin.ClubID ?? 0;
 
             using (var db = new dummyclubsEntities())
             {
-                // Approved but not yet posted to website, filtered by ClubID
+                DateTime now = DateTime.Now;
+
+                // Approved but not yet posted, only upcoming events
                 var approvedNotPosted = db.EVENTS
-                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == false && e.ClubID == clubId)
+                    .Where(e => e.ApprovalStatusID == 2
+                                && e.IsActive == false
+                                && e.ClubID == clubId
+                                && e.EventEndDateAndTime >= now)
                     .ToList();
 
-                // Approved and already posted upcoming events (not yet concluded), filtered by ClubID
+                // Approved and already posted upcoming events (not yet concluded)
                 var postedUpcoming = db.EVENTS
-                    .Where(e => e.ApprovalStatusID == 2 && e.IsActive == true && e.EventStatus == "Upcoming posted" && e.ClubID == clubId)
+                    .Where(e => e.ApprovalStatusID == 2
+                                && e.IsActive == true
+                                && e.EventStatus == "Upcoming posted"
+                                && e.ClubID == clubId
+                                && e.EventEndDateAndTime >= now)
                     .ToList();
 
                 var model = new UpcomingEventsViewModel
@@ -439,13 +444,32 @@ namespace WebApplication1.Controllers
         }
 
 
+
         public ActionResult PostEvent(int eventId)
         {
-            var ev = _db.EVENTS.Find(eventId);
+            var ev = _db.EVENTS
+                        .FirstOrDefault(e => e.EventID == eventId && e.EventEndDateAndTime >= DateTime.Now);
 
             if (ev == null)
+                return HttpNotFound("Event not found or already ended.");
+
+            // Fetch ClubName from ClubID
+            string clubName = string.Empty;
+            if (ev.ClubID != null)
             {
-                return HttpNotFound("Event not found.");
+                var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
+                if (club != null)
+                    clubName = club.ClubName;
+            }
+
+            // Fetch Organizer Name from LOGIN -> ClubRegistrations
+            string organizerName = string.Empty;
+            var login = _db.Logins.FirstOrDefault(l => l.LoginID == ev.EventOrganizerID);
+            if (login != null)
+            {
+                var clubReg = _db.ClubRegistrations.FirstOrDefault(cr => cr.Email == login.Email);
+                if (clubReg != null)
+                    organizerName = clubReg.FullName;
             }
 
             var model = new PostEventViewModel
@@ -457,113 +481,64 @@ namespace WebApplication1.Controllers
                 EventEndDateAndTime = ev.EventEndDateAndTime,
                 RegistrationURL = ev.RegistrationURL,
                 QRContentText = ev.QRContentText,
-                //OrganizerName = ev.OrganizerName,
-                ClubName = ev.ClubName,
-                EventBanner = ev.EventBannerPath
+                OrganizerName = organizerName,
+                ClubName = clubName,
+                Venue = ev.Venue,
+                EventPoster = ev.EventPoster,       // read-only
+                EventBanner = ev.EventBannerPath    // editable
             };
 
             return View(model);
         }
 
-      
+
         [HttpPost]
         public ActionResult PostEvent(PostEventViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            try
             {
-                try
+                var ev = _db.EVENTS.Find(model.EventID);
+                if (ev != null)
                 {
-                    // Ensure the UploadedPosters directory exists
-                    var posterDirectory = Server.MapPath("~/UploadedPosters");
-                    if (!Directory.Exists(posterDirectory))
-                    {
-                        Directory.CreateDirectory(posterDirectory);
-                    }
-              
+                    // Only update editable fields
+                    ev.RegistrationURL = model.RegistrationURL;
 
-                    // Save uploaded poster
-                    if (model.EventPosterFile != null && model.EventPosterFile.ContentLength > 0)
-                    {
-                        var posterFileName = Path.GetFileName(model.EventPosterFile.FileName);
-                        var posterPath = Path.Combine(posterDirectory, posterFileName);
-                        model.EventPosterFile.SaveAs(posterPath);
-                        model.EventPoster = "/UploadedPosters/" + posterFileName;
-                    }
+                    // If you store organizer name in EVENTS table, uncomment:
+                    // ev.OrganizerName = model.OrganizerName;
 
-                    // Ensure the UploadedBanners directory exists
-                    var bannerDirectory = Server.MapPath("~/UploadedBanners");
-                    if (!Directory.Exists(bannerDirectory))
-                    {
-                        Directory.CreateDirectory(bannerDirectory);
-                    }
-
-                    // Save uploaded banner
                     if (model.EventBannerFile != null && model.EventBannerFile.ContentLength > 0)
                     {
+                        var bannerDirectory = Server.MapPath("~/UploadedBanners");
+                        if (!Directory.Exists(bannerDirectory))
+                            Directory.CreateDirectory(bannerDirectory);
+
                         var bannerFileName = Path.GetFileName(model.EventBannerFile.FileName);
                         var bannerPath = Path.Combine(bannerDirectory, bannerFileName);
                         model.EventBannerFile.SaveAs(bannerPath);
-                        model.EventBanner = "/UploadedBanners/" + bannerFileName;
+                        ev.EventBannerPath = "/UploadedBanners/" + bannerFileName;
                     }
 
-                    // Update event in DB
-                    var ev = _db.EVENTS.Find(model.EventID);
-                    if (ev != null)
-                    {
-                        ev.EventDescription = model.EventDescription;
-                        ev.EventStartDateAndTime = model.EventStartDateAndTime;
-                        ev.EventEndDateAndTime = model.EventEndDateAndTime;
-                        ev.EventPoster = model.EventPoster;
-                        ev.EventBannerPath = model.EventBanner;
-                        ev.EventStatus = "Upcoming not posted";
+                    // Mark event as posted
+                    ev.EventStatus = "Upcoming posted";
+                    ev.IsActive = true;
 
-                        if (!string.IsNullOrWhiteSpace(model.RegistrationURL))
-                        {
-                            ev.RegistrationURL = model.RegistrationURL;
-                        }
-
-
-                        // Debug output
-                        System.Diagnostics.Debug.WriteLine("===== Event Details Before Save =====");
-                        System.Diagnostics.Debug.WriteLine("EventID: " + ev.EventID);
-                        System.Diagnostics.Debug.WriteLine("EventDescription: " + ev.EventDescription);
-                        System.Diagnostics.Debug.WriteLine("EventStartDateAndTime: " + ev.EventStartDateAndTime);
-                        System.Diagnostics.Debug.WriteLine("EventEndDateAndTime: " + ev.EventEndDateAndTime);
-                        System.Diagnostics.Debug.WriteLine("EventPoster: " + ev.EventPoster);
-                        System.Diagnostics.Debug.WriteLine("EventBannerPath: " + ev.EventBannerPath);
-                        System.Diagnostics.Debug.WriteLine("EventStatus: " + ev.EventStatus);
-                        System.Diagnostics.Debug.WriteLine("=====================================");
-
-                        _db.SaveChanges();
-                    }
-
-
-                    ViewBag.Message = "Event posted successfully!";
-                    return View("PostEvent", model);
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    foreach (var entityValidationErrors in ex.EntityValidationErrors)
-                    {
-                        foreach (var validationError in entityValidationErrors.ValidationErrors)
-                        {
-                            ModelState.AddModelError(validationError.PropertyName, validationError.ErrorMessage);
-                            // Optional: Log to console or file for debugging
-                            System.Diagnostics.Debug.WriteLine($"Property: {validationError.PropertyName} Error: {validationError.ErrorMessage}");
-                        }
-                    }
+                    _db.SaveChanges();
                 }
 
-                catch (Exception ex)
-                {
-                    // Log the exception details
-                    ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
-                }
+                ViewBag.Message = "Event posted successfully!";
+                return View("PostEvent", model);
             }
-
-            // If we reach here, something went wrong; redisplay the form
-            return View(model);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An unexpected error occurred. Please try again.");
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                return View(model);
+            }
         }
+
 
 
         private string DetermineEventStatus(DateTime start, DateTime end)

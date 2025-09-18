@@ -108,7 +108,7 @@
                     <!-- Approve Form -->
                     <tr id="approve-form-@ev.EventID" style="display:none;">
                         <td colspan="6">
-                            @using (Html.BeginForm("DirectorApproveEvent", "Director", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                            @using (Html.BeginForm("DirectorApproveEvent", "Director", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return confirmApprove();" }))
                             {
                                 @Html.AntiForgeryToken()
                                 @Html.Hidden("eventId", ev.EventID)
@@ -133,16 +133,16 @@
                                     </div>
                                 </div>
                             }
+
                         </td>
                     </tr>
 
                     <!-- Reject Form -->
                     <tr id="reject-form-@ev.EventID" style="display:none;">
                         <td colspan="6">
-                            @using (Html.BeginForm("DirectorRejectEvent", "Director", FormMethod.Post))
+                            @using (Html.BeginForm("DirectorRejectEvent", "Director", FormMethod.Post, new { onsubmit = "return confirmReject();" }))
                             {
-                                @Html.AntiForgeryToken() <!-- Add this line -->
-
+                                @Html.AntiForgeryToken()
                                 @Html.Hidden("eventId", ev.EventID)
 
                                 <div class="action-form">
@@ -161,6 +161,7 @@
                                     </div>
                                 </div>
                             }
+
                         </td>
                     </tr>
                 }
@@ -183,6 +184,25 @@ else
         function toggleReject(eventId) {
             $('#reject-form-' + eventId).slideToggle(200);
             $('#approve-form-' + eventId).hide();
+        }
+    </script>
+    <script>
+        function toggleApprove(eventId) {
+            $('#approve-form-' + eventId).slideToggle(200);
+            $('#reject-form-' + eventId).hide();
+        }
+
+        function toggleReject(eventId) {
+            $('#reject-form-' + eventId).slideToggle(200);
+            $('#approve-form-' + eventId).hide();
+        }
+
+        function confirmApprove() {
+            return confirm("Are you sure you want to approve this event?");
+        }
+
+        function confirmReject() {
+            return confirm("Are you sure you want to reject this event?");
         }
     </script>
 }

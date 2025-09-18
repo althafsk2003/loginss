@@ -92,7 +92,9 @@ namespace WebApplication4.Controllers
             var mentorUser = db.USERs.FirstOrDefault(u => u.Email == mentorLogin.Email);
 
             ViewBag.DepartmentName = department != null ? department.DepartmentName : "Unknown";
-            ViewBag.MentorName = mentorUser != null ? mentorUser.FirstName : "Unknown";
+            ViewBag.MentorName = mentorUser != null
+                ? $"{mentorUser.FirstName} {mentorUser.LastName}"
+                : "Unknown";
             ViewBag.MentorEmail = mentorLogin != null ? mentorLogin.Email : "Unknown";
 
             var university = department != null
@@ -112,6 +114,7 @@ namespace WebApplication4.Controllers
 
             return View(club);
         }
+
 
         [HttpGet]
         public JsonResult GetUniversityAndDepartments(int clubId)
@@ -259,8 +262,10 @@ namespace WebApplication4.Controllers
 
                 var upcomingEvents = db.EVENTS
                     .Where(e => e.ClubID == clubId &&
-                                (e.EventStatus == "Upcoming not posted" || e.EventStatus == "Upcoming posted"))
+                                (e.EventStatus == "Upcoming not posted" || e.EventStatus == "Upcoming posted") &&
+                                e.EventEndDateAndTime >= DateTime.Now)
                     .ToList();
+
 
                 foreach (var ev in upcomingEvents.Where(e => e.EventStatus == "Upcoming not posted"))
                 {

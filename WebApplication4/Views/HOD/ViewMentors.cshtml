@@ -5,7 +5,7 @@
     ViewBag.Title = "View Mentors";
 }
 
-<h2 class="text-center mb-4">@ViewBag.Title</h2>
+@*<h2 class="text-center mb-4">@ViewBag.Title</h2>*@
 
 <!-- ✅ Success Message -->
 @if (TempData["SuccessMessage"] != null)
@@ -13,12 +13,16 @@
     <div class="alert alert-success text-center">@TempData["SuccessMessage"]</div>
 }
 
-<!-- ✅ Buttons to switch views -->
-<div class="text-center mt-3">
-    <a href="@Url.Action("ViewMentors", "HOD")" class="btn btn-primary">View All Mentors</a>
-    <a href="@Url.Action("ViewActiveMentors", "HOD")" class="btn btn-success">View Active Mentors</a>
-    <a href="@Url.Action("ViewDeactivatedMentors", "HOD")" class="btn btn-danger">View Deactivated Mentors</a>
+<!-- Heading + Filter Buttons Container -->
+<div class="d-flex align-items-center mb-4 gap-3">
+    <h2 class="mb-0">@ViewBag.Title</h2>
+    <div>
+        <a href="@Url.Action("ViewMentors", "HOD")" class="btn btn-primary btn-sm">View All Mentors</a>
+        <a href="@Url.Action("ViewActiveMentors", "HOD")" class="btn btn-success btn-sm">View Active Mentors</a>
+        <a href="@Url.Action("ViewDeactivatedMentors", "HOD")" class="btn btn-danger btn-sm">View Deactivated Mentors</a>
+    </div>
 </div>
+
 
 <!-- ✅ Mentors Table -->
 <table class="table table-bordered table-striped">

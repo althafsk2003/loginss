@@ -57,15 +57,18 @@
 </style>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Club Status</h2>
+    <!-- ✅ Heading + Filter Buttons Container -->
+    <div class="d-flex align-items-center mb-3 gap-3 flex-wrap">
+        <h2 class="mb-0">Club Status</h2>
 
-    <!-- ✅ Filter Buttons -->
-    <div class="text-center">
-        <a href="@Url.Action("ClubStatus", new { status = 1 })" class="btn btn-warning btn-filter">Pending Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = 2 })" class="btn btn-success btn-filter">Approved Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = 3 })" class="btn btn-danger btn-filter">Rejected Requests</a>
-        <a href="@Url.Action("ClubStatus", new { status = (int?)null })" class="btn btn-primary btn-filter">View All Requests</a>
+        <div>
+            <a href="@Url.Action("ClubStatus", new { status = 1 })" class="btn btn-warning btn-filter">Pending Requests</a>
+            <a href="@Url.Action("ClubStatus", new { status = 2 })" class="btn btn-success btn-filter">Approved Requests</a>
+            <a href="@Url.Action("ClubStatus", new { status = 3 })" class="btn btn-danger btn-filter">Rejected Requests</a>
+            <a href="@Url.Action("ClubStatus", new { status = (int?)null })" class="btn btn-primary btn-filter">View All Requests</a>
+        </div>
     </div>
+
 
     <!-- ✅ Club Status Table -->
     <table class="club-table">
