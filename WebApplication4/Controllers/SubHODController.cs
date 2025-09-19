@@ -19,9 +19,7 @@ namespace WebApplication4.Controllers
         public ActionResult Index()
         {
             if (Session["Role"]?.ToString() != "SubHOD")
-            {
                 return RedirectToAction("Login", "Admin");
-            }
 
             string subHODEmail = Session["UserEmail"]?.ToString();
 
@@ -45,11 +43,11 @@ namespace WebApplication4.Controllers
             ViewBag.UniversityName = university?.UniversityNAME;
 
             // Mentor statistics
-            var mentorEmails = subDepartments.Select(sd => sd.SubDepartmentID).ToList();
+            var subDeptIds = subDepartments.Select(sd => sd.SubDepartmentID).ToList();
 
             var mentors = _db.Logins
-                            .Where(l => l.Role == "Mentor" && l.SubDepartmentID != null && mentorEmails.Contains((int)l.SubDepartmentID))
-                            .ToList();
+                             .Where(l => l.Role == "Mentor" && l.SubDepartmentID != null && subDeptIds.Contains((int)l.SubDepartmentID))
+                             .ToList();
 
             ViewBag.TotalMentors = mentors.Count;
             ViewBag.ActiveMentors = mentors.Count(m => m.IsActive == true);
@@ -57,15 +55,44 @@ namespace WebApplication4.Controllers
 
             // Clubs under SubHOD
             var clubs = _db.CLUBS
-                            .Where(c => c.SubDepartmentID != null && mentorEmails.Contains((int)c.SubDepartmentID))
-                            .ToList();
+                           .Where(c => c.SubDepartmentID != null && subDeptIds.Contains((int)c.SubDepartmentID))
+                           .ToList();
 
             ViewBag.TotalClubs = clubs.Count;
             ViewBag.ActiveClubs = clubs.Count(c => c.IsActive == true);
             ViewBag.DeactivatedClubs = clubs.Count(c => c.IsActive == false);
 
+            // --- Notifications ---
+            // Club notifications (ApprovalStatusID = 1)
+            var clubNotifications = clubs
+                .Where(c => c.ApprovalStatusID == 1)
+                .Select(c => new
+                {
+                    Name = c.ClubName + " is waiting for your approval",
+                    Url = Url.Action("ClubRequests", "SubHOD")
+                }).ToList();
+
+            // Event notifications (ApprovalStatusID = 4)
+            var clubIds = clubs.Select(c => c.ClubID).ToList();
+
+            var events = _db.EVENTS
+                            .Where(e => e.ClubID.HasValue && clubIds.Contains(e.ClubID.Value))
+                            .ToList();
+
+            var eventNotifications = events
+                .Where(e => e.ApprovalStatusID == 4)
+                .Select(e => new
+                {
+                    Name = e.EventName + " is waiting for your action",
+                    Url = Url.Action("ViewEventRequests", "SubHOD")
+                }).ToList();
+
+            ViewBag.ClubNotifications = clubNotifications;
+            ViewBag.EventNotifications = eventNotifications;
+
             return View(subDepartments);
         }
+
 
 
 
@@ -510,18 +537,20 @@ namespace WebApplication4.Controllers
             return Json(new { success = false, message = "Club not found!" });
         }
 
-
+        // ============================
         // GET: ViewEventRequests
+        // ============================
         public ActionResult ViewEventRequests()
         {
             if (Session["UserEmail"] == null)
                 return RedirectToAction("Login", "Admin");
 
-            string subHODEmail = Session["UserEmail"].ToString();
+            string subHODEmail = Session["UserEmail"].ToString().ToLower();
 
-            // Get all subdepartment IDs for this SubHOD
+            // Get SubDept IDs for this SubHOD
             var subDeptIDs = _db.SUBDEPARTMENTs
-                .Where(sd => sd.HOD_Email.ToLower() == subHODEmail.ToLower())
+                .AsEnumerable() // switch to in-memory for safe ToLower
+                .Where(sd => sd.HOD_Email != null && sd.HOD_Email.ToLower() == subHODEmail)
                 .Select(sd => sd.SubDepartmentID)
                 .ToList();
 
@@ -531,11 +560,11 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Fetch all active clubs under these subdepartments
+            // Fetch active clubs under these subdepartments
             var activeClubs = _db.CLUBS
-.Where(c => c.IsActive == true
-            && c.SubDepartmentID.HasValue
-            && subDeptIDs.Contains(c.SubDepartmentID.Value))
+                .Where(c => c.IsActive == true
+                         && c.SubDepartmentID.HasValue
+                         && subDeptIDs.Contains(c.SubDepartmentID.Value))
                 .Select(c => new SelectListItem
                 {
                     Value = c.ClubID.ToString(),
@@ -550,18 +579,21 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        // ============================
         // POST: ViewEventRequests
+        // ============================
         [HttpPost]
         public ActionResult ViewEventRequests(SubHODEventReviewViewModel model)
         {
             if (Session["UserEmail"] == null)
                 return RedirectToAction("Login", "Admin");
 
-            string subHODEmail = Session["UserEmail"].ToString();
+            string subHODEmail = Session["UserEmail"].ToString().ToLower();
 
-            // Get all subdepartment IDs for this SubHOD
+            // Get SubDept IDs for this SubHOD
             var subDeptIDs = _db.SUBDEPARTMENTs
-                .Where(sd => sd.HOD_Email.ToLower() == subHODEmail.ToLower())
+                .AsEnumerable()
+                .Where(sd => sd.HOD_Email != null && sd.HOD_Email.ToLower() == subHODEmail)
                 .Select(sd => sd.SubDepartmentID)
                 .ToList();
 
@@ -571,7 +603,7 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            // Repopulate dropdown for clubs in all subdepartments
+            // Repopulate dropdown
             model.ActiveClubs = _db.CLUBS
                 .Where(c => subDeptIDs.Contains(c.SubDepartmentID ?? 0) && c.ApprovalStatusID == 2)
                 .Select(c => new SelectListItem
@@ -581,12 +613,19 @@ namespace WebApplication4.Controllers
                 }).ToList();
 
             // Load events forwarded to SubHOD (ApprovalStatus = 4)
-            model.Events = _db.EVENTS
-                .Where(e => e.ApprovalStatusID == 4 && model.SelectedClubId != 0 &&
-                            subDeptIDs.Contains(_db.CLUBS
-                                .Where(c => c.ClubID == e.ClubID)
-                                .Select(c => c.SubDepartmentID ?? 0)
-                                .FirstOrDefault()))
+            var forwardedEvents = _db.EVENTS
+                .Where(e => e.ApprovalStatusID == 4) // only forwarded
+                .ToList(); // fetch to memory
+
+            // Filter by club + subDeptIDs
+            model.Events = forwardedEvents
+                .Where(e =>
+                {
+                    var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == e.ClubID);
+                    return club != null
+                        && subDeptIDs.Contains(club.SubDepartmentID ?? 0)
+                        && (model.SelectedClubId == 0 || e.ClubID == model.SelectedClubId);
+                })
                 .ToList();
 
             return View(model);
@@ -704,30 +743,22 @@ namespace WebApplication4.Controllers
         // ===========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ForwardToDirectorPost(string token)
+        public async Task<ActionResult> ForwardToDirectorPost(int token)
         {
             if (Session["UserEmail"] == null)
                 return RedirectToAction("Login", "Admin");
 
-            var subHod = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
+            string userEmail = Session["UserEmail"]?.ToString(); // Get once
+
+            var subHod = _db.Logins
+                .FirstOrDefault(l => l.Email == userEmail);
             if (subHod == null) return HttpNotFound("SubHOD login not found.");
 
-            string plainData;
-            try { plainData = SecureHelper.Decrypt(token); }
-            catch { return HttpNotFound("Invalid token"); }
+            
 
-            // Token format: EventID|ClubID|SubHODLoginID
-            var parts = plainData.Split('|');
-            if (parts.Length != 3) return HttpNotFound("Invalid token data");
 
-            int eventId = Convert.ToInt32(parts[0]);
-            int clubId = Convert.ToInt32(parts[1]);
-            int subHodId = Convert.ToInt32(parts[2]);
 
-            if (subHod.LoginID != subHodId)
-                return HttpNotFound("Unauthorized token usage.");
-
-            var evt = _db.EVENTS.Find(eventId);
+            var evt = _db.EVENTS.Find(token);
             if (evt == null) return HttpNotFound("Event not found");
 
             if (evt.ApprovalStatusID == 7)
@@ -804,7 +835,9 @@ namespace WebApplication4.Controllers
 
 
 
-
+        // ===========================
+        // GET: Reject Event (from email link or in-app)
+        // ===========================
         [HttpGet]
         [AllowAnonymous]
         public ActionResult RejectEvent(string token)
@@ -830,121 +863,69 @@ namespace WebApplication4.Controllers
             int eventId = Convert.ToInt32(parts[0]);
             int subHodId = Convert.ToInt32(parts[2]);
 
-            bool fromEmail = true; // email flow
-            ViewBag.FromEmail = fromEmail;
-
             var ev = _db.EVENTS.Find(eventId);
             if (ev == null) return Content("❌ Event not found");
 
-            // Fetch the club
-            var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
-            if (club == null) return Content("❌ Club not found");
-
-            // Validate that the token recipient is the actual SubHOD for this club
-            var subHod = _db.SUBDEPARTMENTs
-                .Where(s => s.SubDepartmentID == club.SubDepartmentID)
-                .Select(s => _db.Logins.FirstOrDefault(l => l.LoginID == subHodId))
-                .FirstOrDefault();
-
-            if (subHod == null)
-                return Content("❌ You are not authorized to reject this event.");
-
-            // Prevent rejection if already forwarded or rejected
+            // Prevent rejection if already processed
             if (ev.ApprovalStatusID == 7)
-                return Content($"Event '{ev.EventName}' has already been forwarded. You cannot reject it now.");
+                return Content($"Event '{ev.EventName}' has already been forwarded. Cannot reject.");
             if (ev.ApprovalStatusID == 3)
                 return Content($"Event '{ev.EventName}' is already rejected.");
 
-            // Only the intended recipient sees the form
-            ev.Token = token;
+            ev.Token = token; // pass token to view
+            ViewBag.FromEmail = true; // optional, for UI
             return View("RejectEvent", ev);
         }
 
         // ===========================
-        // POST: Reject Event (SubHOD email or dashboard)
+        // POST: Reject Event
         // ===========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<ActionResult> RejectEvent(int? eventId, string rejectionReason, string token = null)
+        public async Task<ActionResult> RejectEvent(string token, string rejectionReason)
         {
             try
             {
-                int evtId;
-                int subHodId;
+                if (string.IsNullOrEmpty(token))
+                    return Json(new { success = false, message = "Token missing." });
 
-                if (!string.IsNullOrEmpty(token))
+                // Decrypt token
+                string plainData;
+                try
                 {
-                    // Email link flow
-                    string plainData;
-                    try
-                    {
-                        plainData = SecureHelper.Decrypt(token);
-                    }
-                    catch
-                    {
-                        return Json(new { success = false, message = "Invalid token." });
-                    }
-
-                    var parts = plainData.Split('|');
-                    if (parts.Length < 3)
-                        return Json(new { success = false, message = "Invalid token data." });
-
-                    evtId = Convert.ToInt32(parts[0]);
-                    subHodId = Convert.ToInt32(parts[2]);
+                    plainData = SecureHelper.Decrypt(token);
                 }
-                else if (eventId.HasValue)
+                catch
                 {
-                    // In-app dashboard flow
-                    evtId = eventId.Value;
-
-                    if (Session["UserEmail"] == null)
-                        return Json(new { success = false, message = "Session expired. Please login again." });
-
-                    var subHod = _db.Logins.FirstOrDefault(l => l.Email == Session["UserEmail"].ToString());
-                    if (subHod == null)
-                        return Json(new { success = false, message = "SubHOD login not found." });
-
-                    subHodId = subHod.LoginID;
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Missing event information." });
+                    return Json(new { success = false, message = "Invalid token." });
                 }
 
-                var ev = _db.EVENTS.FirstOrDefault(e => e.EventID == evtId);
+                var parts = plainData.Split('|');
+                if (parts.Length < 3)
+                    return Json(new { success = false, message = "Invalid token data." });
+
+                int eventId = Convert.ToInt32(parts[0]);
+                int subHodId = Convert.ToInt32(parts[2]);
+
+                var ev = _db.EVENTS.FirstOrDefault(e => e.EventID == eventId);
                 if (ev == null)
                     return Json(new { success = false, message = "Event not found!" });
 
-                // Fetch the club first
-                var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
-                if (club == null)
-                    return Json(new { success = false, message = "Club not found." });
-
-                // Only the SubHOD from token/session can reject
-                var subHodCheck = _db.SUBDEPARTMENTs
-                    .Where(s => s.SubDepartmentID == club.SubDepartmentID)
-                    .Select(s => _db.Logins.FirstOrDefault(l => l.LoginID == subHodId))
-                    .FirstOrDefault();
-
-                if (subHodCheck == null)
-                    return Json(new { success = false, message = "Unauthorized action." });
-
-
-                // Prevent rejection if already forwarded or rejected
+                // Prevent duplicate actions
                 if (ev.ApprovalStatusID == 7)
-                    return Json(new { success = false, message = $"Event '{ev.EventName}' has already been forwarded. You cannot reject it now." });
+                    return Json(new { success = false, message = $"Event '{ev.EventName}' has already been forwarded." });
                 if (ev.ApprovalStatusID == 3)
                     return Json(new { success = false, message = $"Event '{ev.EventName}' is already rejected." });
 
-                // Update event as Rejected
+                // Mark as rejected
                 ev.ApprovalStatusID = 3;
                 ev.RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? "No specific reason provided." : rejectionReason;
                 _db.SaveChanges();
 
                 var emailService = new EmailService();
 
-                // In-app notification to event organizer
+                // Notify Event Organizer
                 if (ev.EventOrganizerID != null)
                 {
                     _db.Notifications.Add(new Notification
@@ -960,8 +941,8 @@ namespace WebApplication4.Controllers
                 }
 
                 // Email to Club Admin
-                var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
-                if (clubAdminLogin != null && !string.IsNullOrEmpty(clubAdminLogin.Email))
+                var clubLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
+                if (clubLogin != null && !string.IsNullOrEmpty(clubLogin.Email))
                 {
                     string subject = $"Event '{ev.EventName}' Rejected by SubHOD";
                     string body = $@"
@@ -970,11 +951,12 @@ namespace WebApplication4.Controllers
 <p><strong>Reason:</strong> {ev.RejectionReason}</p>
 <br/>
 <p>Regards,<br/>University Event Management System</p>";
-                    await emailService.SendEmailAsync(clubAdminLogin.Email, subject, body);
+                    await emailService.SendEmailAsync(clubLogin.Email, subject, body);
                 }
 
                 // Email to Mentor
-                if (club != null && club.MentorID != null)
+                var club = _db.CLUBS.FirstOrDefault(c => c.ClubID == ev.ClubID);
+                if (club?.MentorID != null)
                 {
                     var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == club.MentorID);
                     if (mentorLogin != null && !string.IsNullOrEmpty(mentorLogin.Email))
@@ -990,7 +972,6 @@ namespace WebApplication4.Controllers
                     }
                 }
 
-
                 return Json(new { success = true, message = "Event rejected and emails sent to mentor and club admin." });
             }
             catch (Exception ex)
@@ -998,6 +979,8 @@ namespace WebApplication4.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+
 
 
 

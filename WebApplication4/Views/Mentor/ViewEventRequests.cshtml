@@ -408,10 +408,15 @@
                             <div style="display: flex; flex-direction: column; align-items: center;">
                                 <button type="button" class="btn btn-danger" onclick="toggleRejectBox(@item.EventID)">Reject</button>
                                 <div id="reject-box-@item.EventID" class="reject-box mt-2" style="display:none;">
-                                    <textarea id="rejection-text-@item.EventID" class="form-control mb-2" placeholder="Enter rejection reason..."></textarea>
-                                    <input type="hidden" id="token-@item.EventID" value="@item.Token" />
-                                    <button class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
+                                    @using (Html.BeginForm("", "", FormMethod.Post, new { id = "reject-form-" + item.EventID }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <textarea name="rejectionReason" class="form-control mb-2" placeholder="Enter rejection reason..." required></textarea>
+                                        <input type="hidden" name="token" value="@item.Token" />
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="submitRejection(@item.EventID)">Submit Rejection</button>
+                                    }
                                 </div>
+
                             </div>
                         </div>
 
@@ -462,9 +467,9 @@
             rejectBox.toggle();
         }
 
-        // Reject with confirmation
         function submitRejection(eventId) {
-            var reason = $("#rejection-text-" + eventId).val().trim();
+            var form = $("#reject-form-" + eventId);
+            var reason = form.find("textarea[name='rejectionReason']").val().trim();
 
             if (!reason) {
                 alert("Please enter a rejection reason.");
@@ -472,19 +477,13 @@
             }
 
             if (!confirm("Are you sure you want to reject this event?")) {
-                return; // Stop if user cancels
+                return;
             }
-
-            var token = $("#token-" + eventId).val();
 
             $.ajax({
                 url: '/Mentor/RejectEventRequest',
                 type: 'POST',
-                data: {
-                    token: token,
-                    rejectionReason: reason,
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
-                },
+                data: form.serialize(),
                 success: function (response) {
                     if (response.success) {
                         alert("Event rejected successfully.");
@@ -499,6 +498,7 @@
                 }
             });
         }
+
 
 
         // Initialize first event

@@ -1,336 +1,101 @@
-﻿@using Newtonsoft.Json
+﻿@using WebApplication4.Models
+@using Newtonsoft.Json
 @Html.AntiForgeryToken()
 @{
     Layout = "~/Views/Shared/_MentorLayout.cshtml";
     ViewBag.Title = "Mentor Dashboard";
+
     var clubNames = ViewBag.ClubNames as List<string> ?? new List<string> { "No Clubs" };
     var eventCounts = ViewBag.EventCounts as List<int> ?? new List<int> { 0 };
-    var pendingEventCounts = ViewBag.PendingEventCounts as List<int> ?? eventCounts.Select(x => x / 2).ToList();
+    var mentorEventNotifications = ViewBag.MentorEventNotifications as List<MentorEventNotification>
+                                   ?? new List<MentorEventNotification>();
 }
 
 <div class="container mt-3">
-    <div class="row">
-        <!-- Left Column: Mentor Info -->
-        <div class="col-lg-4 col-md-12 mb-4">
-            <div class="card shadow-lg border-0 hover-card h-100 mentor-card">
+    <div class="row d-flex align-items-stretch">
+        <!-- Left Column: Mentor Profile -->
+        <div class="col-lg-3 col-md-12 mb-4 d-flex">
+            <div class="card shadow-lg border-0 hover-card mentor-card flex-fill">
                 <div class="card-body position-relative">
-                    <!-- Notification Bell -->
-                    <div class="notification-bell">
-                        <a href="#" data-toggle="modal" data-target="#notificationModal">
-                            <i class="fas fa-bell"></i>
-                            @if (ViewBag.Notifications != null && (ViewBag.Notifications as List<WebApplication4.Models.Notification>).Any())
-                            {
-                                <span id="notificationCount" class="notification-count">
-                                    @((ViewBag.Notifications as List<WebApplication4.Models.Notification>).Count)
-                                </span>
-                            }
-                        </a>
-                    </div>
-
-                    <!-- Avatar and Mentor Info -->
                     <div class="avatar-circle mx-auto mb-3">
                         <i class="fas fa-user fa-2x text-white"></i>
                     </div>
                     <h4 class="card-title text-primary mb-2">@ViewBag.MentorFullName</h4>
                     <div class="text-left">
-                        <p class="mb-2">
-                            <i class="fas fa-envelope me-2 text-primary"></i>
-                            <strong>Email:</strong> @ViewBag.Mentor.Email
-                        </p>
-                        <p class="mb-2">
-                            <i class="fas fa-university me-2 text-primary"></i>
-                            <strong>University:</strong> @ViewBag.UniversityName
-                        </p>
+                        <p class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i><strong>Email:</strong> @ViewBag.Mentor.Email</p>
+                        <p class="mb-2"><i class="fas fa-university me-2 text-primary"></i><strong>University:</strong> @ViewBag.UniversityName</p>
 
                         @if (!string.IsNullOrEmpty(ViewBag.SubDepartmentName))
                         {
-                            <p class="mb-2">
-                                <i class="fas fa-sitemap me-2 text-primary"></i>
-                                <strong>Sub-Department:</strong> @ViewBag.SubDepartmentName
-                            </p>
+                            <p class="mb-2"><i class="fas fa-sitemap me-2 text-primary"></i><strong>Sub-Department:</strong> @ViewBag.SubDepartmentName</p>
                         }
 
                         @if (!string.IsNullOrEmpty(ViewBag.DepartmentName))
                         {
-                            <p class="mb-2">
-                                <i class="fas fa-building me-2 text-primary"></i>
-                                <strong>Department:</strong> @ViewBag.DepartmentName
-                            </p>
+                            <p class="mb-2"><i class="fas fa-building me-2 text-primary"></i><strong>Department:</strong> @ViewBag.DepartmentName</p>
                         }
 
                         @if (ViewBag.SubHOD != null)
                         {
-                            <p class="mb-2">
-                                <i class="fas fa-user-tie me-2 text-primary"></i>
-                                <strong>Sub-HOD:</strong> @ViewBag.SubHOD.FirstName @ViewBag.SubHOD.LastName
-                            </p>
+                            <p class="mb-2"><i class="fas fa-user-tie me-2 text-primary"></i><strong>Sub-HOD:</strong> @ViewBag.SubHOD.FirstName @ViewBag.SubHOD.LastName</p>
                         }
 
                         @if (ViewBag.HOD != null)
                         {
-                            <p class="mb-2">
-                                <i class="fas fa-user-tie me-2 text-primary"></i>
-                                <strong>HOD:</strong> @ViewBag.HOD.FirstName @ViewBag.HOD.LastName
-                            </p>
+                            <p class="mb-2"><i class="fas fa-user-tie me-2 text-primary"></i><strong>HOD:</strong> @ViewBag.HOD.FirstName @ViewBag.HOD.LastName</p>
                         }
 
                         @if (ViewBag.Director != null)
                         {
-                            <p class="mb-2">
-                                <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>
-                                <strong>Director:</strong> @ViewBag.Director.FirstName @ViewBag.Director.LastName
-                            </p>
+                            <p class="mb-2"><i class="fas fa-chalkboard-teacher me-2 text-primary"></i><strong>Director:</strong> @ViewBag.Director.FirstName @ViewBag.Director.LastName</p>
                         }
 
-                        <p class="mb-2">
-                            <i class="fas fa-users me-2 text-primary"></i>
-                            <strong>Total Clubs:</strong> @ViewBag.ClubsCount
-                        </p>
-                        <p class="mb-2">
-                            <i class="fas fa-calendar-check me-2 text-primary"></i>
-                            <strong>Total Events:</strong> @ViewBag.EventsCount
-                        </p>
+                        <p class="mb-2"><i class="fas fa-users me-2 text-primary"></i><strong>Total Clubs:</strong> @ViewBag.ClubsCount</p>
+                        <p class="mb-2"><i class="fas fa-calendar-check me-2 text-primary"></i><strong>Total Events:</strong> @ViewBag.EventsCount</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column: Chart -->
-        <div class="col-lg-8 col-md-12 mb-4">
-            <div class="card shadow-sm p-4 border-0 h-100 chart-card">
+        <!-- Middle Column: Chart -->
+        <div class="col-lg-6 col-md-12 mb-4 d-flex">
+            <div class="card shadow-sm p-4 border-0 chart-card flex-fill">
                 <h4 class="text-center mb-2">Clubs and Their Events</h4>
                 <div class="chart-container">
                     <canvas id="clubEventChart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Notification Modal -->
-<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-dialog-end">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                @if (ViewBag.Notifications != null && (ViewBag.Notifications as List<WebApplication4.Models.Notification>).Any())
-                {
-                    foreach (var note in ViewBag.Notifications as List<WebApplication4.Models.Notification>)
+        <!-- Right Column: Notifications -->
+        <div class="col-lg-3 col-md-12 mb-4 d-flex">
+            <div class="card shadow-sm border-0 hover-card flex-fill">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Event Notifications</h5>
+                    @if (mentorEventNotifications.Any())
                     {
-                        <div class="alert alert-light border d-flex justify-content-between align-items-start mb-2" id="notification-@note.NotificationID">
-                            <div class="flex-grow-1">
-                                <strong>@note.Message</strong><br />
-                                <button class="btn btn-sm btn-success" onclick="markNotificationAsRead(@note.NotificationID, this)">Mark as Read</button>
-                            </div>
-                        </div>
+                        <ul class="list-group list-group-flush" style="max-height: 450px; overflow-y: auto;">
+                            @foreach (var n in mentorEventNotifications)
+                            {
+                                <li class="list-group-item">
+                                    <a href="@n.Url" class="notification-link">
+                                       Event @n.EventName - <span class="fw-bold">@n.Message</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
                     }
-                }
-                else
-                {
-                    <p class="text-muted">No new notifications</p>
-                }
+                    else
+                    {
+                        <p class="text-muted">No pending event actions</p>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 
-<script>
-    function markNotificationAsRead(notificationId) {
-        var token = $('input[name="__RequestVerificationToken"]').val();
-
-        $.ajax({
-            url: '/Mentor/MarkNotificationAsRead',
-            type: 'POST',
-            data: {
-                notificationId: notificationId,
-                __RequestVerificationToken: token
-            },
-            success: function (response) {
-                if (response.success) {
-                    // Remove the notification UI block
-                    $("#notification-" + notificationId).remove();
-
-                    // Update notification count
-                    var countElem = $("#notificationCount");
-                    var count = parseInt(countElem.text());
-                    if (!isNaN(count) && count > 0) {
-                        countElem.text(count - 1);
-                        if (count - 1 === 0) {
-                            countElem.hide(); // Hide badge if no notifications left
-                        }
-                    }
-
-                    // If all notifications are read
-                    if ($(".alert").length === 0) {
-                        $(".modal-body").html('<p class="text-muted">No new notifications</p>');
-                    }
-                } else {
-                    alert("Failed to mark notification as read.");
-                }
-            },
-            error: function () {
-                alert("Error processing the request.");
-            }
-        });
-    }
-</script>
-
-
-
-@section Styles {
-    <style>
-        :root {
-            --primary-gradient-start: #4a00e0;
-            --primary-gradient-end: #8e2de2;
-            --secondary-color: #f7f9fc;
-            --text-primary: #2d2d2d;
-            --text-secondary: #6c757d;
-            --accent-color: #ff6f61;
-            --shadow-color: rgba(0, 0, 0, 0.15);
-        }
-
-        .mentor-card {
-            background: linear-gradient(145deg, var(--secondary-color), #ffffff);
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .hover-card {
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-
-            .hover-card:hover {
-                transform: translateY(-8px) scale(1.03);
-                box-shadow: 0 12px 24px var(--shadow-color) !important;
-            }
-
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border: 2px solid #ffffff;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 1.5rem;
-            letter-spacing: 0.8px;
-            color: var(--primary-gradient-start);
-        }
-
-        .card-body p {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-            .card-body p strong {
-                color: var(--text-primary);
-                font-weight: 600;
-            }
-
-        .chart-card {
-            background: linear-gradient(145deg, #ffffff, var(--secondary-color));
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-            .chart-card h4 {
-                font-weight: 700;
-                color: var(--text-primary);
-                font-size: 1.6rem;
-                letter-spacing: 0.5px;
-                position: relative;
-            }
-
-                .chart-card h4::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -5px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 50px;
-                    height: 3px;
-                    background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
-                    border-radius: 2px;
-                }
-
-        .chart-container {
-            width: 100%;
-            height: 450px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        #clubEventChart {
-            width: 100% !important;
-            height: 450px !important;
-        }
-
-        .notification-bell {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.3rem;
-            color: var(--accent-color);
-            transition: transform 0.2s ease;
-        }
-
-            .notification-bell:hover {
-                transform: scale(1.15);
-                color: #dc3545;
-            }
-
-        .notification-count {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background-color: red;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 50%;
-        }
-
-        @@media (max-width: 991px) {
-            .avatar-circle {
-                width: 65px;
-                height: 65px;
-            }
-
-                .avatar-circle i {
-                    font-size: 1.8rem;
-                }
-
-            .card-title {
-                font-size: 1.3rem;
-            }
-
-            .chart-container,
-            #clubEventChart {
-                height: 320px;
-            }
-
-            .chart-card h4 {
-                font-size: 1.4rem;
-            }
-        }
-    </style>
-}
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
@@ -353,10 +118,7 @@
             }
 
             const ctx = document.getElementById('clubEventChart');
-            if (!ctx) {
-                console.error('Chart canvas not found.');
-                return;
-            }
+            if (!ctx) return;
 
             new Chart(ctx, {
                 type: 'bar',
@@ -375,38 +137,111 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutCubic'
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.label}: ${context.raw} events`
-                            }
-                        }
-                    },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Event Count'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Clubs'
-                            }
-                        }
+                        y: { beginAtZero: true, title: { display: true, text: 'Event Count' } },
+                        x: { title: { display: true, text: 'Clubs' } }
                     }
                 }
             });
         });
     </script>
+}
+
+@section Styles {
+    <style>
+        :root {
+            --primary-gradient-start: #4a00e0;
+            --primary-gradient-end: #8e2de2;
+            --secondary-color: #f7f9fc;
+            --text-primary: #2d2d2d;
+            --text-secondary: #6c757d;
+            --accent-color: #ff6f61;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .mentor-card, .hover-card {
+            border-radius: 16px;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+            .hover-card:hover {
+                transform: translateY(-8px) scale(1.03);
+                box-shadow: 0 12px 24px var(--shadow-color) !important;
+            }
+
+        .mentor-card {
+            background: linear-gradient(145deg, var(--secondary-color), #ffffff);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ffffff;
+            margin: 0 auto 15px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 0.8px;
+            color: var(--primary-gradient-start);
+        }
+
+        .chart-card {
+            background: linear-gradient(145deg, #ffffff, var(--secondary-color));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 450px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #clubEventChart {
+            width: 100%;
+            height: 450px !important;
+        }
+
+        @@media (max-width: 991px) {
+            .avatar-circle {
+                width: 65px;
+                height: 65px;
+            }
+
+                .avatar-circle i {
+                    font-size: 1.8rem;
+                }
+
+            .card-title {
+                font-size: 1.3rem;
+            }
+
+            .chart-container, #clubEventChart {
+                height: 320px;
+            }
+        }
+        .notification-link {
+            color: #4a00e0; /* Choose your color */
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+            .notification-link:hover {
+                color: #8e2de2; /* Hover color */
+                text-decoration: underline;
+            }
+
+
+    </style>
 }

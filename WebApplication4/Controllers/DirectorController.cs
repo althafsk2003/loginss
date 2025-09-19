@@ -624,7 +624,7 @@ namespace WebApplication4.Controllers
             }
 
             var parts = plainData.Split('|');
-            if (parts.Length < 2)
+            if (parts.Length < 1)
                 return HttpNotFound("Invalid token data");
 
             int eventId = Convert.ToInt32(parts[0]);
@@ -648,47 +648,31 @@ namespace WebApplication4.Controllers
         // ===========================
         [HttpPost]
         [AllowAnonymous] // allow both flows
-        [ValidateAntiForgeryTokenIfNoToken] // custom attribute we'll define below
-        public async Task<ActionResult> DirectorRejectEvent(int? eventId, string rejectionReason, string token = null)
+        [ValidateAntiForgeryTokenIfNoToken] // custom attribute if needed
+        public async Task<ActionResult> DirectorRejectEvent(string token, string rejectionReason)
         {
             try
             {
-                int evtId;
+                if (string.IsNullOrEmpty(token))
+                    return Json(new { success = false, message = "Token missing." });
 
-                if (!string.IsNullOrEmpty(token))
+                string plainData;
+                try
                 {
-                    // Email link flow
-                    string plainData;
-                    try
-                    {
-                        plainData = SecureHelper.Decrypt(token);
-                    }
-                    catch
-                    {
-                        return Json(new { success = false, message = "Invalid token." });
-                    }
-
-                    var parts = plainData.Split('|');
-                    if (parts.Length < 1)
-                        return Json(new { success = false, message = "Invalid token data." });
-
-                    evtId = Convert.ToInt32(parts[0]);
+                    plainData = SecureHelper.Decrypt(token);
                 }
-                else if (eventId.HasValue)
+                catch
                 {
-                    // In-app dashboard flow
-                    evtId = eventId.Value;
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Missing event information." });
+                    return Json(new { success = false, message = "Invalid token." });
                 }
 
-                // Fetch event with minimal required data
-                var ev = _db.EVENTS
-                    .Include(e => e.CLUB)
-                    .FirstOrDefault(e => e.EventID == evtId);
+                var parts = plainData.Split('|');
+                if (parts.Length < 1)
+                    return Json(new { success = false, message = "Invalid token data." });
 
+                int eventId = Convert.ToInt32(parts[0]);
+
+                var ev = _db.EVENTS.Include(e => e.CLUB).FirstOrDefault(e => e.EventID == eventId);
                 if (ev == null || ev.CLUB == null)
                     return Json(new { success = false, message = "Event not found." });
 
@@ -703,10 +687,11 @@ namespace WebApplication4.Controllers
                 ev.RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? "No reason provided." : rejectionReason;
 
                 string message = $"❌ Event '{ev.EventName}' from club '{ev.CLUB.ClubName}' was rejected by Director.\nReason: {ev.RejectionReason}";
+
                 var emailService = new EmailService();
                 var emailTasks = new List<Task>();
 
-                // 1️⃣ Notify Mentor
+                // Notify Mentor
                 if (ev.CLUB.MentorID != null)
                 {
                     var mentorLogin = _db.Logins.FirstOrDefault(l => l.LoginID == ev.CLUB.MentorID);
@@ -727,7 +712,7 @@ namespace WebApplication4.Controllers
                     }
                 }
 
-                // 2️⃣ Notify Club Admin
+                // Notify Club Admin
                 var clubAdminLogin = _db.Logins.FirstOrDefault(l => l.ClubID == ev.ClubID);
                 if (clubAdminLogin != null)
                 {
@@ -745,7 +730,7 @@ namespace WebApplication4.Controllers
                         emailTasks.Add(emailService.SendEmailAsync(clubAdminLogin.Email, $"Event Rejected: {ev.EventName}", message));
                 }
 
-                // 3️⃣ Notify SubHOD via SUBDEPARTMENT
+                // Notify SubHOD
                 if (ev.CLUB.SubDepartmentID != null && ev.CLUB.SubDepartmentID != 0)
                 {
                     var subDept = _db.SUBDEPARTMENTs.FirstOrDefault(sd => sd.SubDepartmentID == ev.CLUB.SubDepartmentID);
@@ -764,34 +749,22 @@ namespace WebApplication4.Controllers
                                 CreatedDate = DateTime.Now
                             });
 
-                            emailTasks.Add(emailService.SendEmailAsync(subHODLogin.Email, $"Event Rejected: {ev.EventName}", message));
+                            if (!string.IsNullOrEmpty(subHODLogin.Email))
+                                emailTasks.Add(emailService.SendEmailAsync(subHODLogin.Email, $"Event Rejected: {ev.EventName}", message));
                         }
                     }
                 }
 
-                // ✅ Save everything in one go
                 _db.SaveChanges();
 
-                // ✅ Send all emails in parallel
                 if (emailTasks.Any())
                     await Task.WhenAll(emailTasks);
 
-                // Decide response
-                if (!string.IsNullOrEmpty(token))
-                    return Content("✅ Event rejected successfully.");
-                else
-                {
-                    TempData["Message"] = "Event rejected successfully.";
-                    return RedirectToAction("EventsForDirectorApproval");
-                }
+                return Json(new { success = true, message = "Event rejected and notifications/emails sent." });
             }
             catch (Exception ex)
             {
-                if (!string.IsNullOrEmpty(token))
-                    return Content("❌ Error: " + ex.Message);
-
-                TempData["Error"] = ex.Message;
-                return RedirectToAction("EventsForDirectorApproval");
+                return Json(new { success = false, message = ex.Message });
             }
         }
 

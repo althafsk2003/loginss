@@ -64,7 +64,7 @@
                                     @using (Html.BeginForm("ForwardToDirectorPost", "SubHOD", FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirmForward();" }))
                                     {
                                         @Html.AntiForgeryToken()
-                                        @Html.Hidden("eventId", evt.EventID)
+                                        @Html.Hidden("token", evt.EventID)
                                         <button type="submit" class="btn btn-sm btn-success">Forward to Director</button>
                                     }
 
@@ -105,7 +105,7 @@
             </div>
             <div class="modal-body">
                 @Html.AntiForgeryToken()
-                <input type="hidden" id="rejectEventId" />
+                <input type="hidden" id="rejectEventId" name="token"/>
                 <div class="form-group">
                     <label for="RejectReason">Reason for rejection:</label>
                     <textarea id="RejectReason" class="form-control" required></textarea>

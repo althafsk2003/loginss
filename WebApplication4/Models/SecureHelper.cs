@@ -48,12 +48,12 @@ namespace WebApplication4.Models
 
         public static string Decrypt(string cipherText)
         {
-            string encryptionKey = WebConfigurationManager.AppSettings["EncryptionKey"];
+            if (string.IsNullOrEmpty(cipherText))
+                throw new ArgumentNullException(nameof(cipherText), "Cannot decrypt null or empty string.");
 
-            // Restore Base64 characters that were replaced during encryption
+            string encryptionKey = WebConfigurationManager.AppSettings["EncryptionKey"];
             cipherText = cipherText.Replace("_", "/").Replace("-", "+");
 
-            // Ensure the Base64 string is properly padded
             int padding = cipherText.Length % 4;
             if (padding > 0)
             {
@@ -82,6 +82,7 @@ namespace WebApplication4.Models
                 }
             }
         }
+
 
         public static string GetIPAddress()
         {

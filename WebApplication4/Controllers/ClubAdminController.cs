@@ -52,10 +52,40 @@ namespace WebApplication1.Controllers
                                     .ToList();
             ViewBag.Notifications = notifications;
 
+            // ✅ Event Status Notifications (Updated Section)
+            var eventNotifications = _db.EVENTS
+                .Where(e => e.ClubID == clubId)
+                .Select(e => new
+                {
+                    e.EventID,
+                    e.EventName,
+                    e.EventStatus,
+                    e.ApprovalStatusID // 👈 Added
+                })
+                .ToList();
+
+            var eventCards = eventNotifications.Select(ev => new
+            {
+                Message = ev.EventStatus == "Concluded"
+                    ? $"{ev.EventName} - Concluded"
+                    : ev.ApprovalStatusID == 2
+                        ? $"{ev.EventName} - Approved"
+                        : $"{ev.EventName} - Pending Approval",
+
+                Url = ev.EventStatus == "Concluded"
+                        ? Url.Action("ConcludedEvents", "ClubAdmin", new { eventId = ev.EventID })
+                        : ev.ApprovalStatusID == 1
+                            ? Url.Action("UpcomingEvents", "ClubAdmin", new { eventId = ev.EventID })
+                            : null // 👉 pending events won’t have a link
+            }).ToList();
+
+            ViewBag.EventCards = eventCards;
+
+
             // ✅ Info for dashboard
             ViewBag.ClubAdminName = club.ClubName;
             ViewBag.ClubName = club.ClubName;
-            ViewBag.ClubAdminPhoto = club.LogoImagePath; // used in view to display logo
+            ViewBag.ClubAdminPhoto = club.LogoImagePath;
             ViewBag.University = _db.UNIVERSITies
                                     .FirstOrDefault(u => u.UniversityID == clubAdmin.UniversityID)?.UniversityNAME;
 
@@ -74,6 +104,7 @@ namespace WebApplication1.Controllers
 
             return View();
         }
+
 
         //
         // ============================================
